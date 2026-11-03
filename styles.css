@@ -358,8 +358,8 @@ a { color: inherit; }
 .footer-group .footer-fine { margin: 2px 0; }
 
 /* ---------- Reveal on scroll ---------- */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.reveal.visible { opacity: 1; transform: none; }
+.reveal { transform: translateY(24px); transition: transform 0.7s ease; }
+.reveal.visible { transform: none; }
 
 /* ---------- State of the art: scroll-driven reveal (no JavaScript) ----------
    Where supported, the reveal is driven by the element's own scroll progress.
@@ -371,7 +371,7 @@ a { color: inherit; }
     animation-range: entry 10% cover 30%;
   }
   @keyframes reveal-in {
-    to { opacity: 1; transform: none; }
+    to { transform: none; }
   }
 }
 
@@ -473,7 +473,9 @@ a { color: inherit; }
 }
 
 /* ---------- State of the art III: cross-document view transitions ----------
-   Same-origin page changes crossfade while the brand mark holds its place. */
+   Same-origin page changes use an OPAQUE cover (owner standard 2026-11-03:
+   transitions never render translucent). The old page holds at opacity 1;
+   the new page covers it. The brand mark holds its place, opaque. */
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {
     navigation: auto;
@@ -481,10 +483,27 @@ a { color: inherit; }
   .nav .brand-mark {
     view-transition-name: brand-mark;
   }
+  ::view-transition-old(root) {
+    animation: none;
+    opacity: 1;
+  }
+  ::view-transition-new(root) {
+    animation: vt-cover 0.38s cubic-bezier(.4, 0, .2, 1);
+    opacity: 1;
+  }
+  ::view-transition-old(brand-mark),
+  ::view-transition-new(brand-mark) {
+    animation: none;
+    opacity: 1;
+  }
+  @keyframes vt-cover {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; animation: none; }
+  .reveal { transform: none; transition: none; animation: none; }
   .phase::before { animation: none; }
   .circuit .trace { animation: none; stroke-dashoffset: 0; }
   .circuit .node { animation: none; opacity: .95; }
