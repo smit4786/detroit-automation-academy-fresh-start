@@ -9704,7 +9704,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             function () { clearTimeout(timer); return null; });
   }
   function poll() {
-    var proxy = (window.FORGE_LIVE_PROXY || '').replace(/\/$/, '');
+    var proxy = (window.FORGE_LIVE_DATA_URL || '').replace(/\/$/, '');
     if (!proxy) { setHeader(null, 'connecting…', false); return; }
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, 20000);
@@ -10433,7 +10433,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     fvRefreshProofs();
   }
   function pollAlerts() {
-    var proxy = (window.FORGE_LIVE_PROXY || '').replace(/\/$/, '');
+    var proxy = (window.FORGE_LIVE_DATA_URL || '').replace(/\/$/, '');
     if (!proxy) return;
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, 15000);
