@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/feed.xsl"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Detroit Automation Academy</title>
+    <link>https://www.detroitautomationacademy.com/</link>
+    <atom:link href="https://www.detroitautomationacademy.com/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Robotics, drones, and automation training for Detroit's young builders — plus The Signal newsletter, the Live Transit Detroit series, and technical notes, as they publish.</description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 16 Oct 2026 12:00:00 -0400</lastBuildDate>
+    <image>
+      <url>https://www.detroitautomationacademy.com/assets/logo.webp</url>
+      <title>Detroit Automation Academy</title>
+      <link>https://www.detroitautomationacademy.com/</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
+    <item>
+      <title>The Triumphant Return</title>
+      <link>https://www.detroitautomationacademy.com/signal/special-triumphant-return/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/special-triumphant-return/</guid>
+      <pubDate>Fri, 16 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>A Signal special edition: on October 15, SMART returned to Live Transit Detroit the same day it was removed — 5,437 stops restored, on a licensed Swiftly feed.</description>
+      <content:encoded><![CDATA[<p>A Signal special edition: on October 15, SMART returned to Live Transit Detroit the same day it was removed — 5,437 stops restored, on a licensed Swiftly feed.</p><p><a href="https://www.detroitautomationacademy.com/signal/special-triumphant-return/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The Trip Your App Doesn't Show You</title>
+      <link>https://www.detroitautomationacademy.com/signal/special-the-trip-your-app-doesnt-show-you/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/special-the-trip-your-app-doesnt-show-you/</guid>
+      <pubDate>Fri, 16 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>A Signal special edition in plain language: of 24 best two-transfer Detroit bus journeys tested, Google showed 2 and Moovit showed 5.</description>
+      <content:encoded><![CDATA[<p>A Signal special edition in plain language: of 24 best two-transfer Detroit bus journeys tested, Google showed 2 and Moovit showed 5.</p><p><a href="https://www.detroitautomationacademy.com/signal/special-the-trip-your-app-doesnt-show-you/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The Invisible Middle Leg</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/the-invisible-middle-leg/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/the-invisible-middle-leg/</guid>
+      <pubDate>Fri, 16 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>Case study of two-transfer invisibility in Detroit transit routing: optima invisible to Google at 0.89 and to Moovit at 0.78; controls surfaced 7 of 8.</description>
+      <content:encoded><![CDATA[<p>Case study of two-transfer invisibility in Detroit transit routing: optima invisible to Google at 0.89 and to Moovit at 0.78; controls surfaced 7 of 8.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/the-invisible-middle-leg/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Shut Down by the Meter</title>
+      <link>https://www.detroitautomationacademy.com/signal/special-shut-down-by-the-meter/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/special-shut-down-by-the-meter/</guid>
+      <pubDate>Thu, 15 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>A Signal special edition: on October 15, 2026, Netlify quota-paused Live Transit Detroit's live-data service, and DDOT's BusTime key hit its daily cap.</description>
+      <content:encoded><![CDATA[<p>A Signal special edition: on October 15, 2026, Netlify quota-paused Live Transit Detroit&#x27;s live-data service, and DDOT&#x27;s BusTime key hit its daily cap.</p><p><a href="https://www.detroitautomationacademy.com/signal/special-shut-down-by-the-meter/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Every Stop, Counted</title>
+      <link>https://www.detroitautomationacademy.com/signal/edition-05/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/edition-05/</guid>
+      <pubDate>Thu, 15 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>The QLINE joins Live Transit Detroit on its own tracks, the stop registry is rebuilt at 10,583 stops, and the SMART fallback is labeled for what it is.</description>
+      <content:encoded><![CDATA[<p>The QLINE joins Live Transit Detroit on its own tracks, the stop registry is rebuilt at 10,583 stops, and the SMART fallback is labeled for what it is.</p><p><a href="https://www.detroitautomationacademy.com/signal/edition-05/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>QLINE Streetcars Now Live on Live Transit Detroit's 3D Map — on Their Real Track Alignments</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/qline-announcement/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/qline-announcement/</guid>
+      <pubDate>Wed, 14 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>Press release, October 14, 2026: The QLINE streetcar is live on Live Transit Detroit, on its real GTFS track alignments, with all 12 stations.</description>
+      <content:encoded><![CDATA[<p>Press release, October 14, 2026: The QLINE streetcar is live on Live Transit Detroit, on its real GTFS track alignments, with all 12 stations.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/qline-announcement/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The QLINE Sign Error</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/</guid>
+      <pubDate>Tue, 13 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>The QLINE track rendered as a floating diagonal bar, mirrored kilometres north of Woodward Avenue. Cause: a sign error in one coordinate of qline-3d.json.</description>
+      <content:encoded><![CDATA[<p>The QLINE track rendered as a floating diagonal bar, mirrored kilometres north of Woodward Avenue. Cause: a sign error in one coordinate of qline-3d.json.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The Signal is now a transit newsletter</title>
+      <link>https://www.detroitautomationacademy.com/signal/relaunch/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/relaunch/</guid>
+      <pubDate>Sun, 11 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>The Signal repositions to transit: the buses, the rails, the maps, and the people building them. Why the shift, what stays, and what comes next.</description>
+      <content:encoded><![CDATA[<p>The Signal repositions to transit: the buses, the rails, the maps, and the people building them. Why the shift, what stays, and what comes next.</p><p><a href="https://www.detroitautomationacademy.com/signal/relaunch/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Beyond 8 Mile</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/</guid>
+      <pubDate>Sun, 11 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>The Live Transit map no longer ends at the city line. The street mosaic now covers the full SMART service area, and route ribbons are smoothed at every zoom.</description>
+      <content:encoded><![CDATA[<p>The Live Transit map no longer ends at the city line. The street mosaic now covers the full SMART service area, and route ribbons are smoothed at every zoom.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The People Mover Is Under Construction</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/people-mover-under-construction/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/people-mover-under-construction/</guid>
+      <pubDate>Fri, 09 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>The Live Transit map rebuilt its People Mover layer as what the system actually is: an elevated, automated, single-track loop. Build notes on the rework.</description>
+      <content:encoded><![CDATA[<p>The Live Transit map rebuilt its People Mover layer as what the system actually is: an elevated, automated, single-track loop. Build notes on the rework.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/people-mover-under-construction/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Belle Isle, Rendered — True-Form Island Geometry for Live Transit</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/belle-isle/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/belle-isle/</guid>
+      <pubDate>Wed, 07 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>DDOT route 12 serves Belle Isle, but the Live Transit map rendered no island. Build notes on sourcing the true OSM outline, verified against GTFS stops.</description>
+      <content:encoded><![CDATA[<p>DDOT route 12 serves Belle Isle, but the Live Transit map rendered no island. Build notes on sourcing the true OSM outline, verified against GTFS stops.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/belle-isle/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Postmortem: Activating Empirical Timetable Substitution</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/2b-ii-postmortem/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/2b-ii-postmortem/</guid>
+      <pubDate>Tue, 06 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>Postmortem on Phase 2b-ii of the Forge Line live transit layer: reported active, found inert, misdiagnosed twice, root-caused to a page-index/GTFS-ID gap.</description>
+      <content:encoded><![CDATA[<p>Postmortem on Phase 2b-ii of the Forge Line live transit layer: reported active, found inert, misdiagnosed twice, root-caused to a page-index/GTFS-ID gap.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/2b-ii-postmortem/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Build Notes: October 6 Promotion — Nine Changes to Production</title>
+      <link>https://www.detroitautomationacademy.com/live-transit-detroit/ship-day-20261006/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/live-transit-detroit/ship-day-20261006/</guid>
+      <pubDate>Tue, 06 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Live Transit Detroit</category>
+      <description>Build notes for the October 6, 2026 Live Transit promotion: transition engine, Kalman-filtered bus motion, landmark massing, and depth-ordered tap picking.</description>
+      <content:encoded><![CDATA[<p>Build notes for the October 6, 2026 Live Transit promotion: transition engine, Kalman-filtered bus motion, landmark massing, and depth-ordered tap picking.</p><p><a href="https://www.detroitautomationacademy.com/live-transit-detroit/ship-day-20261006/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/live-transit-detroit/">Live Transit Detroit</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Who Is It For?</title>
+      <link>https://www.detroitautomationacademy.com/signal/detroit-2126-02/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/detroit-2126-02/</guid>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 -0400</pubDate>
+      <category>Detroit 2126</category>
+      <description>Detroit 2126, installment two: the median Detroit household earns $39,938; new builds list at $511,180. Who is it for? It's arithmetic.</description>
+      <content:encoded><![CDATA[<p>Detroit 2126, installment two: the median Detroit household earns $39,938; new builds list at $511,180. Who is it for? It&#x27;s arithmetic.</p><p><a href="https://www.detroitautomationacademy.com/signal/detroit-2126-02/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">Detroit 2126</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>What the Pictures Say Now</title>
+      <link>https://www.detroitautomationacademy.com/signal/special-accessibility/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/special-accessibility/</guid>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>A Signal special edition: a site-wide alt-text audit — 50 images across 16 pages — against the University of Michigan's 10-Week Accessibility Challenge guide.</description>
+      <content:encoded><![CDATA[<p>A Signal special edition: a site-wide alt-text audit — 50 images across 16 pages — against the University of Michigan&#x27;s 10-Week Accessibility Challenge guide.</p><p><a href="https://www.detroitautomationacademy.com/signal/special-accessibility/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The Rulebook Changed Again — and the Robots Keep Moving to Detroit</title>
+      <link>https://www.detroitautomationacademy.com/signal/edition-04/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/edition-04/</guid>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>BIOBUZZ Team Updates 01 and 02 rewrite defense and the human-player role — plus Robotize and Teradyne Robotics planting flags in metro Detroit.</description>
+      <content:encoded><![CDATA[<p>BIOBUZZ Team Updates 01 and 02 rewrite defense and the human-player role — plus Robotize and Teradyne Robotics planting flags in metro Detroit.</p><p><a href="https://www.detroitautomationacademy.com/signal/edition-04/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Every DDOT Bus, Live, in 3D — Now With Trip Planning</title>
+      <link>https://www.detroitautomationacademy.com/signal/special-live-transit/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/special-live-transit/</guid>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>A Signal special edition: the Live Transit open beta — every DDOT bus in 3D, now with trip planning, live delay badges, and ride guidance.</description>
+      <content:encoded><![CDATA[<p>A Signal special edition: the Live Transit open beta — every DDOT bus in 3D, now with trip planning, live delay badges, and ride guidance.</p><p><a href="https://www.detroitautomationacademy.com/signal/special-live-transit/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The Ride Is Free</title>
+      <link>https://www.detroitautomationacademy.com/signal/detroit-2126-01/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/detroit-2126-01/</guid>
+      <pubDate>Wed, 30 Sep 2026 12:00:00 -0400</pubDate>
+      <category>Detroit 2126</category>
+      <description>Detroit 2126, installment one: the region voted to connect its transit system. What a century of fare-free, automated movement looks like.</description>
+      <content:encoded><![CDATA[<p>Detroit 2126, installment one: the region voted to connect its transit system. What a century of fare-free, automated movement looks like.</p><p><a href="https://www.detroitautomationacademy.com/signal/detroit-2126-01/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">Detroit 2126</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Thirty Days to Keep the Doors Open</title>
+      <link>https://www.detroitautomationacademy.com/signal/special-food-coop/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/special-food-coop/</guid>
+      <pubDate>Tue, 29 Sep 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>A Signal special edition: the Detroit People's Food Co-op — a community-owned grocery store in the North End — has about a month to keep the doors open.</description>
+      <content:encoded><![CDATA[<p>A Signal special edition: the Detroit People&#x27;s Food Co-op — a community-owned grocery store in the North End — has about a month to keep the doors open.</p><p><a href="https://www.detroitautomationacademy.com/signal/special-food-coop/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Your Ballot, Decoded: The Detroit Voter Guide Is Live</title>
+      <link>https://www.detroitautomationacademy.com/signal/edition-03/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/edition-03/</guid>
+      <pubDate>Mon, 28 Sep 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>The Detroit Voter Guide is live: 10 races, 63 candidates, 3 ballot questions — every claim sourced, every gap flagged.</description>
+      <content:encoded><![CDATA[<p>The Detroit Voter Guide is live: 10 races, 63 candidates, 3 ballot questions — every claim sourced, every gap flagged.</p><p><a href="https://www.detroitautomationacademy.com/signal/edition-03/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>BIOBUZZ, Week Two: The Three Bets That Win This Season</title>
+      <link>https://www.detroitautomationacademy.com/signal/edition-02/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/edition-02/</guid>
+      <pubDate>Fri, 25 Sep 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>The coach's read on the three bets that will decide the BIOBUZZ season: the launcher, the last 60 seconds, and the human player.</description>
+      <content:encoded><![CDATA[<p>The coach&#x27;s read on the three bets that will decide the BIOBUZZ season: the launcher, the last 60 seconds, and the human player.</p><p><a href="https://www.detroitautomationacademy.com/signal/edition-02/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>BIOBUZZ Is Here: What the New FTC Season Demands</title>
+      <link>https://www.detroitautomationacademy.com/signal/edition-01/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/signal/edition-01/</guid>
+      <pubDate>Wed, 23 Sep 2026 12:00:00 -0400</pubDate>
+      <category>The Signal</category>
+      <description>The 2026-27 FIRST Tech Challenge game is BIOBUZZ: how the game scores, the six rule changes that matter, and why the rulebook rewards the spirit of the rule.</description>
+      <content:encoded><![CDATA[<p>The 2026-27 FIRST Tech Challenge game is BIOBUZZ: how the game scores, the six rule changes that matter, and why the rulebook rewards the spirit of the rule.</p><p><a href="https://www.detroitautomationacademy.com/signal/edition-01/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/signal/">The Signal</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Sprint 3: Privacy-First Spatial Intelligence</title>
+      <link>https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/</guid>
+      <pubDate>Tue, 03 Mar 2026 12:00:00 -0500</pubDate>
+      <category>Notes</category>
+      <description>Sprint 3: CoreLocation and MapKit for spatial context, Photos framework highlights, and on-device narrative generation — the zero-knowledge architecture intact.</description>
+      <content:encoded><![CDATA[<p>Sprint 3: CoreLocation and MapKit for spatial context, Photos framework highlights, and on-device narrative generation — the zero-knowledge architecture intact.</p><p><a href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/notes/">Notes</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks</title>
+      <link>https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/</guid>
+      <pubDate>Sat, 28 Feb 2026 12:00:00 -0500</pubDate>
+      <category>Notes</category>
+      <description>Why we chose native Apple frameworks over third-party SDKs for a private on-device diary app — MusicKit, EventKit, CoreData with CloudKit.</description>
+      <content:encoded><![CDATA[<p>Why we chose native Apple frameworks over third-party SDKs for a private on-device diary app — MusicKit, EventKit, CoreData with CloudKit.</p><p><a href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/notes/">Notes</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Registration Live: From Zero to Cloud Run in One Session</title>
+      <link>https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/</guid>
+      <pubDate>Sat, 28 Feb 2026 12:00:00 -0500</pubDate>
+      <category>Notes</category>
+      <description>How we took a broken multi-tenant registration build — Go backend, React frontend — to a live deployment on Google Cloud Run in a single engineering session.</description>
+      <content:encoded><![CDATA[<p>How we took a broken multi-tenant registration build — Go backend, React frontend — to a live deployment on Google Cloud Run in a single engineering session.</p><p><a href="https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/notes/">Notes</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate</title>
+      <link>https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/</guid>
+      <pubDate>Sat, 28 Feb 2026 12:00:00 -0500</pubDate>
+      <category>Notes</category>
+      <description>A post-mortem on recurring deployment failures — Hugo builds with missing content, uninitialized theme submodules, and the automated QA gate that caught them.</description>
+      <content:encoded><![CDATA[<p>A post-mortem on recurring deployment failures — Hugo builds with missing content, uninitialized theme submodules, and the automated QA gate that caught them.</p><p><a href="https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/notes/">Notes</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Digital Stoicism: The Pause-and-Pivot Protocol</title>
+      <link>https://www.detroitautomationacademy.com/notes/pause-and-pivot-protocol/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/notes/pause-and-pivot-protocol/</guid>
+      <pubDate>Sat, 28 Feb 2026 12:00:00 -0500</pubDate>
+      <category>Notes</category>
+      <description>Mastering the gap between a digital stimulus and your response: a 60-second firewall, a three-question audit, and the minimalist intervention.</description>
+      <content:encoded><![CDATA[<p>Mastering the gap between a digital stimulus and your response: a 60-second firewall, a three-question audit, and the minimalist intervention.</p><p><a href="https://www.detroitautomationacademy.com/notes/pause-and-pivot-protocol/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/notes/">Notes</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Stability through Shared Storage: The App Group Milestone</title>
+      <link>https://www.detroitautomationacademy.com/notes/app-group-stability/</link>
+      <guid isPermaLink="true">https://www.detroitautomationacademy.com/notes/app-group-stability/</guid>
+      <pubDate>Sat, 21 Feb 2026 12:00:00 -0500</pubDate>
+      <category>Notes</category>
+      <description>Implementing a shared App Group architecture so an iOS app and its widget read and write the same SwiftData store — eliminating the empty-widget problem.</description>
+      <content:encoded><![CDATA[<p>Implementing a shared App Group architecture so an iOS app and its widget read and write the same SwiftData store — eliminating the empty-widget problem.</p><p><a href="https://www.detroitautomationacademy.com/notes/app-group-stability/">Read on the site</a> · More from <a href="https://www.detroitautomationacademy.com/notes/">Notes</a>.</p>]]></content:encoded>
+    </item>
+  </channel>
+</rss>

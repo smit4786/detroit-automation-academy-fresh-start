@@ -2,40 +2,372 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detroit Automation Academy — Under Construction</title>
-<meta name="description" content="Detroit Automation Academy is under construction. A fresh start is being built here.">
-<style>
-  :root { --ink:#000; --paper:#fff; --mid:#555; --line:#000; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--paper); color:var(--ink);
-         font-family:-apple-system,"Helvetica Neue",Arial,sans-serif; }
-  .wrap { max-width:680px; margin:0 auto; padding:48px 16px 64px; }
-  .rule { border-top:4px solid var(--line); padding-top:24px; }
-  h1 { font-size:28px; line-height:1.2; margin:0 0 8px; font-weight:700; }
-  .kicker { font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--mid); margin:0 0 24px; }
-  p { font-size:17px; line-height:1.55; margin:0 0 16px; }
-  .links { margin-top:32px; border-top:1px solid var(--line); }
-  .links a { display:block; padding:16px 0; border-bottom:1px solid var(--line);
-             color:var(--ink); font-size:17px; font-weight:600; text-decoration:none; }
-  .links a span { display:block; font-weight:400; font-size:14px; color:var(--mid); margin-top:2px; }
-  .links a:hover { text-decoration:underline; }
-  footer { margin-top:40px; font-size:13px; color:var(--mid); }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Detroit Automation Academy — Now Board</title>
+<meta name="description" content="Every DDOT bus live in 3D; SMART buses shown live under license. Positions publish about every five minutes — the map dead-reckons between updates.">
+<meta name="author" content="Justin Spencer Smith">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/webp" href="assets/logo.webp">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css?v=20261102-1818">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:title" content="Live Transit Detroit — Every Bus, Live on One Map">
+<meta property="og:description" content="Every DDOT bus live in 3D; SMART buses shown live under license. Positions publish about every five minutes — the map dead-reckons between updates.">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/live-transit-og.jpg">
+<meta property="og:image:alt" content="Live Transit Detroit — every DDOT bus, live in 3D">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Live Transit Detroit — Every Bus, Live on One Map">
+<meta name="twitter:description" content="Every DDOT bus live in 3D; SMART buses shown live under license. Positions publish about every five minutes — the map dead-reckons between updates.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/live-transit-og.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Detroit Automation Academy",
+  "alternateName": "DAA",
+  "url": "https://www.detroitautomationacademy.com/",
+  "slogan": "Where Detroit builds what's next.",
+  "description": "Robotics, drones, and automation training for Detroit's young builders \u2014 from first circuit to first career.",
+  "email": "justin@detroitautomationacademy.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Southfield",
+    "addressRegion": "MI",
+    "addressCountry": "US"
+  },
+  "sameAs": [
+    "https://www.linkedin.com/in/smit4786",
+    "https://www.linkedin.com/company/the-acadamie"
+  ],
+  "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Detroit Automation Academy",
+  "url": "https://www.detroitautomationacademy.com/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="feed.xml">
 </head>
 <body>
-<main class="wrap">
-  <div class="rule">
-    <h1>Detroit Automation Academy</h1>
-    <p class="kicker">Under Construction</p>
-    <p>This site is being rebuilt from a fresh start. Work is under way in a new repository, and progress is tracked in the open on the project board.</p>
-    <nav class="links">
-      <a href="https://github.com/users/smit4786/projects/73">Project board — DAAD Fresh Start<span>github.com/users/smit4786/projects/73</span></a>
-      <a href="https://github.com/smit4786/detroit-automation-academy-fresh-start">New repository<span>github.com/smit4786/detroit-automation-academy-fresh-start</span></a>
-      <a href="https://www.detroitautomationacademy.com/">detroitautomationacademy.com<span>The main domain</span></a>
-    </nav>
-    <footer>Detroit Automation Academy · Detroit, Michigan</footer>
-  </div>
+<a class="skip-link" href="#top">Skip to main content</a>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="#top" aria-label="Detroit Automation Academy — home"><img src="assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="live-transit.html">Live Map</a><a class="lane" data-audience="user" href="live-transit/">Cities</a><a class="lane" data-audience="visitor" href="programs.html">Programs</a><a class="lane" data-audience="visitor" href="voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="signal/">The Signal</a><a class="lane" data-audience="reader" href="the-index/">The Index</a><a class="lane" data-audience="visitor" href="inquire.html">Contact</a><a class="lane" data-audience="visitor" href="find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="nav.js?v=20261102-1618"></script>
+
+<main id="top">
+  <noscript>
+    <section class="section">
+      <div class="wrap">
+        <p class="kicker">JavaScript is disabled</p>
+        <h2>Detroit Automation Academy &mdash; core content without JavaScript</h2>
+        <div class="prose">
+          <p>Detroit Automation Academy provides robotics, drones, and automation training for Detroit's young builders &mdash; from first circuit to first career. Some interactive features on this site, including the site navigation and the 3D district, need JavaScript and cannot load with it disabled. The core content below and in the rest of this page remains available.</p>
+          <p>Programs: Robotics Cohorts; Drones; Automation &amp; IoT; Apple Code + Create.</p>
+          <p>Read The Signal, the academy's weekly transit newsletter, at <a href="signal/">detroitautomationacademy.com/signal/</a>, and see every DDOT bus live in 3D at <a href="live-transit.html">Live Transit Detroit</a> (that page also needs JavaScript for the live map).</p>
+          <p>Contact: <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a> &middot; Detroit, Michigan</p>
+        </div>
+      </div>
+    </section>
+  </noscript>
+
+  <!-- HERO — the Academy front door (T7) -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-inner">
+      <div class="hero-mark-wrap">
+        <svg class="circuit" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
+          <g class="traces" stroke-width="2">
+            <path class="trace" d="M300,300 L300,160 L360,100"/>
+            <path class="trace" d="M300,300 L300,120"/>
+            <path class="trace" d="M300,300 L420,300 L480,240"/>
+            <path class="trace" d="M300,300 L460,300"/>
+            <path class="trace" d="M300,300 L420,380 L480,440"/>
+            <path class="trace" d="M300,300 L300,400"/>
+            <path class="trace" d="M300,300 L180,380 L120,440"/>
+            <path class="trace" d="M300,300 L140,300"/>
+            <path class="trace" d="M300,300 L180,220 L120,160"/>
+            <path class="trace" d="M300,300 L240,140 L200,80"/>
+          </g>
+          <g class="nodes">
+            <circle class="node" cx="360" cy="100" r="5"/>
+            <circle class="node" cx="300" cy="120" r="5"/>
+            <circle class="node" cx="480" cy="240" r="5"/>
+            <circle class="node" cx="460" cy="300" r="5"/>
+            <circle class="node" cx="480" cy="440" r="5"/>
+            <circle class="node" cx="300" cy="400" r="5"/>
+            <circle class="node" cx="120" cy="440" r="5"/>
+            <circle class="node" cx="140" cy="300" r="5"/>
+            <circle class="node" cx="120" cy="160" r="5"/>
+            <circle class="node" cx="200" cy="80" r="5"/>
+          </g>
+        </svg>
+        <img src="assets/logo.webp" alt="Forge D — Detroit Automation Academy mark" class="hero-mark">
+      </div>
+      <p class="eyebrow">Detroit Automation Academy</p>
+      <h1 id="hero-heading">Robotics, drones, and automation training for Detroit's <span class="accent">young builders.</span></h1>
+      <p class="lede">From first circuit to first career — seasonal cohorts in robotics, drones, automation &amp; IoT, a published curriculum, and registration by email.</p>
+      <div class="hero-actions">
+        <a href="programs.html" class="btn btn-primary">See the programs</a>
+        <a href="mailto:justin@detroitautomationacademy.com?subject=Program%20registration%20inquiry" class="btn btn-ghost">Register by email</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCT — Live Transit Detroit (T7) -->
+  <section class="section section-alt" aria-labelledby="product-heading">
+    <div class="wrap">
+      <p class="kicker">Featured product · Live Transit Detroit</p>
+      <h2 id="product-heading">Every bus in Detroit, live on one <span class="accent">map.</span></h2>
+      <div class="prose">
+        <p>Every DDOT bus live in 3D; SMART buses shown live under license, display only. Positions poll continuously and publish about every five minutes; the map dead-reckons between updates.</p>
+        <p class="fine">Built by <strong>Justin Spencer Smith</strong> — Lead Technologist, AutomatedTechnologies; builder of Live Transit Detroit and the Detroit Automation Academy.</p>
+      </div>
+      <div class="signal-cta">
+        <a href="live-transit.html" class="btn btn-primary">Open Live Transit</a>
+        <a href="board/" class="btn btn-ghost">Find your stop — Departure Board</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">83</span><span class="stat-label">Routes tracked, estate-wide</span></div>
+        <div class="stat"><span class="stat-num">~5 min</span><span class="stat-label">Position publish cadence</span></div>
+        <div class="stat"><span class="stat-num">3</span><span class="stat-label">Systems — DDOT · SMART · QLINE</span></div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="section section-alt" id="plan" aria-labelledby="plan-heading">
+    <div class="wrap">
+      <p class="kicker">Ride · Vote</p>
+      <h2 id="plan-heading">Plan the <span class="accent">trip.</span></h2>
+      <div class="signal-grid">
+
+        <article class="signal-card">
+          <p class="signal-card-kicker">Ride · Live Transit</p>
+          <h4>Live Transit</h4>
+          <p class="signal-card-dek">The 3D map and trip planner — DDOT, SMART scheduled, QLINE.</p>
+          <a class="signal-card-link" href="live-transit.html">Open the map →</a>
+        </article>
+
+        <article class="signal-card">
+          <p class="signal-card-kicker">Ride · Departure Board</p>
+          <h4>Departure Board</h4>
+          <p class="signal-card-dek">Find your stop — the nearest stop and its next departures, big-type.</p>
+          <a class="signal-card-link" href="board/">Find your stop →</a>
+        </article>
+
+        <article class="signal-card">
+          <p class="signal-card-kicker">Vote · Voter Guide</p>
+          <h4>The Detroit Voter Guide</h4>
+          <p class="signal-card-dek">Four ballot questions, and a planned trip to every early vote center.</p>
+          <a class="signal-card-link" href="voter-guide.html">Read the guide →</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- THE SIGNAL / NEWSLETTER -->
+  <section class="section" id="signal" aria-labelledby="signal-heading">
+    <div class="wrap">
+      <p class="kicker">The Signal</p>
+      <h2 id="signal-heading">Following Detroit's <span class="accent">transit future.</span></h2>
+      <div class="signal-animation">
+        <iframe src="signal-animation.html" title="The Signal logo animation — a spotlight sweeping the night sky until it lights up the Forge D" loading="lazy"></iframe>
+      </div>
+      <div class="prose">
+        <p><strong>The Signal</strong> is the academy's weekly newsletter — the buses, the rails, the maps, and the people building them. Schedules, reliability, and the gaps between the map and the street. Free to read, built to forward.</p>
+        <p>It's also how the academy gets funded. Here's the trajectory:</p>
+      </div>
+      <ol class="trajectory">
+        <li class="phase">
+          <span class="phase-tag">Phase 01 — Now</span>
+          <h3>Audience</h3>
+          <p>A free weekly newsletter building a loyal readership. Reputation first, revenue later.</p>
+        </li>
+        <li class="phase">
+          <span class="phase-tag">Phase 02 — Next</span>
+          <h3>Sponsorship</h3>
+          <p>Sponsors underwrite the editions. Their brand becomes part of Detroit's builder story.</p>
+        </li>
+        <li class="phase">
+          <span class="phase-tag">Phase 03 — The flywheel</span>
+          <h3>Advisory</h3>
+          <p>Advisory revenue flows straight back into the academy. Every edition funds a student trained.</p>
+        </li>
+      </ol>
+      <div class="signal-articles">
+        <h3 class="signal-articles-heading">Featured articles</h3>
+        <p class="signal-articles-sub">Every piece below, newest first — the full story is right here, no click-through required. Links at the foot of each card go to the full text.</p>
+        <div class="signal-grid">
+
+          <article class="signal-card">
+            <p class="signal-card-kicker">The Signal · Relaunch Edition</p>
+            <h4>The Signal is now a transit newsletter</h4>
+            <p class="signal-card-date">Published October 11, 2026</p>
+            <p class="signal-card-dek">The Signal repositions to transit: the buses, the rails, the maps, and the people building them. Why the shift, what stays, and what comes next.</p>
+            <a class="signal-card-link" href="signal/relaunch/">Read the full piece →</a>
+          </article>
+
+          <article class="signal-card">
+            <p class="signal-card-kicker">The Signal · Special edition</p>
+            <h4>Every DDOT Bus, Live, in 3D — Now With Trip Planning</h4>
+            <p class="signal-card-date">Published October 6, 2026</p>
+            <p class="signal-card-dek">Every DDOT bus in Detroit, drawn on the actual streets in 3D — now with trip planning.</p>
+            <a class="signal-card-link" href="signal/special-live-transit/">Read the full piece →</a>
+          </article>
+
+          <article class="signal-card">
+            <p class="signal-card-kicker">Detroit 2126 · Installment 1</p>
+            <h4>The Ride Is Free</h4>
+            <p class="signal-card-date">Published October 1, 2026</p>
+            <p class="signal-card-dek">What does Detroit look like in a hundred years if we build it for everyone who'll live here? First up: how we move.</p>
+            <a class="signal-card-link" href="signal/detroit-2126-01/">Read the full piece →</a>
+          </article>
+
+        </div>
+      <div class="signal-cta">
+        <a href="https://www.linkedin.com/newsletters/7508391258638311424/" class="btn btn-primary" target="_blank" rel="noopener">Subscribe on LinkedIn</a>
+        <p class="fine">New editions weekly. The transit archive lives at <a href="signal/">detroitautomationacademy.com/signal/</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- MISSION -->
+  <section class="section section-alt" id="mission" aria-labelledby="mission-heading">
+    <div class="wrap">
+      <p class="kicker">The mission</p>
+      <h2 id="mission-heading">The city that put the world on wheels<br>trains the kids who'll run the <span class="accent">automated</span> world.</h2>
+      <div class="prose">
+        <p>Detroit Automation Academy exists for one reason: the young people of this city should be the ones building the automated future, not watching it arrive from somewhere else. We teach robotics, drones, and automation the way Detroit taught the world manufacturing — hands on, no shortcuts, pride in the work.</p>
+        <p>This academy has never received institutional funding. No grant, no sponsor, no check that was promised. It was built anyway — nights, weekends, borrowed space — and it's being finished on principle. Detroit's kids shouldn't have to wait on paperwork.</p>
+      </div>
+      <div class="principles">
+        <div class="principle"><h3>Build, don't watch</h3><p>Every student leaves with something they made move, fly, or think.</p></div>
+        <div class="principle"><h3>No pity, no jargon</h3><p>We talk to young builders like builders. High bar, plain language.</p></div>
+        <div class="principle"><h3>Detroit first</h3><p>The talent is here. The training should be too.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAMS -->
+  <section class="section" id="programs" aria-labelledby="programs-heading">
+    <div class="wrap">
+      <p class="kicker">Programs</p>
+      <h2 id="programs-heading">Four tracks. <span class="accent">Zero</span> fluff.</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="card-num">01</div>
+          <h3>Robotics Cohorts</h3>
+          <p>Seasonal build cohorts — design, wire, and program robots that compete and perform. Challenge-based learning from day one.</p>
+        </article>
+        <article class="card">
+          <div class="card-num">02</div>
+          <h3>Drones</h3>
+          <p>Design and build quadcopters — frames, flight stacks, and the engineering behind the rotors, with safety at every step.</p>
+        </article>
+        <article class="card">
+          <div class="card-num">03</div>
+          <h3>Automation &amp; IoT</h3>
+          <p>Sensors, controllers, and the logic that connects them. The same systems thinking that runs modern factories.</p>
+        </article>
+        <article class="card">
+          <div class="card-num">04</div>
+          <h3>Apple Code + Create</h3>
+          <p>App design and Swift development for young creators — run with the Michigan Engineering Zone. From idea to working prototype.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <p class="fine">Tracks, the published curriculum, and registration live on the <a href="programs.html">Programs page →</a></p>
+    </div>
+  </section>
+
+  <!-- TRY IT -->
+  <section class="section section-alt" id="demo" aria-labelledby="demo-heading">
+    <div class="wrap">
+      <p class="kicker">Try it</p>
+      <h2 id="demo-heading">Type a command. <span class="accent">Watch it move.</span></h2>
+      <div class="prose">
+        <p>This is what day one feels like at the academy: you tell a machine what to do, and it does it. The training bot is listening &mdash; drag to orbit the 3D training district, tap a building to visit it, or type &ldquo;takeoff&rdquo; and fly it as a quadcopter.</p>
+        <p><a class="btn btn-primary" href="district.html">Enter the 3D district</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNERS -->
+  <section class="section" id="partners" aria-labelledby="partners-heading">
+    <div class="wrap">
+      <p class="kicker">In good company</p>
+      <h2 id="partners-heading">Built alongside <span class="accent">Detroit's builders.</span></h2>
+      <ul class="partner-list">
+        <li><a href="https://umci.umich.edu/" target="_blank" rel="noopener">University of Michigan Center for Innovation</a> <span style="color:var(--concrete);">— advisor</span></li>
+        <li><a href="https://www.thinkabitlab.com/" target="_blank" rel="noopener">Qualcomm Thinkabit Lab</a> <span style="color:var(--concrete);">— instructor</span></li>
+        <li><a href="https://www.ccsdetroit.edu/" target="_blank" rel="noopener">College for Creative Studies</a> <span style="color:var(--concrete);">— mentor</span></li>
+        <li><a href="https://detroit.umich.edu/engagement-projects/featured-projects/michigan-engineering-zone/" target="_blank" rel="noopener">Michigan Engineering Zone</a> <span style="color:var(--concrete);">— instructor</span></li>
+      </ul>
+    </div>
+  </section>
+
 </main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="live-transit.html">Live Map</a> · <a href="board/">Departure Board</a> · <a href="live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="live-transit.html">Detroit</a> · <a href="live-transit/philadelphia/">Philadelphia</a> · <a href="live-transit/cincinnati/">Cincinnati</a> · <a href="live-transit/denver/">Denver</a> · <a href="live-transit/austin/">Austin</a> · <a href="live-transit/sacramento/">Sacramento</a> · <a href="live-transit/san-diego/">San Diego</a> · <a href="live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="signal/">The Signal</a> · <a href="live-transit-detroit/">Live Transit Detroit stories</a> · <a href="notes/">Notes</a> · <a href="press/">The Press</a> · <a href="the-index/">The Index</a> · <a href="feed/">Latest</a> · <a href="watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="programs.html">Programs</a> · <a href="curriculum/online-safety/">Online Safety</a> · <a href="voter-guide.html">Voter Guide</a> · <a href="partners.html">Partners</a> · <a href="api.html">API</a> · <a href="inquire.html">Contact</a> · <a href="apple-learning-coach/">Coach Profile</a> · <a href="press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="dashboard.html">Status</a> · <a href="terms.html">Terms of Service</a> · <a href="privacy.html">Privacy Policy</a> · <a href="live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="script.js?v=20261003-1330"></script>
+    <script src="owner.js" defer></script>
+<script src="assets/measure.js?v=20261023-o2" defer></script>
 </body>
 </html>
