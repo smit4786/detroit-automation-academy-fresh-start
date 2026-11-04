@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Every Stop, Counted — The Signal · Detroit Automation Academy</title>
+<meta name="description" content="The QLINE joins Live Transit Detroit on its own tracks, the stop registry is rebuilt at 10,583 stops, and the SMART fallback is labeled for what it is.">
+<meta property="og:title" content="Every Stop, Counted">
+<meta property="og:description" content="The QLINE joins Live Transit Detroit on its own tracks, the stop registry is rebuilt from source at 10,583 stops, and the SMART fallback is labeled for what it is.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261102-1818">
+<style>
+.signal-pager{display:flex;gap:12px;flex-wrap:wrap;margin:2rem 0 1rem;}
+h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/signal/edition-05/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Every Stop, Counted">
+<meta name="twitter:description" content="The QLINE joins Live Transit Detroit on its own tracks, the stop registry is rebuilt at 10,583 stops, and the SMART fallback is labeled for what it is.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Every Stop, Counted — The Signal · Detroit Automation Academy",
+  "description": "The QLINE joins Live Transit Detroit on its own tracks, the stop registry is rebuilt from source at 10,583 stops, and the SMART fallback is labeled for what it is.",
+  "url": "https://www.detroitautomationacademy.com/signal/edition-05/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="../../feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="../../" aria-label="Detroit Automation Academy — home"><img src="../../assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="../../live-transit.html">Live Map</a><a class="lane" data-audience="user" href="../../live-transit/">Cities</a><a class="lane" data-audience="visitor" href="../../programs.html">Programs</a><a class="lane" data-audience="visitor" href="../../voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="../../signal/">The Signal</a><a class="lane" data-audience="reader" href="../../the-index/">The Index</a><a class="lane" data-audience="visitor" href="../../inquire.html">Contact</a><a class="lane" data-audience="visitor" href="../../find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="../../nav.js?v=20261102-1618"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">The Signal</a> · Edition 5 · October 2026</p>
+      <h1>Every Stop, <span class="accent">Counted</span></h1>
+      <p class="fine">Published October 15, 2026 · By Justin Spencer Smith · <a href="https://www.linkedin.com/pulse/every-stop-counted-justin-spencer-smith-0t2mc/" target="_blank" rel="noopener">Also on LinkedIn</a></p>
+      <div class="prose">
+        <p>Detroit's transit map got honest this month — about what it shows, and about what it still can't.</p>
+        <h3>The QLINE is on the map — on its own tracks</h3>
+        <p>The streetcar joined Live Transit Detroit on October 14, built from the QLINE's own published GTFS: all 12 stations, the Grand Boulevard terminus, and the downtown terminal loop, with live positions from the QLINE's public real-time feed. Getting there took three fixes, each found the same way — by checking the map against the street: a sign error that mirrored the track miles from where it belonged, a street centerline standing in for the actual track alignment, and a rendering cap written for a smaller map that silently clipped stops. The full story is Live Transit Detroit installment six, "The QLINE Sign Error."</p>
+        <h3>10,583 stops, rebuilt from source</h3>
+        <p>The launch completed a full rebuild of the map's stop registry from the agencies' own GTFS data: 5,124 DDOT stops, 5,437 SMART stops, and 22 QLINE stops — the QLINE previously had none. Every production stop ID was preserved, so nothing that referenced a stop before the rebuild broke after it. The count is verifiable the same way everything on the map is: go look.</p>
+        <h3>The honest part</h3>
+        <p>SMART's live feed still waits on SMART. The schedules are not the obstacle — all 45 SMART routes and all 5,437 SMART stops are on the map. What's missing is the real-time key, which runs through SMART's approval at Swiftly. Our October inquiry drew an automated acknowledgment and, so far, no answer; a formal key request followed on October 13. Until it lands, SMART positions arrive through a fallback that was never live, and the map's job is to say so rather than dress it up. We published the full account as a press release on October 14 — it's on the site, and it's the standing offer: the day the key arrives, SMART goes live on the same 60-second cadence as everything else. As of tonight the map labels the fallback for what it is: "SMART positions as of 10:40 PM — snapshot, not live GPS," with the count itself marked stale once a snapshot passes an hour old.</p>
+        <h3>What's next</h3>
+        <p>Two builds that were next are live. Service alerts shipped on October 14: DDOT bulletins and SMART notices as badges on the routes they affect, an active-alerts list, and the effects in plain language — 32 bulletins were active the night it shipped. And the trip planner's timing model was audited against the buses' own reported departures: at terminal stops it had been adding dwell that never happened, 806 seconds of phantom wait in the worst timing cells. Corrected, those cells read 269 seconds, against a 322-second clean baseline. What is actually next is the events layer — concerts, games, and festivals as destinations the trip planner understands, appearing only while they're relevant. Its sources are settled: Ticketmaster, the league feed for Red Wings games, and Eastern Market, with the major annual festivals entered by hand once their dates are confirmed.</p>
+        <p>Thirty-four subscribers got the first transit edition. This one goes to whoever's joined since. The work is the pitch: every stop, counted — and every gap, labeled.</p>
+        <hr>
+        <p><em>The Signal is the newsletter of Detroit Automation Academy — where Detroit builds what's next. New editions monthly. If you know a young builder who should be in the room, send them our way.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../edition-04/" class="btn btn-ghost">← Edition 4: The Rulebook Changed Again</a>
+        <a href="../" class="btn btn-ghost">All editions</a>
+      </div>
+      <div class="signal-cta">
+        <a href="https://www.linkedin.com/newsletters/7508391258638311424/" class="btn btn-primary" target="_blank" rel="noopener">Subscribe to The Signal</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="../../assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="../../live-transit.html">Live Map</a> · <a href="../../board/">Departure Board</a> · <a href="../../live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="../../live-transit.html">Detroit</a> · <a href="../../live-transit/philadelphia/">Philadelphia</a> · <a href="../../live-transit/cincinnati/">Cincinnati</a> · <a href="../../live-transit/denver/">Denver</a> · <a href="../../live-transit/austin/">Austin</a> · <a href="../../live-transit/sacramento/">Sacramento</a> · <a href="../../live-transit/san-diego/">San Diego</a> · <a href="../../live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="../../signal/">The Signal</a> · <a href="../../live-transit-detroit/">Live Transit Detroit stories</a> · <a href="../../notes/">Notes</a> · <a href="../../press/">The Press</a> · <a href="../../the-index/">The Index</a> · <a href="../../feed/">Latest</a> · <a href="../../watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="../../programs.html">Programs</a> · <a href="../../curriculum/online-safety/">Online Safety</a> · <a href="../../voter-guide.html">Voter Guide</a> · <a href="../../partners.html">Partners</a> · <a href="../../api.html">API</a> · <a href="../../inquire.html">Contact</a> · <a href="../../apple-learning-coach/">Coach Profile</a> · <a href="../../press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="../../dashboard.html">Status</a> · <a href="../../terms.html">Terms of Service</a> · <a href="../../privacy.html">Privacy Policy</a> · <a href="../../live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="../../find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+<script src="../../assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

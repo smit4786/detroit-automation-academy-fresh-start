@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Signal — Forge D Animation</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #0d0d0d; overflow: hidden; }
+  svg { display: block; width: 100%; height: 100%; }
+
+  .beam {
+    transform-box: view-box;
+    transform-origin: 300px -10px;
+    animation: sweep 10s ease-in-out infinite;
+  }
+  @keyframes sweep {
+    0%   { transform: rotate(-26deg); opacity: 0; }
+    4%   { opacity: .85; }
+    18%  { transform: rotate(14deg); }
+    36%  { transform: rotate(-10deg); }
+    50%  { transform: rotate(0deg); }
+    88%  { transform: rotate(0deg); opacity: .85; }
+    96%  { opacity: 0; }
+    100% { transform: rotate(-26deg); opacity: 0; }
+  }
+
+  .forge-d {
+    animation: lightUp 10s ease-in-out infinite;
+  }
+  @keyframes lightUp {
+    0%, 46%   { fill: #2e2e2e; filter: none; }
+    58%, 85%  { fill: #f5f5f5; filter: drop-shadow(0 0 18px rgba(255,255,255,.75)); }
+    96%, 100% { fill: #2e2e2e; filter: none; }
+  }
+
+  .traces {
+    animation: tracesUp 10s ease-in-out infinite;
+  }
+  @keyframes tracesUp {
+    0%, 46%   { stroke: #232323; }
+    58%, 85%  { stroke: #9a9a9a; }
+    96%, 100% { stroke: #232323; }
+  }
+
+  .wordmark {
+    font-family: 'Space Grotesk', 'Arial Narrow', Arial, sans-serif;
+    font-weight: 700; letter-spacing: .42em;
+    animation: wordUp 10s ease-in-out infinite;
+  }
+  @keyframes wordUp {
+    0%, 46%   { fill: #3d3d3d; }
+    58%, 85%  { fill: #e8e8e8; }
+    96%, 100% { fill: #3d3d3d; }
+  }
+
+  .star { animation: twinkle 3.6s ease-in-out infinite; }
+  .star.s2 { animation-duration: 4.7s; animation-delay: -1.4s; }
+  .star.s3 { animation-duration: 5.5s; animation-delay: -2.6s; }
+  @keyframes twinkle {
+    0%, 100% { opacity: .25; }
+    50%      { opacity: .8; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .beam { animation: none; transform: rotate(0deg); opacity: .85; }
+    .forge-d { animation: none; fill: #f5f5f5; filter: drop-shadow(0 0 18px rgba(255,255,255,.75)); }
+    .traces { animation: none; stroke: #9a9a9a; }
+    .wordmark { animation: none; fill: #e8e8e8; }
+    .star { animation: none; opacity: .5; }
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 600 600" role="img" aria-label="The Signal logo animation — a spotlight sweeping the night sky until it lights up the Forge D">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d0d0d"/>
+      <stop offset="1" stop-color="#1c1c1c"/>
+    </linearGradient>
+    <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="600" height="600" fill="url(#sky)"/>
+
+  <g fill="#d9d9d9">
+    <circle class="star"    cx="62"  cy="70"  r="1.6"/>
+    <circle class="star s2" cx="140" cy="150" r="1.2"/>
+    <circle class="star s3" cx="215" cy="52"  r="1.4"/>
+    <circle class="star s2" cx="330" cy="96"  r="1.1"/>
+    <circle class="star"    cx="418" cy="58"  r="1.6"/>
+    <circle class="star s3" cx="492" cy="140" r="1.2"/>
+    <circle class="star s2" cx="548" cy="66"  r="1.5"/>
+    <circle class="star"    cx="96"  cy="238" r="1.1"/>
+    <circle class="star s3" cx="168" cy="308" r="1.3"/>
+    <circle class="star s2" cx="452" cy="252" r="1.2"/>
+    <circle class="star"    cx="524" cy="318" r="1.4"/>
+    <circle class="star s3" cx="382" cy="176" r="1.0"/>
+    <circle class="star s2" cx="44"  cy="356" r="1.2"/>
+    <circle class="star"    cx="566" cy="420" r="1.1"/>
+    <circle class="star s3" cx="258" cy="128" r="1.0"/>
+    <circle class="star s2" cx="505" cy="36"  r="1.0"/>
+  </g>
+
+  <g class="beam">
+    <polygon points="291,-10 309,-10 438,486 162,486" fill="url(#beamGrad)"/>
+  </g>
+
+  <g class="traces" stroke-width="3" fill="none">
+    <path d="M300,262 L300,196 L344,152"/>
+    <path d="M300,262 L398,262 L448,222"/>
+    <path d="M300,262 L202,262 L152,222"/>
+    <circle cx="344" cy="152" r="4" fill="#232323"/>
+    <circle cx="448" cy="222" r="4" fill="#232323"/>
+    <circle cx="152" cy="222" r="4" fill="#232323"/>
+  </g>
+  <path class="forge-d" fill="#2e2e2e" fill-rule="evenodd"
+        d="M228,196 L318,196 A86,86 0 1 1 318,368 L228,368 Z M262,230 L312,230 A52,52 0 1 1 312,334 L262,334 Z"/>
+
+  <text class="wordmark" x="306" y="424" text-anchor="middle" font-size="21">THE SIGNAL</text>
+
+  <g fill="#050505">
+    <rect x="0"   y="492" width="74"  height="108"/>
+    <rect x="66"  y="466" width="52"  height="134"/>
+    <rect x="112" y="502" width="88"  height="98"/>
+    <rect x="196" y="478" width="58"  height="122"/>
+    <rect x="248" y="508" width="104" height="92"/>
+    <rect x="346" y="472" width="62"  height="128"/>
+    <rect x="402" y="500" width="84"  height="100"/>
+    <rect x="480" y="462" width="54"  height="138"/>
+    <rect x="528" y="496" width="72"  height="104"/>
+  </g>
+  <g fill="#2a2a2a">
+    <rect x="84"  y="486" width="6" height="8"/>
+    <rect x="100" y="512" width="6" height="8"/>
+    <rect x="366" y="494" width="6" height="8"/>
+    <rect x="498" y="484" width="6" height="8"/>
+    <rect x="514" y="516" width="6" height="8"/>
+    <rect x="216" y="498" width="6" height="8"/>
+  </g>
+  <rect x="0" y="598" width="600" height="2" fill="#000000"/>
+</svg>
+</body>
+</html>

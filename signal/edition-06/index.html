@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Week We Audited Ourselves — The Signal · Detroit Automation Academy</title>
+<meta name="description" content="The Signal, Edition 6: the Academy audited its own domain and repaired what it found — 80 internal files moved out of public view, a retired token proven accepted nowhere, a 600-email alert flood traced to one file — while Detroit's map was rebuilt from source, the app got a new front door, and Philadelphia went live as the second city.">
+<meta property="og:title" content="The Week We Audited Ourselves">
+<meta property="og:description" content="The Signal, Edition 6: a security review of our own estate, a rebuilt map, a new front door, and a second city — the week's record, at the size it actually is.">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css?v=20261102-1818">
+<style>
+.signal-pager{display:flex;gap:12px;flex-wrap:wrap;margin:2rem 0 1rem;}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/signal/edition-06/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Week We Audited Ourselves — The Signal · Detroit Automation Academy">
+<meta name="twitter:description" content="The Signal, Edition 6: the estate audited itself — and published the record, including the parts still open.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Week We Audited Ourselves — The Signal · Detroit Automation Academy",
+  "description": "The Signal, Edition 6 (October 23, 2026): a full security review and remediation of detroitautomationacademy.com — 80 internal files evicted from the public repo to a private one, the September console token proven accepted nowhere, CI hardened, three unescaped sinks fixed with no exploitable sink found, security.txt published — alongside the Geometry Pipeline v2 rebuild of the map, the new first view on Live Transit Detroit, and Philadelphia live as the second city.",
+  "url": "https://www.detroitautomationacademy.com/signal/edition-06/",
+  "datePublished": "2026-10-23",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="daa-nav"></div>
+<script src="../../nav.js?v=20261102-1618"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">The Signal</a> · Edition 6 · October 2026</p>
+      <h2>The Week We <span class="accent">Audited</span> Ourselves</h2>
+      <p class="fine">Published Friday, October 23, 2026 · By Justin Spencer Smith · <a href="https://www.linkedin.com/newsletters/7508391258638311424/" target="_blank" rel="noopener">Also on LinkedIn</a></p>
+      <div class="prose">
+        <p>This week, the Academy read its own estate the way it reads everyone else's: as evidence. A security review covered the whole domain. The map's geometry was rebuilt from source. Detroit's transit app got a new front door. A second city went live. The record, at the size it actually is:</p>
+
+        <h3>A new front door, and straighter lines</h3>
+        <p>Live Transit Detroit opens with a question now — what do you want to do? Six tiles answer it: live map, plan a trip, ride along, all routes, near me, alerts. The location prompt that used to greet every visit is deleted, and "just the map" is still one tap away; the choice is remembered for the next visit.</p>
+        <p>Underneath, the map was rebuilt from the agencies' own published shape data. One downtown route had been rendering as a crumpled fold — a reader caught it in a screenshot — and it now draws as the single smooth loop the bus actually drives. The rebuild covers all 206 route paths across DDOT, SMART, and the QLINE, and every path now carries a public provenance record: which feed version, which source shape. If a line on the map is wrong, its paperwork sits next to the line.</p>
+
+        <h3>Philadelphia is live — as a page</h3>
+        <p>Philadelphia is the second city on the same engine: 178 SEPTA routes and 13,665 stops, live bus and rail vehicles in separate feed sections, at <a href="https://www.detroitautomationacademy.com/live-transit/philadelphia/">detroitautomationacademy.com/live-transit/philadelphia/</a>. It is a working map, published when it existed. The agency has not been approached and nothing has been announced; we are not calling a page a launch.</p>
+        <p>Its data froze this morning, and the cause is worth printing: the collection workflow had run exactly twice in its life, both times by hand — its schedule never fired. The repair is a watchdog on the same pattern Detroit's feeds already use, checking the data's age every two minutes and dispatching the collector when it goes stale. Two consecutive watchdog-driven refreshes are verified in the record. The cadence it holds is five to eight minutes.</p>
+
+        <h3>The audit turned inward</h3>
+        <p>Eighty files that were never public material — internal charters, infrastructure documents, a customer-relationship codebase — moved out of the public repository into a new private one, byte for byte. The deploy workflow no longer copies files by pattern; data publishes from an explicit list, so the next internal file cannot become public by accident of its name.</p>
+        <p>One question deserved a documented answer. A hash of an owner token from September's console builds sits in the repository's public history. The October repair record proves the token was never rotated. It also proves the token is accepted nowhere: the page that checked it was deleted, the server that would have succeeded it was never deployed, and the token file is gone. It is burned, and it will never be reused. The history stays unrewritten — a rewrite cannot retract the copies that exist, and the hash unlocks nothing.</p>
+        <p>The week's noisiest failure was smaller. About six hundred failure emails traced to one unformatted Python file failing a formatting check on every commit — including the feed's own data commits, every few minutes. The file is formatted, the pipeline is green, and data commits no longer trigger the pipeline at all. Across the workflows, third-party actions are now pinned to exact commits, the secrets-bearing workflows run on Node 22, and the three places in the app code that took data-file values without escaping are fixed. A full audit of the rest found no exploitable sink. A <a href="https://www.detroitautomationacademy.com/.well-known/security.txt">security.txt</a> — the standard address for reporting what we missed — is live.</p>
+
+        <h3>One disclosure that did not apply</h3>
+        <p>This year's disclosure batch included a pair of critical PHP flaws: unauthenticated remote code execution, scored 9.2, with a public exploit reported. The estate's exposure is zero, by construction — there is not one PHP file in its 1,032-file tree. Justin kicked PHP in college.</p>
+
+        <h3>What is still open</h3>
+        <p>Two items remain open, named rather than smoothed over. The domain's mail protections — a DMARC record, a tightened sender policy, certificate-authority restrictions — are written and waiting on a paste that only the account holder can make. And the host cannot serve security headers; closing that gap is a hosting decision, not a code change. Both are on the record, with owners.</p>
+
+        <h3>The close</h3>
+        <p>That is the week: a new front door, straighter lines, a second city, and an estate that keeps less of itself in public than it did on Monday. The Signal publishes on Fridays now — this is the first one.</p>
+        <p>Canonical record and full technical detail: the Academy's publish logs and program records, at <a href="https://www.detroitautomationacademy.com/signal/">detroitautomationacademy.com/signal/</a>.</p>
+        <hr>
+        <p><em>The Signal is the newsletter of Detroit Automation Academy — where Detroit builds what's next. If you know a young builder who should be in the room, send them our way.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../" class="btn btn-ghost">← All editions</a>
+      </div>
+      <div class="signal-cta">
+        <a href="https://www.linkedin.com/newsletters/7508391258638311424/" class="btn btn-primary" target="_blank" rel="noopener">Subscribe to The Signal</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="../../assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="../../live-transit.html">Live Map</a> · <a href="../../board/">Departure Board</a> · <a href="../../live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="../../live-transit.html">Detroit</a> · <a href="../../live-transit/philadelphia/">Philadelphia</a> · <a href="../../live-transit/cincinnati/">Cincinnati</a> · <a href="../../live-transit/denver/">Denver</a> · <a href="../../live-transit/austin/">Austin</a> · <a href="../../live-transit/sacramento/">Sacramento</a> · <a href="../../live-transit/san-diego/">San Diego</a> · <a href="../../live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="../../signal/">The Signal</a> · <a href="../../live-transit-detroit/">Live Transit Detroit stories</a> · <a href="../../notes/">Notes</a> · <a href="../../press/">The Press</a> · <a href="../../the-index/">The Index</a> · <a href="../../feed/">Latest</a> · <a href="../../watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="../../programs.html">Programs</a> · <a href="../../curriculum/online-safety/">Online Safety</a> · <a href="../../voter-guide.html">Voter Guide</a> · <a href="../../partners.html">Partners</a> · <a href="../../api.html">API</a> · <a href="../../inquire.html">Contact</a> · <a href="../../apple-learning-coach/">Coach Profile</a> · <a href="../../press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="../../dashboard.html">Status</a> · <a href="../../terms.html">Terms of Service</a> · <a href="../../privacy.html">Privacy Policy</a> · <a href="../../live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="../../find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+</body>
+</html>

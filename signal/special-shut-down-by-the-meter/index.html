@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shut Down by the Meter — The Signal · Detroit Automation Academy</title>
+<meta name="description" content="A Signal special edition: on October 15, 2026, Netlify quota-paused Live Transit Detroit's live-data service, and DDOT's BusTime key hit its daily cap.">
+<meta property="og:title" content="Shut Down by the Meter">
+<meta property="og:description" content="A Signal special edition: the hosted live-data proxy was shut down by its host's meter. The map never closed. The quota, the DDOT cap, the case study the service had already proven, and the same-day rebuild on our own stack.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261102-1818">
+<style>
+.signal-pager{display:flex;gap:12px;flex-wrap:wrap;margin:2rem 0 1rem;}
+h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/signal/special-shut-down-by-the-meter/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Shut Down by the Meter">
+<meta name="twitter:description" content="A Signal special edition: on October 15, 2026, Netlify quota-paused Live Transit Detroit's live-data service, and DDOT's BusTime key hit its daily cap.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Shut Down by the Meter — The Signal · Detroit Automation Academy",
+  "description": "A Signal special edition: on October 15, 2026, Netlify quota-paused the hosted proxy behind Live Transit Detroit's live data (HTTP 503 usage_exceeded on every path). The site and the map, hosted on GitHub Pages, never closed. The live feed was rebuilt the same afternoon on infrastructure the Academy runs itself.",
+  "url": "https://www.detroitautomationacademy.com/signal/special-shut-down-by-the-meter/",
+  "datePublished": "2026-10-15",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="../../feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="../../" aria-label="Detroit Automation Academy — home"><img src="../../assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="../../live-transit.html">Live Map</a><a class="lane" data-audience="user" href="../../live-transit/">Cities</a><a class="lane" data-audience="visitor" href="../../programs.html">Programs</a><a class="lane" data-audience="visitor" href="../../voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="../../signal/">The Signal</a><a class="lane" data-audience="reader" href="../../the-index/">The Index</a><a class="lane" data-audience="visitor" href="../../inquire.html">Contact</a><a class="lane" data-audience="visitor" href="../../find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="../../nav.js?v=20261102-1618"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">The Signal</a> · Special Edition · October 2026</p>
+      <h1>Shut Down by <span class="accent">the Meter</span></h1>
+      <p class="fine">Published October 15, 2026 · By Justin Spencer Smith · <a href="https://www.linkedin.com/newsletters/7508391258638311424/" target="_blank" rel="noopener">Also on LinkedIn</a></p>
+      <div class="prose">
+        <p><em>Published off-cycle, on the day of the events it records.</em></p>
+        <p>On October 15, 2026, at approximately 3:24 PM Eastern, the hosted service behind Live Transit Detroit's live data stopped answering. Every path on the proxy — <code>/healthz</code>, <code>/api/vehicles</code>, <code>/api/alerts</code>, and the site root — returned HTTP 503 with the body <code>{"error":"usage_exceeded"}</code>. The host, Netlify, had quota-paused the site. The live feed was down for every visitor until it was rebuilt later the same afternoon. This special edition records what was shut down, why the meter ran out, what the service had already proven by the day it closed, and where things stand now.</p>
+
+        <h3>What was shut down — and what was not</h3>
+        <p>What was shut down is specific: the hosted live-data proxy and the public API endpoints it served. The Live Transit page drew its entire live layer — vehicle positions and service alerts — from that proxy, so at the pause the map stopped receiving live data. Everything else that lived on the same host went down with it, including the five-minute telemetry logger described below.</p>
+        <p>What was not shut down: this website and the Live Transit map itself. They are hosted on GitHub Pages, a separate system that was unaffected throughout. The site never closed, no page was removed, and the map's stops, routes, geometry, and journey planner — all of which run on published data served with the site — remained available. The shutdown was a data-service shutdown, not a site closure, and the distinction matters for everything that follows.</p>
+
+        <h3>Why: the meter</h3>
+        <p>The proxy ran on Netlify's Personal plan: $9 per month, upgraded on October 10, carrying a budget of 1,000 credits per month. Credits are consumed by the hosted work the site performs. Three standing loads drew against that budget continuously. First, the page itself: every open copy of the Live Transit page polled two proxy endpoints — vehicles every 60 seconds, alerts every 120 seconds — so proxy invocations scaled with the audience. Second, the telemetry logger: a scheduled function on the same Netlify site polled the same upstreams every five minutes and appended vehicle records to the transit-data archive that the empirical timing model is built from. Third, our own verification traffic, which was heavy that day. At approximately 3:24 PM the budget was exhausted and the host paused the site outright — not a degraded mode, a hard stop on every path.</p>
+        <p>The architectural contribution is ours and is stated plainly: the proxy design called its upstreams in response to page traffic, so its cost grew with the number of people using the map. A public service whose cost scales with its audience, running on a fixed monthly meter, has a known failure date; the only unknown is which day it lands on. It landed on October 15.</p>
+        <p>The telemetry stream's fate is the same lesson in a second form. Because the logger shared the host, it shared the pause: the JSONL event stream, the timing-model inputs, and the page's history overlay froze at the same moment. The logger was repointed to the rebuilt feed the same afternoon; its stream records the interruption as a bounded gap of 32 minutes 5 seconds, represented as a gap and never backfilled.</p>
+
+        <h3>The day's second budget: DDOT's transaction cap</h3>
+        <p>The same day carried a second, independent budget failure, upstream of us. DDOT's BusTime API — the source of DDOT vehicle positions and service bulletins — documents a default limit of 10,000 requests per day per key (Clever Devices, <em>BusTime Developer API Guide</em>, v3, §1.5). On October 15 the key returned the error "Transaction limit for current day has been exceeded," recorded in our own alerts file at 20:15 UTC. DDOT vehicles had read as zero from approximately 1:12 PM Eastern.</p>
+        <p>The cause connects directly to the design retired that day. Until October 15, the key's consumer was the same per-page-view proxy: it ran a 41-call pattern — 4 batched vehicle calls and 37 per-route bulletin calls — on every page-driven poll, so daily volume scaled with audience and reached the cap by early afternoon. The rebuilt feed is fixed-cadence by construction: one builder, one schedule, and a volume that does not grow with the audience. Even so, the arithmetic had to be faced honestly — 41 calls across 288 five-minute cycles is approximately 11,800 transactions per day, above the documented default on its own. Bulletin collection was therefore moved to an hourly sub-cadence, bringing the operating volume to approximately 2,040 transactions per day, inside the default cap.</p>
+        <p>A request to raise the cap — to 50,000 transactions per day, with 25,000 stated as acceptable — was sent to DDOT on October 15 and is now in DDOT's hands. DDOT live positions return with the provider's daily reset; the durable arrangement depends on that decision.</p>
+
+        <h3>What the service had already proven</h3>
+        <p>The shutdown arrived one day after the Live Transit Detroit series published a case study of the map's native journey planner, and the results stand independent of the hosting failure. The reference journey runs from Providence Hospital to Woodward &amp; Warren, ready at 12:45 PM on a Thursday, computed entirely from DDOT's published schedule. The native optimum is the three-bus sequence 10-3-8: 57 minutes, arriving 1:42 PM. Measured against the same ready time, the fastest answers from the three external engines benchmarked — Google Maps, the DDOT trip planner, and Moovit — were all built on SMART buses and arrived at 1:55 PM, 1:59 PM, and 2:01 PM respectively. DDOT route 3, the middle leg of the native optimum, appears in zero of the 25 itineraries those engines returned.</p>
+        <table class="postmeta">
+          <tr><th>Engine</th><td><strong>Fastest routing</strong></td><td><strong>Arrival</strong></td></tr>
+          <tr><th>Live Transit Detroit (native, DDOT only)</th><td>DDOT 10 → 3 → 8</td><td>1:42 PM</td></tr>
+          <tr><th>Google Maps</th><td>SMART 710 → 462</td><td>1:55 PM</td></tr>
+          <tr><th>DDOT trip planner</th><td>SMART 710 → 462</td><td>1:59 PM</td></tr>
+          <tr><th>Moovit</th><td>SMART 710 → 462/461</td><td>2:01 PM</td></tr>
+        </table>
+        <p>The study behind the headline is larger than one trip. Across 259 departures spanning Thursday, Saturday, and Sunday service, the two-transfer winner's advantage decomposes exactly: the third bus does not add ride cost — its ride-and-walk component was lower in 259 of 259 instances — it relocates the wait to a faster connection. A generalization census then re-optimized 630 journeys (15 hub nodes, all 210 directed pairs, three departures) and measured every leg of every optimum by removing it and re-planning: 752 of 1,083 legs in optimal journeys are load-bearing at a margin of five minutes or more. Two-transfer optima hold 189 of those 752 load-bearing legs — 25.1 percent of them.</p>
+        <p>The visibility result is the finding with a boundary, and the boundary is part of the result. In the demonstration phase, external engines offered the exact native sequence in 7 of 8 instances — at rank 1 every time it was offered — whenever the optimum was direct or single-transfer. Two-transfer optima were surfaced in 0 of 5 engine measurements. The invisible class is the multi-transfer optimum whose connecting middle leg — route 3 in the Providence journey, route 31 in one demonstration instance — an engine must specifically construct. The Providence invisibility was real; the generalization phase establishes it as a property of that journey class, not of native computation generally.</p>
+
+        <h3>Where things stand now</h3>
+        <p>The product is DDOT and QLINE. SMART was removed from the map the same day (build 20261015-1502), a priority decision recorded in the Live Transit Detroit series' files: the map now carries all 37 DDOT routes and 5,124 DDOT stops, and the QLINE streetcar.</p>
+        <p>The QLINE streetcar remains fully live on the map in the interim. Its positions never depended on the shut-down host or on the DDOT key — the QLINE feed is a public GTFS-Realtime stream the rebuilt builder reads directly — and at last verification the feed carried 4 streetcars with current positions on the Woodward corridor. While DDOT live positions are dark, users are free to enjoy the QLINE in the interim: it is running, it is on the map, and it is live in the same sense it has always been.</p>
+        <p>The feed itself was rebuilt the same afternoon on infrastructure the Academy runs itself. A workflow in this site's own repository polls the upstreams every five minutes and publishes the live data as static files on the site; the page reads those files, and a small dispatch driver on our own machine holds the five-minute cadence after GitHub's scheduler fired zero scheduled runs on the first day. The telemetry stream was repointed to the same feed. A service degradation notice is also live on the page (build 20261015-1638): when a data source degrades, the page now states which source, since when, and what still works, instead of presenting silence as if it were an empty street. The public API documentation page records the retired proxy endpoints as retired, with the reason.</p>
+        <p>What remains open is DDOT live positions. As of publication they await the provider's daily reset, and the durable fix is the cap decision described above. Nothing in the current state is fabricated to cover that gap: the DDOT leg of the feed reports its actual state, and the map shows DDOT's scheduled service — every stop, every route, the planner — while the live layer is dark.</p>
+
+        <h3>The close</h3>
+        <p>The hosted public API that other tools and pages could call is retired, and this special edition is its record. We hope to be back in the future — with fuller live coverage than the map carries today — when the data arrangements allow it. That is stated as hope and intent, not as a promise and not with a date: the two failures recorded here were both, at bottom, arrangements that did not hold, and the next arrangement will be announced when it exists, not before. In the meantime the map is open, the planner is computing, the streetcar is live, and the work continues on infrastructure we run ourselves.</p>
+        <p>Canonical record and full technical detail: the Live Transit Detroit series and the Academy's publish logs, at detroitautomationacademy.com/live-transit-detroit/.</p>
+        <hr>
+        <p><em>The Signal is the newsletter of Detroit Automation Academy — where Detroit builds what's next. If you know a young builder who should be in the room, send them our way.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../" class="btn btn-ghost">← All editions</a>
+      </div>
+      <div class="signal-cta">
+        <a href="https://www.linkedin.com/newsletters/7508391258638311424/" class="btn btn-primary" target="_blank" rel="noopener">Subscribe to The Signal</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="../../assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="../../live-transit.html">Live Map</a> · <a href="../../board/">Departure Board</a> · <a href="../../live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="../../live-transit.html">Detroit</a> · <a href="../../live-transit/philadelphia/">Philadelphia</a> · <a href="../../live-transit/cincinnati/">Cincinnati</a> · <a href="../../live-transit/denver/">Denver</a> · <a href="../../live-transit/austin/">Austin</a> · <a href="../../live-transit/sacramento/">Sacramento</a> · <a href="../../live-transit/san-diego/">San Diego</a> · <a href="../../live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="../../signal/">The Signal</a> · <a href="../../live-transit-detroit/">Live Transit Detroit stories</a> · <a href="../../notes/">Notes</a> · <a href="../../press/">The Press</a> · <a href="../../the-index/">The Index</a> · <a href="../../feed/">Latest</a> · <a href="../../watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="../../programs.html">Programs</a> · <a href="../../curriculum/online-safety/">Online Safety</a> · <a href="../../voter-guide.html">Voter Guide</a> · <a href="../../partners.html">Partners</a> · <a href="../../api.html">API</a> · <a href="../../inquire.html">Contact</a> · <a href="../../apple-learning-coach/">Coach Profile</a> · <a href="../../press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="../../dashboard.html">Status</a> · <a href="../../terms.html">Terms of Service</a> · <a href="../../privacy.html">Privacy Policy</a> · <a href="../../live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="../../find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+<script src="../../assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>
