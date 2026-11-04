@@ -87,7 +87,8 @@ a:visited { color: #5a5a5a; }
 a:hover { color: #111111; }
 a:active { color: #111111; }
 :root { accent-color: #111111; }
-img { filter: grayscale(1); }
+img, picture, video, svg image { filter: grayscale(1); }
+.cards img, .signal-feature img { filter: grayscale(1); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -247,6 +248,7 @@ a { color: inherit; }
 }
 .btn:hover { transform: translateY(-2px); }
 .btn-primary { background: var(--forge); color: var(--midnight); }
+.btn-primary:visited { color: var(--midnight); }
 .btn-primary:hover { background: var(--amber); }
 .btn-ghost { border: 1px solid var(--line); color: var(--paper); background: rgba(13,13,13,0.03); }
 .btn-ghost:hover { border-color: var(--forge); color: var(--forge); }
