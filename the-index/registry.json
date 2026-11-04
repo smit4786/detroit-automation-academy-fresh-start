@@ -1,0 +1,1818 @@
+{
+ "counts": {
+  "board_items": 524,
+  "boards": 71,
+  "boards_internal_excluded": 11,
+  "gates_decided": 18,
+  "gates_internal_excluded": 4,
+  "gates_open": 10,
+  "implementations": 12,
+  "implementations_internal_excluded": 1,
+  "modules": 21
+ },
+ "errors": [],
+ "gates": [
+  {
+   "anchor": "V-HOME \u00b7 V-WATCH \u00b7 Board 71",
+   "date": null,
+   "decider": "Owner",
+   "gates": "The final skin for the Home / Now Board composition and the watch Now Board \u2014 one look across both surfaces.",
+   "id": "G-DIRECTION",
+   "internal": false,
+   "name": "Direction pick \u2014 D1 through D5",
+   "source": "goals/daa-domain-v2/files/outstanding-design-decisions-gate-2026-11-01.md",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "V-HOME",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Hero treatment for the Home view; redesign input only until picked.",
+   "id": "G-HERO",
+   "internal": false,
+   "name": "Homepage hero variants \u2014 V01 through V20",
+   "source": "goals/daa-domain-v2/files/daad-hero-20-visualizations-2026-11-01.html",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "V-HOME \u00b7 domain identity",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Domain logo mark; redesign input only until picked.",
+   "id": "G-LOGO",
+   "internal": false,
+   "name": "Logo marks \u2014 M1 through M8",
+   "source": "MEMORY.md (2026-11-01 gallery record)",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 69",
+   "date": null,
+   "decider": "Owner",
+   "gates": "The toolkit's product name and CLI binary name. Recommendation on file: keep \u201cTransit Orchestration Layer\u201d and `tol`.",
+   "id": "G-TOL-1",
+   "internal": false,
+   "name": "Transit Orchestration Layer \u2014 D-1: product name",
+   "source": "goals/transit-orchestration-layer-city-agnostic-cli-toolkit/files/cli-toolkit-design-2026-11-01.md \u00a76",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 69",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Whether the generalized layer lives in a new repository. Recommendation on file: a new repository; the estate becomes its first consumer by configuration.",
+   "id": "G-TOL-2",
+   "internal": false,
+   "name": "Transit Orchestration Layer \u2014 D-2: repository home",
+   "source": "goals/transit-orchestration-layer-city-agnostic-cli-toolkit/files/cli-toolkit-design-2026-11-01.md \u00a76",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 69",
+   "date": null,
+   "decider": "Owner",
+   "gates": "The toolkit repository's visibility posture. Recommendation on file: private through the first implementation tranche and first outside onboarding.",
+   "id": "G-TOL-3",
+   "internal": false,
+   "name": "Transit Orchestration Layer \u2014 D-3: public vs private posture",
+   "source": "goals/transit-orchestration-layer-city-agnostic-cli-toolkit/files/cli-toolkit-design-2026-11-01.md \u00a76",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 69",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Which non-estate city onboards first. Recommendation on file: none yet \u2014 the first tranche proves the contract on an estate city re-onboarded through configuration alone.",
+   "id": "G-TOL-4",
+   "internal": false,
+   "name": "Transit Orchestration Layer \u2014 D-4: first outside city",
+   "source": "goals/transit-orchestration-layer-city-agnostic-cli-toolkit/files/cli-toolkit-design-2026-11-01.md \u00a76",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 68 \u00b7 module renderer/camera.mjs",
+   "date": null,
+   "decider": "Owner",
+   "gates": "The remaining questions under the proposed Universal Camera contract (LT-KAES-44) for the map renderer. Q3 is decided (see decided gates).",
+   "id": "G-CAMERA",
+   "internal": false,
+   "name": "Universal Camera \u2014 open questions Q1\u2013Q2, Q4\u2013Q8",
+   "source": "Universal Camera architecture record (contract LT-KAES-44); Board 68",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "All views \u00b7 Board 71",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Promotion of the compiled V2 set (elements E1\u2013E6) from staging to production. Release states run STAGED \u2192 UAT PASS \u2192 OWNER ACCEPTED \u2192 SHIPPED \u2192 ACCEPTED LIVE; nothing promotes without the owner's verdict.",
+   "id": "G-ACCEPT",
+   "internal": false,
+   "name": "DAAD V2 release set \u2014 owner acceptance",
+   "source": "goals/daa-domain-v2/files/deployment-parity-and-uat-gate-2026-11-01.md; goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a710\u2013\u00a711",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 70",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Retirement of superseded automation and check baselines left over from the 2026-11-01 production flip.",
+   "id": "G-FALLOUT",
+   "internal": false,
+   "name": "Domain deletion \u2014 fallout watch (Board 70, item 5)",
+   "source": "Board 70 (GitHub Projects read, 2026-11-02): 5 items \u2014 4 Done, 1 In Progress",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Correspondence (no sitemap anchor)",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Whether a drafted rate quote is sent. Draft complete; terms not published.",
+   "id": "G-MEMX",
+   "internal": true,
+   "name": "MEMX rate-quote send",
+   "source": "MEMORY.md (2026-11-01 directive record)",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Board 72",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Eight residual packages from the completed hardening program, each with one step only the owner can take. No detail published.",
+   "id": "G-THREAT-RESIDUALS",
+   "internal": true,
+   "name": "Estate hardening \u2014 residual packages (8)",
+   "source": "goals/estate-threat-detection/files/packages/ (8 packages, 2026-11-01)",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Public claims register",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Wording and filing questions left open by the 2026-10-31 public-claims audit (49 claims: 33 verified, 6 corrected, 5 unsupported and flagged, 5 undetermined).",
+   "id": "G-CLAIMS",
+   "internal": true,
+   "name": "Claims audit \u2014 open flags (U1, U2/U3, U5)",
+   "source": "goals/detroit-automation-academy-rebrand/files/claims-audit-2026-10-31.md",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "Repository: forge-line-transit-data",
+   "date": null,
+   "decider": "Owner",
+   "gates": "Pruning and retention for a legacy vehicle-telemetry store that grows without bound. Nothing is deleted without the owner's word.",
+   "id": "G-ES2",
+   "internal": true,
+   "name": "Telemetry store \u2014 retention remedy (ES-2)",
+   "source": "MEMORY.md (ES-2 record)",
+   "state": "OPEN"
+  },
+  {
+   "anchor": "V-INDEX",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Named this page, in the house family: The Signal \u00b7 The Press \u00b7 The Index.",
+   "id": "G-INDEX-NAME",
+   "internal": false,
+   "name": "Documentation page name \u2014 \u201cThe Index\u201d",
+   "source": "MEMORY.md (owner pick, 2026-11-02 09:58 EST)",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-PRESS",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "The Press ships with the full V2 set at the set's promotion; the single-view production carve-out is not exercised.",
+   "id": "G-PRESS-HOLD",
+   "internal": false,
+   "name": "The Press \u2014 held at beta gate",
+   "source": "MEMORY.md (owner pick, 2026-11-02 09:56 EST)",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-PRESS",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Advanced The Press alone to its beta gate on staging, with full-text search over all 496 listed items.",
+   "id": "G-PRESS-STANDARDS",
+   "internal": false,
+   "name": "The Press \u2014 meets standards; search added; advanced to beta gate",
+   "source": "goals/daa-domain-v2/files/ltd-v2-design-graph-2026-11-01.md \u00a78.6; PRD \u00a715",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-LTD \u00b7 V-SIG \u00b7 V-HOME \u00b7 Board 71",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Rejected the staged V2 candidate (stale bound data; The Signal served under the Live Transit masthead). Under the all-views rule, every staging view returned to under construction; the candidate remains recoverable in history for reference only.",
+   "id": "G-UAT-FAIL",
+   "internal": false,
+   "name": "LTD V2 candidate \u2014 UAT verdict: FAIL",
+   "source": "goals/daa-domain-v2/files/ltd-v2-design-graph-2026-11-01.md \u00a78.5",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-LTD \u00b7 all views",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Set the rebuild rule: against the archived product, the only change is monochrome in place of color. Engine, camera, shell, and interactions stay as archived; every change is classified COLOR, STRUCTURE, or BEHAVIOR before it ships.",
+   "id": "G-MONOCHROME",
+   "internal": false,
+   "name": "The monochrome rule",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a713 (REQ-X-1\u2026X-4)",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "Modularity track \u00b7 Core v2.3",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Confirmed the Core v2 architecture as the basis of the restoration; no engine redesign.",
+   "id": "G-ENGINE",
+   "internal": false,
+   "name": "Engine v2 architecture \u2014 approved as it stands",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a716",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-LTD \u00b7 modules renderer.mjs, scene-model.mjs",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Directed grayscale gradient tokens for every route and bus (the monochrome identity mechanism) and one opacity control in the map control cluster.",
+   "id": "G-GRADIENTS",
+   "internal": false,
+   "name": "Atomic gradients + opacity control \u2014 directed",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a716 (REQ-V-6, REQ-V-7)",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "All views",
+   "date": "2026-11-02",
+   "decider": "Owner",
+   "gates": "Standing layout direction: where a layout choice exists, elements align vertically rather than horizontally. Engine untouched.",
+   "id": "G-VERTICAL",
+   "internal": false,
+   "name": "Vertical alignment preference",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a714",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "All views \u00b7 Board 71",
+   "date": "2026-11-02",
+   "decider": "Agent, under the agentic-recommendation doctrine; reversible by the owner",
+   "gates": "Adopted PRD v1.0 as the design of record for the rebuild, including live data binding in every environment (REQ-D-1) and per-view mastheads (REQ-ID-1). The failed candidate's tranche plan is superseded.",
+   "id": "G-PRD",
+   "internal": false,
+   "name": "DAAD PRD v1.0 \u2014 design of record",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a711",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "Board 59",
+   "date": "2026-11-02",
+   "decider": "Coordinator adjudication; reversible by the owner",
+   "gates": "Settled what the data-lake corpus fence admits: licensed realtime content never enters the corpus; the published static schedule feed is held as a restricted reference record only. The corpus itself is untouched.",
+   "id": "G-FENCE",
+   "internal": false,
+   "name": "Data-lake corpus fence \u2014 interpretation settled",
+   "source": "goals/data-lake-municipal-expansion/GOAL.md (adjudication, 2026-11-02)",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-LTD \u00b7 Board 71",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Accepted the redesigned application design. The build it authorized later failed UAT (see the 2026-11-02 verdict) and was superseded by PRD v1.0 plus the monochrome rule.",
+   "id": "G-DESIGN-ACCEPT",
+   "internal": false,
+   "name": "LTD V2 design (Redraft 2) \u2014 accepted; build authorized",
+   "source": "goals/daa-domain-v2/files/ltd-v2-design-graph-2026-11-01.md \u00a78",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "All views",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Domain-wide: grayscale only; state is carried by weight, contrast, pattern, and label \u2014 never by hue.",
+   "id": "G-BW",
+   "internal": false,
+   "name": "Black-and-white visual standard \u2014 permanent",
+   "source": "goals/daa-domain-v2/files/daad-visual-standard-bw-2026-11-01.md",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-WATCH \u00b7 Board 71",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Chose the watch face design: nearest stops lead, ranked on the watch; location is never transmitted or logged; without location, the base board shows.",
+   "id": "G-W1",
+   "internal": false,
+   "name": "Watch \u2014 W1 pick: Draft 08 \u201cNow Board\u201d + location amendment",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a78",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-HOME \u00b7 V-WATCH",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Set the design frame the D1\u2013D5 direction pick operates inside: the homepage and the watch board are designed as one surface pair.",
+   "id": "G-DUAL",
+   "internal": false,
+   "name": "Dual design \u2014 desktop home + watch, one look",
+   "source": "goals/daa-domain-v2/files/outstanding-design-decisions-gate-2026-11-01.md",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "All views",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Set the V2 domain's purpose: a personal domain. No pricing, advertising, or sponsor framing.",
+   "id": "G-PERSONAL",
+   "internal": false,
+   "name": "Domain purpose \u2014 personal domain",
+   "source": "MEMORY.md (personal-domain pivot, 2026-11-01)",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "All views",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Adopted the release discipline every view set ships under: parity inventory, UAT before production, byte-identical promotion, and the all-views completeness rule (C11).",
+   "id": "G-PARITY",
+   "internal": false,
+   "name": "Deployment parity + UAT gate \u2014 controls C1\u2013C11",
+   "source": "goals/daa-domain-v2/files/deployment-parity-and-uat-gate-2026-11-01.md",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "Board 68 \u00b7 module renderer/camera.mjs",
+   "date": "2026-11-01",
+   "decider": "Owner",
+   "gates": "Kept the existing camera control library under the proposed Universal Camera contract.",
+   "id": "G-CAM-Q3",
+   "internal": false,
+   "name": "Universal Camera \u2014 Q3: retain OrbitControls",
+   "source": "Universal Camera architecture record (contract LT-KAES-44); Board 68",
+   "state": "DECIDED"
+  },
+  {
+   "anchor": "V-LTD \u00b7 V-TERMS",
+   "date": "2026-10-15",
+   "decider": "Owner (standing fence; reconfirmed 2026-11-02)",
+   "gates": "Standing rule for Live Transit: SMART service is display-only; scheduled SMART legs in the planner come from the published schedule feed, never from licensed realtime content.",
+   "id": "G-SMART-FENCE",
+   "internal": false,
+   "name": "SMART service \u2014 display only",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a76",
+   "state": "DECIDED"
+  }
+ ],
+ "generated_at": "2026-11-02T15:31:35.057334+00:00",
+ "generated_at_local": "2026-11-02 10:31 EST",
+ "implementations": [
+  {
+   "anchor": "Production sitemap \u00b7 Board 70",
+   "evidence": "bytes + behavior (hourly checks)",
+   "internal": false,
+   "name": "Production \u2014 all views under construction (directed state)",
+   "pin": "flip commit eb5a4449 (2026-11-01); stub 940 B, MD5 ab912e6c\u2026",
+   "source": "goals/daa-domain-v2/files/ltd-v2-design-graph-2026-11-01.md \u00a78.5",
+   "state": "SHIPPED"
+  },
+  {
+   "anchor": "Baseline for V-HOME \u00b7 V-LTD \u00b7 V-SIG \u00b7 V-PRESS",
+   "evidence": "bytes (mirror integrity check passed; checksums match)",
+   "internal": false,
+   "name": "Domain archive \u2014 complete and verified",
+   "pin": "archive of main tip 3e21495e (2026-11-01)",
+   "source": "goals/daa-domain-deletion/hidden_files/archive/",
+   "state": "VERIFIED"
+  },
+  {
+   "anchor": "Production sitemap: live-data/ \u00b7 live-transit/<city>/data/ \u00b7 V-WATCH",
+   "evidence": "bytes + behavior (hourly verification)",
+   "internal": false,
+   "name": "Live data plane \u2014 Detroit + eight cities + watch bundle",
+   "pin": "production data plane, advancing continuously",
+   "source": "Production repository tree (this registry's sitemap census)",
+   "state": "LIVE"
+  },
+  {
+   "anchor": "V-SIG",
+   "evidence": "bytes",
+   "internal": false,
+   "name": "The Signal \u2014 Edition 7, \u201cDetroit Votes This Week\u201d",
+   "pin": "published 2026-10-30; served MD5 b9b531ba\u2026",
+   "source": "MEMORY.md (The Signal record)",
+   "state": "SHIPPED"
+  },
+  {
+   "anchor": "UAT sitemap: /press/ \u00b7 release element E1",
+   "evidence": "bytes + behavior (search verified in a real browser)",
+   "internal": false,
+   "name": "The Press \u2014 beta, staged on UAT with search",
+   "pin": "staging c49a39cd (2026-11-02)",
+   "source": "goals/daa-domain-v2/files/ltd-v2-design-graph-2026-11-01.md \u00a78.6 + addendum",
+   "state": "STAGED"
+  },
+  {
+   "anchor": "V-LTD \u00b7 V-SIG \u00b7 V-HOME \u00b7 Board 71",
+   "evidence": "bytes + behavior (owner device verdict)",
+   "internal": false,
+   "name": "LTD V2 designed candidate \u2014 staged, failed UAT, rolled back",
+   "pin": "candidate 6f31bd24 \u2192 rollback 570ed7e2 (2026-11-02)",
+   "source": "goals/daa-domain-v2/files/ltd-v2-design-graph-2026-11-01.md \u00a78.5",
+   "state": "ROLLED BACK"
+  },
+  {
+   "anchor": "V-LTD \u00b7 V-SIG \u00b7 V-PRESS \u00b7 Modularity track",
+   "evidence": "bytes (scripted diff + assumption tests)",
+   "internal": false,
+   "name": "LTD v3 build \u2014 archived engine, monochrome conversion",
+   "pin": "uat-v3-build tree, 336 files; changes COLOR 134 \u00b7 STRUCTURE 24 \u00b7 BEHAVIOR 0",
+   "source": "goals/daa-domain-v2/hidden_files/uat-v3-build/CHANGE-MANIFEST.md; design record \u00a78.7",
+   "state": "BUILT (local)"
+  },
+  {
+   "anchor": "V-LTD \u00b7 modules renderer.mjs, scene-model.mjs",
+   "evidence": "claim (integration in flight at generation time)",
+   "internal": false,
+   "name": "Atomic gradients + opacity control (REQ-V-6 / REQ-V-7)",
+   "pin": "directed 2026-11-02; integrating into the v3 build tree",
+   "source": "goals/daa-domain-v2/files/daad-product-requirements-2026-11-02.md \u00a716",
+   "state": "IN BUILD"
+  },
+  {
+   "anchor": "Release set \u00b7 Board 71",
+   "evidence": "bytes",
+   "internal": false,
+   "name": "Release compilation \u2014 elements E1\u2013E5",
+   "pin": "release-v2 tree (2026-11-02); E1 byte-pinned: press/index.html MD5 5575186f\u2026",
+   "source": "goals/daa-domain-v2/hidden_files/release-v2/RELEASE-MANIFEST.md",
+   "state": "COMPILED"
+  },
+  {
+   "anchor": "V-INDEX",
+   "evidence": "bytes (registry validated at generation)",
+   "internal": false,
+   "name": "The Index \u2014 dynamic documentation page (E6)",
+   "pin": "docs-page-build tree (2026-11-02); compiles at assembly",
+   "source": "goals/daa-domain-v2/hidden_files/docs-page-build/",
+   "state": "PREPARED"
+  },
+  {
+   "anchor": "Board 59",
+   "evidence": "bytes (full-population hash verification)",
+   "internal": false,
+   "name": "Data lake \u2014 integrity verification (Board 59)",
+   "pin": "2026-11-02: segments 138/138 \u00b7 records 1,310/1,310 \u00b7 objects 1,298/1,298",
+   "source": "goals/data-lake-municipal-expansion/ (verification record, 2026-11-02)",
+   "state": "VERIFIED"
+  },
+  {
+   "anchor": "Board 72",
+   "evidence": "claim (program record; no control detail published)",
+   "internal": false,
+   "name": "Estate hardening program \u2014 complete",
+   "pin": "completed 2026-11-01; Board 72",
+   "source": "goals/estate-threat-detection/files/threat-assessment-summary-2026-11-01.md",
+   "state": "COMPLETE"
+  },
+  {
+   "anchor": "V-HOME subscribe surface",
+   "evidence": "bytes + behavior",
+   "internal": true,
+   "name": "Subscribe endpoint \u2014 hardening applied and verified live",
+   "pin": "2026-11-01 (ETF-14)",
+   "source": "goals/estate-threat-detection/files/threat-assessment-summary-2026-11-01.md",
+   "state": "COMPLETE"
+  }
+ ],
+ "modularity": {
+  "lineage": [
+   "Core v2 extract \u2014 CORE_STAMP t1-extract-1+01c77a2d (module set extracted from the monolith)",
+   "Core v2.3 \u2014 BUILD_STAMP 20261101-0056; archived at main tip 3e21495e (the functional floor for V2)",
+   "V2 restoration build (build tree \u201cv3\u201d) \u2014 the archived modules with a monochrome palette conversion: COLOR 134 \u00b7 STRUCTURE 24 \u00b7 BEHAVIOR 0 changed lines across 19 of 336 files",
+   "Gradients + opacity tranche \u2014 in build on the same tree (REQ-V-6 / REQ-V-7, owner-directed 2026-11-02)",
+   "No \u201cV3\u201d product version exists: v3 is a build-tree name only. A major version requires a new engine lineage."
+  ],
+  "modules": [
+   {
+    "archive_md5": "dd834873",
+    "build_md5": "d4915f0d",
+    "change_class": "COLOR + STRUCTURE (REQ-D-1 live-data binding)",
+    "group": "config",
+    "path": "live-transit/detroit/config/city-config.mjs",
+    "state": "changed in the restoration build"
+   },
+   {
+    "archive_md5": "92022679",
+    "build_md5": "92022679",
+    "change_class": null,
+    "group": "config",
+    "path": "live-transit/detroit/config/stamp.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "ac45f146",
+    "build_md5": "ac45f146",
+    "change_class": null,
+    "group": "modules",
+    "path": "live-transit/detroit/modules/app.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "fb2c7d67",
+    "build_md5": "fb2c7d67",
+    "change_class": null,
+    "group": "modules",
+    "path": "live-transit/detroit/modules/data-layer.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "e22634d1",
+    "build_md5": "e22634d1",
+    "change_class": null,
+    "group": "modules",
+    "path": "live-transit/detroit/modules/ops.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "333b0748",
+    "build_md5": "333b0748",
+    "change_class": null,
+    "group": "modules",
+    "path": "live-transit/detroit/modules/planner-host.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "d54f3d64",
+    "build_md5": "9e33b626",
+    "change_class": "COLOR (palette conversion)",
+    "group": "modules",
+    "path": "live-transit/detroit/modules/renderer.mjs",
+    "state": "changed in the restoration build"
+   },
+   {
+    "archive_md5": "2fb48da2",
+    "build_md5": "2fb48da2",
+    "change_class": null,
+    "group": "modules",
+    "path": "live-transit/detroit/modules/ride-along.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "600188bc",
+    "build_md5": "9375084d",
+    "change_class": "post-manifest change \u2014 atomic gradients + opacity tranche (in build)",
+    "group": "modules",
+    "path": "live-transit/detroit/modules/surfaces.mjs",
+    "state": "changed in the restoration build"
+   },
+   {
+    "archive_md5": "2c8fab5b",
+    "build_md5": "2c8fab5b",
+    "change_class": null,
+    "group": "planner",
+    "path": "live-transit/detroit/planner/lib/archetypes-v2.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "85297028",
+    "build_md5": "85297028",
+    "change_class": null,
+    "group": "planner",
+    "path": "live-transit/detroit/planner/lib/live-fusion.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "5a8fb825",
+    "build_md5": "5a8fb825",
+    "change_class": null,
+    "group": "planner",
+    "path": "live-transit/detroit/planner/lib/loader.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "70089637",
+    "build_md5": "70089637",
+    "change_class": null,
+    "group": "planner",
+    "path": "live-transit/detroit/planner/lib/selection.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "55d49c0c",
+    "build_md5": "55d49c0c",
+    "change_class": null,
+    "group": "planner",
+    "path": "live-transit/detroit/planner/lib/signature.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "18662682",
+    "build_md5": "18662682",
+    "change_class": null,
+    "group": "platform",
+    "path": "live-transit/detroit/platform/loader.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "9d4d2028",
+    "build_md5": "9d4d2028",
+    "change_class": null,
+    "group": "platform",
+    "path": "live-transit/detroit/platform/picking.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "71fd98ba",
+    "build_md5": "71fd98ba",
+    "change_class": null,
+    "group": "platform",
+    "path": "live-transit/detroit/platform/projector.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "af5f6d2d",
+    "build_md5": "af5f6d2d",
+    "change_class": null,
+    "group": "renderer",
+    "path": "live-transit/detroit/renderer/camera.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "59243975",
+    "build_md5": "59243975",
+    "change_class": null,
+    "group": "renderer",
+    "path": "live-transit/detroit/renderer/geometry.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "a1a952da",
+    "build_md5": "a1a952da",
+    "change_class": null,
+    "group": "renderer",
+    "path": "live-transit/detroit/renderer/motion.mjs",
+    "state": "unchanged in the restoration build"
+   },
+   {
+    "archive_md5": "6d3ecdf9",
+    "build_md5": "14657899",
+    "change_class": "COLOR (palette conversion)",
+    "group": "renderer",
+    "path": "live-transit/detroit/renderer/scene-model.mjs",
+    "state": "changed in the restoration build"
+   }
+  ],
+  "program": "Live Transit \u2014 Core v2.3 modular engine",
+  "summary": "The map application is a modular engine: a shell with thirteen mounts, filled by modules for data, rendering, planning, and surfaces. The archive of the previous site is the module set's baseline; the V2 restoration converts color only and changes no module's behavior.",
+  "versions": [
+   {
+    "name": "Core",
+    "note": "BUILD_STAMP 20261101-0056 \u00b7 CORE_STAMP t1-extract-1+01c77a2d \u00b7 CONFIG_REV 1+dd834873",
+    "version": "v2.3"
+   },
+   {
+    "name": "Estate shared assets",
+    "note": "stylesheet and navigation stamps, identical across the fleet",
+    "version": "20261031-0615"
+   },
+   {
+    "name": "DAAD Product Requirements",
+    "note": "2026-11-02, with dated addenda \u00a7\u00a713\u201317",
+    "version": "PRD v1.0"
+   },
+   {
+    "name": "Release discipline",
+    "note": "Deployment parity + UAT gate, adopted 2026-11-01",
+    "version": "C1\u2013C11"
+   },
+   {
+    "name": "Visual standard",
+    "note": "Permanent, adopted 2026-11-01; enterprise margin standard alongside",
+    "version": "B/W standard"
+   },
+   {
+    "name": "Internal communication standard",
+    "note": "Adopted 2026-10-31",
+    "version": "comm v1.0"
+   }
+  ]
+ },
+ "page": {
+  "name": "The Index",
+  "note": "Board figures and both sitemaps refresh from GitHub each time the registry is generated. Gate and implementation entries are curated from the estate's records and refreshed by hand at delivery time. If the stamp above is old, this page is a snapshot, not the current state.",
+  "route": "/the-index/",
+  "tagline": "Projects, decision gates, and implementations for the Detroit Automation Academy domain \u2014 the state of the work, on the record."
+ },
+ "projects": [
+  {
+   "by_status": {},
+   "closed": false,
+   "items_total": 0,
+   "number": 2,
+   "title": "@AT_Music Spotify Integration",
+   "url": "https://github.com/users/smit4786/projects/2"
+  },
+  {
+   "by_status": {
+    "Done": 15,
+    "In Progress": 6,
+    "Todo": 17
+   },
+   "closed": false,
+   "items_total": 38,
+   "number": 3,
+   "title": "DetroitAutomationAcademy",
+   "url": "https://github.com/users/smit4786/projects/3"
+  },
+  {
+   "by_status": {
+    "Done": 11,
+    "In Progress": 4,
+    "Todo": 9
+   },
+   "closed": false,
+   "items_total": 24,
+   "number": 4,
+   "title": "Live Transit Detroit \u2014 Enterprise Uplift",
+   "url": "https://github.com/users/smit4786/projects/4"
+  },
+  {
+   "by_status": {
+    "Done": 2,
+    "In Progress": 1,
+    "Todo": 2
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 5,
+   "title": "Find \u2014 Academy Site Search",
+   "url": "https://github.com/users/smit4786/projects/5"
+  },
+  {
+   "by_status": {
+    "Done": 7,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 6,
+   "title": "Live Transit \u2014 Position Integrity",
+   "url": "https://github.com/users/smit4786/projects/6"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "In Progress": 2,
+    "Todo": 3
+   },
+   "closed": false,
+   "items_total": 11,
+   "number": 7,
+   "title": "Live Transit \u2014 Ride Along",
+   "url": "https://github.com/users/smit4786/projects/7"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "Todo": 7
+   },
+   "closed": false,
+   "items_total": 13,
+   "number": 8,
+   "title": "Live Transit \u2014 Error Handling & Resilience",
+   "url": "https://github.com/users/smit4786/projects/8"
+  },
+  {
+   "by_status": {
+    "Done": 2,
+    "In Progress": 1,
+    "Todo": 2
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 9,
+   "title": "Live Transit \u2014 Planner Bus Focus",
+   "url": "https://github.com/users/smit4786/projects/9"
+  },
+  {
+   "by_status": {
+    "In Progress": 8
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 10,
+   "title": "Live Transit \u2014 Touch Accuracy",
+   "url": "https://github.com/users/smit4786/projects/10"
+  },
+  {
+   "by_status": {
+    "Done": 9,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 10,
+   "number": 11,
+   "title": "Live Transit \u2014 Ride Along Return & Endpoint Selection",
+   "url": "https://github.com/users/smit4786/projects/11"
+  },
+  {
+   "by_status": {
+    "Done": 5,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 12,
+   "title": "Live Transit \u2014 Endpoint Position Accuracy",
+   "url": "https://github.com/users/smit4786/projects/12"
+  },
+  {
+   "by_status": {
+    "Done": 7,
+    "In Progress": 1,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 9,
+   "number": 13,
+   "title": "Live Transit \u2014 Product Defect Reconciliation",
+   "url": "https://github.com/users/smit4786/projects/13"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 14
+  },
+  {
+   "by_status": {
+    "Done": 6
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 15,
+   "title": "Render Engine Research \u2014 Dynamic Full-Map Endpoint Management & Control",
+   "url": "https://github.com/users/smit4786/projects/15"
+  },
+  {
+   "by_status": {
+    "Done": 10,
+    "In Progress": 1,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 12,
+   "number": 16,
+   "title": "Live Transit \u2014 Default View Uplift",
+   "url": "https://github.com/users/smit4786/projects/16"
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "Todo": 1
+   },
+   "closed": true,
+   "items_total": 4,
+   "number": 17,
+   "title": "Bionic Text \u2014 Enablement Research",
+   "url": "https://github.com/users/smit4786/projects/17"
+  },
+  {
+   "by_status": {
+    "Done": 4,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 18,
+   "title": "Live Transit \u2014 Route Reverse: Endpoint Rollover to Return Trip",
+   "url": "https://github.com/users/smit4786/projects/18"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 19
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "Todo": 3
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 20,
+   "title": "Live Transit Detroit 2126 \u2014 Renders of an Imagined Future State",
+   "url": "https://github.com/users/smit4786/projects/20"
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "In Progress": 2
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 21,
+   "title": "Live Transit \u2014 Prominent Stop: Named Stops at Default Zoom",
+   "url": "https://github.com/users/smit4786/projects/21"
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 22,
+   "title": "Live Transit \u2014 Vibrant Dynamic Color Shading",
+   "url": "https://github.com/users/smit4786/projects/22"
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 23,
+   "title": "Live Transit \u2014 Endpoint Graphic",
+   "url": "https://github.com/users/smit4786/projects/23"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 24
+  },
+  {
+   "by_status": {
+    "Done": 7
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 25,
+   "title": "Legal \u2014 Terms of Service & Privacy Policies",
+   "url": "https://github.com/users/smit4786/projects/25"
+  },
+  {
+   "by_status": {
+    "Done": 7
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 26,
+   "title": "Proprietary Data Lake",
+   "url": "https://github.com/users/smit4786/projects/26"
+  },
+  {
+   "by_status": {
+    "Done": 2,
+    "In Progress": 1,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 27,
+   "title": "Route Drawing Revamp",
+   "url": "https://github.com/users/smit4786/projects/27"
+  },
+  {
+   "by_status": {
+    "Done": 4,
+    "In Progress": 1,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 28,
+   "title": "LTD Engineering Improvements",
+   "url": "https://github.com/users/smit4786/projects/28"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 29
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 30,
+   "title": "GitHub Actions Pipeline \u2014 Diagnosis & Re-Architecture",
+   "url": "https://github.com/users/smit4786/projects/30"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 31
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 32,
+   "title": "DAA Uplift U1 \u2014 Sitemap & Discovery Integrity",
+   "url": "https://github.com/users/smit4786/projects/32"
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 33,
+   "title": "DAA Uplift U2 \u2014 Heading & Semantics Remediation",
+   "url": "https://github.com/users/smit4786/projects/33"
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 34,
+   "title": "DAA Uplift U3 \u2014 Meta & Social Conformance",
+   "url": "https://github.com/users/smit4786/projects/34"
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 35,
+   "title": "DAA Uplift U4 \u2014 Structured Data Completion",
+   "url": "https://github.com/users/smit4786/projects/35"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 36
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 37,
+   "title": "DAA Uplift U6 \u2014 Estate Conformance Harness",
+   "url": "https://github.com/users/smit4786/projects/37"
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 38,
+   "title": "DAA Uplift U7 \u2014 SMART Scheduled Service in the Planner",
+   "url": "https://github.com/users/smit4786/projects/38"
+  },
+  {
+   "by_status": {
+    "Done": 6
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 39,
+   "title": "Live Transit \u2014 RAPTOR Engine v2",
+   "url": "https://github.com/users/smit4786/projects/39"
+  },
+  {
+   "by_status": {
+    "Done": 10
+   },
+   "closed": false,
+   "items_total": 10,
+   "number": 40,
+   "title": "DAA Domain V2",
+   "url": "https://github.com/users/smit4786/projects/40"
+  },
+  {
+   "by_status": {
+    "Done": 4
+   },
+   "closed": false,
+   "items_total": 4,
+   "number": 41,
+   "title": "Live Transit \u2014 Frontier Precompute (Empirical Engine)",
+   "url": "https://github.com/users/smit4786/projects/41"
+  },
+  {
+   "by_status": {
+    "Done": 5
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 42,
+   "title": "Live Transit \u2014 Dot Version Program",
+   "url": "https://github.com/users/smit4786/projects/42"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 43
+  },
+  {
+   "by_status": {
+    "Done": 8
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 44,
+   "title": "AutomatedTechnologies \u2014 Asset Implementation",
+   "url": "https://github.com/users/smit4786/projects/44"
+  },
+  {
+   "by_status": {
+    "In Progress": 1,
+    "Todo": 5
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 45,
+   "title": "AutomatedTechnologies \u2014 M&A Technology Consulting",
+   "url": "https://github.com/users/smit4786/projects/45"
+  },
+  {
+   "by_status": {
+    "In Progress": 1,
+    "Todo": 5
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 46,
+   "title": "AutomatedTechnologies \u2014 AI-Augmented Coordination & Implementation",
+   "url": "https://github.com/users/smit4786/projects/46"
+  },
+  {
+   "by_status": {
+    "Done": 4,
+    "In Progress": 7,
+    "Todo": 5
+   },
+   "closed": false,
+   "items_total": 16,
+   "number": 47,
+   "title": "Live Transit \u2014 Multi-City Expansion",
+   "url": "https://github.com/users/smit4786/projects/47"
+  },
+  {
+   "by_status": {
+    "Done": 2,
+    "In Progress": 5,
+    "Todo": 4
+   },
+   "closed": false,
+   "items_total": 11,
+   "number": 48,
+   "title": "Live Transit \u2014 Philadelphia",
+   "url": "https://github.com/users/smit4786/projects/48"
+  },
+  {
+   "by_status": {
+    "Done": 5,
+    "In Progress": 2
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 49,
+   "title": "Live Transit \u2014 Geometry Pipeline v2",
+   "url": "https://github.com/users/smit4786/projects/49"
+  },
+  {
+   "by_status": {
+    "In Progress": 5,
+    "Todo": 2
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 50,
+   "title": "Live Transit \u2014 Feed Vintage & Provenance Handler",
+   "url": "https://github.com/users/smit4786/projects/50"
+  },
+  {
+   "by_status": {
+    "Done": 5,
+    "In Progress": 2
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 51,
+   "title": "Live Transit \u2014 Cincinnati",
+   "url": "https://github.com/users/smit4786/projects/51"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 52,
+   "title": "Live Transit \u2014 Denver/Aurora",
+   "url": "https://github.com/users/smit4786/projects/52"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 53,
+   "title": "Live Transit \u2014 Austin",
+   "url": "https://github.com/users/smit4786/projects/53"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 54,
+   "title": "Live Transit \u2014 Sacramento",
+   "url": "https://github.com/users/smit4786/projects/54"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 55,
+   "title": "Live Transit \u2014 San Diego",
+   "url": "https://github.com/users/smit4786/projects/55"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 56,
+   "title": "Live Transit \u2014 Columbus",
+   "url": "https://github.com/users/smit4786/projects/56"
+  },
+  {
+   "by_status": {
+    "In Progress": 2,
+    "Todo": 7
+   },
+   "closed": false,
+   "items_total": 9,
+   "number": 57,
+   "title": "Live Transit \u2014 Philadelphia Uplift",
+   "url": "https://github.com/users/smit4786/projects/57"
+  },
+  {
+   "by_status": {
+    "Done": 2,
+    "Todo": 4
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 58,
+   "title": "Live Transit \u2014 Driving Directions",
+   "url": "https://github.com/users/smit4786/projects/58"
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "Todo": 5
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 59,
+   "title": "Data Lake \u2014 Municipal Expansion",
+   "url": "https://github.com/users/smit4786/projects/59"
+  },
+  {
+   "by_status": {
+    "Done": 6,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 7,
+   "number": 60,
+   "title": "Live Transit Detroit \u2014 Transit Navigation API",
+   "url": "https://github.com/users/smit4786/projects/60"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 61
+  },
+  {
+   "by_status": {
+    "Done": 5,
+    "In Progress": 1,
+    "Todo": 2
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 62,
+   "title": "DAA \u2014 React Incorporation",
+   "url": "https://github.com/users/smit4786/projects/62"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 63
+  },
+  {
+   "by_status": {
+    "Done": 3,
+    "Todo": 2
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 64,
+   "title": "The House \u2014 Sports Section",
+   "url": "https://github.com/users/smit4786/projects/64"
+  },
+  {
+   "by_status": {
+    "Done": 5,
+    "In Progress": 1,
+    "Todo": 2
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 65,
+   "title": "Live Transit \u2014 Philadelphia Metropolis Redesign",
+   "url": "https://github.com/users/smit4786/projects/65"
+  },
+  {
+   "by_status": {
+    "Done": 5
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 66,
+   "title": "Sacramento \u2014 Trip-Assignment Diagnosis & Integration",
+   "url": "https://github.com/users/smit4786/projects/66"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 67
+  },
+  {
+   "by_status": {
+    "In Progress": 2,
+    "Todo": 10
+   },
+   "closed": false,
+   "items_total": 12,
+   "number": 68,
+   "title": "Live Transit \u2014 Cities V2",
+   "url": "https://github.com/users/smit4786/projects/68"
+  },
+  {
+   "by_status": {
+    "In Progress": 5,
+    "Todo": 1
+   },
+   "closed": false,
+   "items_total": 6,
+   "number": 69,
+   "title": "Transit Orchestration Layer \u2014 City-Agnostic CLI Toolkit",
+   "url": "https://github.com/users/smit4786/projects/69"
+  },
+  {
+   "by_status": {
+    "Done": 4,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 5,
+   "number": 70,
+   "title": "DAA Domain Deletion",
+   "url": "https://github.com/users/smit4786/projects/70"
+  },
+  {
+   "by_status": {
+    "Done": 7,
+    "In Progress": 1
+   },
+   "closed": false,
+   "items_total": 8,
+   "number": 71,
+   "title": "DAA Domain v2.0",
+   "url": "https://github.com/users/smit4786/projects/71"
+  },
+  {
+   "closed": false,
+   "internal": true,
+   "number": 72
+  }
+ ],
+ "release_views": [
+  {
+   "id": "V-HOME",
+   "name": "Home / Now Board",
+   "note": "Front door: what is live now, latest Signal, latest Press. Composition direction is an open gate (D1\u2013D5).",
+   "production": "Under construction (stub)",
+   "route": "/",
+   "uat": "Under construction (stub)"
+  },
+  {
+   "id": "V-LTD",
+   "name": "Live Transit Detroit",
+   "note": "The flagship instrument. Core v2.3 modular engine; see the Modularity track.",
+   "production": "Under construction (stub); live data plane is live",
+   "route": "/live-transit.html",
+   "uat": "Under construction (stub); corrected build prepared locally"
+  },
+  {
+   "id": "V-CITIES",
+   "name": "Cities",
+   "note": "The same core in eight cities: Detroit, Austin, Cincinnati, Columbus, Denver, Philadelphia, Sacramento, San Diego.",
+   "production": "Under construction (stub); all eight city data chains are live",
+   "route": "/live-transit/",
+   "uat": "Not staged (hub is a production-composition item)"
+  },
+  {
+   "id": "V-SIG",
+   "name": "The Signal",
+   "note": "Weekly briefing, published Fridays. Edition 7, \u201cDetroit Votes This Week,\u201d published 2026-10-30.",
+   "production": "Under construction (stub)",
+   "route": "/signal/",
+   "uat": "Under construction (stub); own masthead restored in the corrected build"
+  },
+  {
+   "id": "V-PRESS",
+   "name": "The Press",
+   "note": "Searchable press-brief archive: 248 briefs.",
+   "production": "Under construction (stub)",
+   "route": "/press/",
+   "uat": "Staged at beta gate \u2014 search added; held to ship with the full V2 set"
+  },
+  {
+   "id": "V-TERMS",
+   "name": "Terms of Use",
+   "note": "License terms surface for the scheduled-service data shown in the planner.",
+   "production": "Under construction (stub)",
+   "route": "/live-transit/terms/",
+   "uat": "In the corrected local build"
+  },
+  {
+   "id": "V-API",
+   "name": "Transit API",
+   "note": "Documents the published static JSON data. In the V2 view set per PRD decision D-4.",
+   "production": "Under construction (stub)",
+   "route": "/api.html",
+   "uat": "Not staged"
+  },
+  {
+   "id": "V-WATCH",
+   "name": "Apple Watch Now Board",
+   "note": "Draft 08 \u201cNow Board\u201d (W1 pick, 2026-11-01): nearest stops lead, ranked on the watch; location is never transmitted or logged.",
+   "production": "Live \u2014 Draft 08 bundle served from the production data plane",
+   "route": "live-data/watch/",
+   "uat": "Binds the production data plane (no staging copy)"
+  },
+  {
+   "id": "V-INDEX",
+   "name": "The Index",
+   "note": "This page. Added 2026-11-02; name decided by the owner the same day.",
+   "production": "Not yet released",
+   "route": "/the-index/",
+   "uat": "Prepared \u2014 compiles with the release set at assembly"
+  }
+ ],
+ "schema": "the-index/registry 1",
+ "sitemaps": {
+  "production": {
+   "commit_date": "2026-11-02T15:31:17Z",
+   "groups": {
+    ".github/workflows/ \u2014 publication workflows": 9,
+    "live-data/ \u2014 Detroit live plane (root payloads)": 5,
+    "live-data/smart-tu/ \u2014 SMART display sidecars": 46,
+    "live-data/watch/ \u2014 Apple Watch bundle (Draft 08)": 12,
+    "live-transit/<city>/publish-manifest.json \u2014 7 city manifests": 7,
+    "live-transit/austin/data/ \u2014 city data chain": 240,
+    "live-transit/cincinnati/data/ \u2014 city data chain": 244,
+    "live-transit/columbus/data/ \u2014 city data chain": 4,
+    "live-transit/denver/data/ \u2014 city data chain": 351,
+    "live-transit/philadelphia/data/ \u2014 city data chain": 659,
+    "live-transit/philadelphia/pipeline/ \u2014 PHL pipeline code": 10,
+    "live-transit/sacramento/data/ \u2014 city data chain": 74,
+    "live-transit/san-diego/data/ \u2014 city data chain": 173
+   },
+   "head": "8ec5976a509b8165fdcac456bd57663fd99f2ba5",
+   "head_short": "8ec5976a",
+   "html_routes": [
+    "404.html",
+    "index.html"
+   ],
+   "repo": "AutomatedTechnologies/detroit-automation-academy-public",
+   "total_blobs": 1839,
+   "tree": "8ec5976a509b8165fdcac456bd57663fd99f2ba5",
+   "truncated": false
+  },
+  "uat": {
+   "commit_date": "2026-11-02T15:20:54Z",
+   "groups": {
+    "press/ \u2014 brief pages": 248,
+    "press/ \u2014 index, media kit, data, assets": 5,
+    "shared assets (nav, styles)": 87
+   },
+   "head": "fa1d5e6fc2fb3aa40ceceed217426f08796f4fa8",
+   "head_short": "fa1d5e6f",
+   "html_routes": [
+    "404.html",
+    "index.html",
+    "live-transit.html",
+    "live-transit/terms/index.html",
+    "press/1-679-fires-recorded-in-brazil-s-amazonas-state-in-first-two-weeks-of/index.html",
+    "press/11th-circuit-allows-florida-to-enforce-law-barring-children-under-14-f/index.html",
+    "press/40-state-attorneys-general-urge-delaware-bankruptcy-judge-to-protect-c/index.html",
+    "press/a-judge-rules-kim-mathers-may-leave-jail-for-in-patient-treatment/index.html",
+    "press/a-july-9-traffic-stop-in-center-line-leads-to-a-resisting-arrest-charg/index.html",
+    "press/afd-and-bsw-pass-symbolic-motion-in-saxony-anhalt-parliament-calling-f/index.html",
+    "press/afd-wins-44-percent-in-saxony-anhalt-provincial-election/index.html",
+    "press/air-india-sets-up-a-dedicated-cost-savings-team-and-tightens-spending/index.html",
+    "press/alex-gibney-s-documentary-musk-released-october-9/index.html",
+    "press/ann-arbor-city-council-votes-10-1-to-oppose-proposal-e-the-public-powe/index.html",
+    "press/anne-carson-wins-2026-nobel-prize-in-literature/index.html",
+    "press/anthropic-says-it-will-add-u-s-voting-information-from-democracy-works/index.html",
+    "press/anthropic-third-quarter-revenue-reported-at-16-8-billion-up-45-from-se/index.html",
+    "press/anthropic-told-investors-it-turned-a-profit-in-the-third-quarter-finan/index.html",
+    "press/arrests-near-raf-fairford-suspects-released-on-bail/index.html",
+    "press/asia-pacific-shares-fall-and-u-s-indexes-fall-after-september-u-s-cons/index.html",
+    "press/at-least-10-jewish-families-withdrew-children-from-san-francisco-schoo/index.html",
+    "press/at-least-17-students-and-one-teacher-killed-in-a-school-roof-collapse/index.html",
+    "press/australia-employment-falls-39-300-in-september-unemployment-rate-is-4/index.html",
+    "press/bank-of-america-fined-1-21-billion-over-anti-money-laundering-complian/index.html",
+    "press/bank-of-england-chief-economist-huw-pill-says-a-future-rate-increase-n/index.html",
+    "press/bar-asraf-30-found-dead-at-grave-of-friend-killed-october-7/index.html",
+    "press/bicyclist-54-from-superior-township-killed-in-crash-on-ford-road-in-ca/index.html",
+    "press/bild-reports-lufthansa-has-instructed-crews-on-selected-routes-to-carr/index.html",
+    "press/bloomberg-news-reports-bytedance-is-near-a-chip-supply-agreement-with/index.html",
+    "press/brazil-senate-approves-constitutional-amendment-reducing-the-workweek/index.html",
+    "press/brent-crude-falls-1-39-to-104-67-a-barrel-in-early-thursday-trade-wti/index.html",
+    "press/british-land-expects-underlying-profit-of-166-million-for-the-six-mont/index.html",
+    "press/british-officials-warn-of-war-risk-with-russia/index.html",
+    "press/canada-to-halt-maid-expansion-to-mental-illness-indefinitely/index.html",
+    "press/character-ai-files-for-chapter-11-bankruptcy/index.html",
+    "press/china-and-north-korea-hold-opening-ceremony-for-new-yalu-river-bridge/index.html",
+    "press/china-exported-2-6-billion-of-chicken-products-last-year-customs-data/index.html",
+    "press/china-s-supreme-people-s-procuratorate-seeks-arrest-of-former-chengdu/index.html",
+    "press/citigroup-says-it-expects-the-federal-reserve-to-raise-rates-by-25-bas/index.html",
+    "press/coefficient-giving-set-to-spend-over-2-billion-this-year/index.html",
+    "press/colombia-opens-an-embassy-in-jerusalem-on-wednesday-after-restoring-di/index.html",
+    "press/coreweave-shares-fall-15-on-wednesday-and-a-further-6-after-the-close/index.html",
+    "press/coreweave-shares-fall-16-and-nasdaq-falls-2-on-wednesday-after-u-s-inf/index.html",
+    "press/cornell-health-published-sexual-health-guides-in-2019/index.html",
+    "press/cornell-president-michael-kotlikoff-says-in-an-interview-that-he-knew/index.html",
+    "press/cornell-students-protest-over-2024-assault-case/index.html",
+    "press/costa-rica-opens-high-containment-prison-with-capacity-for-5-100-inmat/index.html",
+    "press/crooked-media-co-founder-jon-lovett-hosts-hasan-piker/index.html",
+    "press/danish-study-finds-atlantic-current-system-could-recover-if-warming-is/index.html",
+    "press/dearborn-heights-police-say-drone-video-shows-woman-with-a-nearly-600/index.html",
+    "press/dearborn-police-release-drone-video-from-october-7-break-in-response-s/index.html",
+    "press/detroit-lions-announce-fan-fest-in-munich-on-november-13-and-14-before/index.html",
+    "press/detroit-s-halloween-in-the-d-main-event-is-scheduled-for-saturday-octo/index.html",
+    "press/diesel-prices-up-roughly-50-percent-since-iran-war-began/index.html",
+    "press/dollar-index-falls-0-1-to-102-06-on-thursday-september-core-cpi-rises/index.html",
+    "press/douglas-appoints-jean-marc-bellaiche-as-ceo-effective-november-1/index.html",
+    "press/dunelm-reports-total-sales-up-1-1-to-433-million-in-the-13-weeks-ended/index.html",
+    "press/easyjet-publishes-the-scheme-document-for-its-5-7-billion-takeover-by/index.html",
+    "press/eight-u-s-states-sue-openai-over-alleged-harms-to-children-from-chatgp/index.html",
+    "press/eisenkot-s-yashar-polls-at-22-percent-before-october-27-election/index.html",
+    "press/el-sayed-questioned-on-leaked-call-remarks-at-grand-rapids-gaggle/index.html",
+    "press/elisha-wiesel-column-responds-to-2026-nobel-peace-prize-award/index.html",
+    "press/energy-minister-miatta-fahnbulleh-says-jackdaw-gas-field-decision-is-i/index.html",
+    "press/ericsson-reports-a-smaller-than-expected-drop-in-third-quarter-core-pr/index.html",
+    "press/eu-leaders-meet-in-brussels-on-thursday-to-discuss-china-exports-energ/index.html",
+    "press/european-commission-proposes-a-one-year-delay-to-methane-rules-for-oil/index.html",
+    "press/european-commission-says-it-is-in-dialogue-with-google-over-fines-and/index.html",
+    "press/european-commission-says-it-will-not-oppose-leonardo-acquisition-of-iv/index.html",
+    "press/exail-technologies-reports-third-quarter-revenue-of-121-million-up-21/index.html",
+    "press/executives-at-largest-u-s-banks-discuss-ai-financing-and-internal-ai-u/index.html",
+    "press/faber-says-it-will-no-longer-supply-sally-rooney-s-books-in-the-uk/index.html",
+    "press/family-of-sherman-butler-files-150-million-federal-lawsuit-over-july-2/index.html",
+    "press/father-files-67-page-federal-complaint-over-september-9-2025-volleybal/index.html",
+    "press/federal-appeals-court-schedules-oral-arguments-on-wednesday-over-the-n/index.html",
+    "press/federal-judge-blocks-usda-from-proceeding-with-planned-reorganization/index.html",
+    "press/federal-maritime-commission-proposes-200-000-fee-on-spanish-flagged-sh/index.html",
+    "press/fertility-rates-cited-for-mexico-nigeria-and-latin-america/index.html",
+    "press/fewer-than-six-etfs-rely-solely-on-ai-for-stock-selection-managing-abo/index.html",
+    "press/figma-cfo-praveer-melwani-says-the-company-is-willing-to-accept-lower/index.html",
+    "press/fiji-cabinet-approves-six-month-partnership-with-new-zealand-security/index.html",
+    "press/fire-breaks-out-at-albania-s-education-ministry-during-student-protest/index.html",
+    "press/five-alleged-russian-agents-charged-in-plot-against-kasparov/index.html",
+    "press/fixed-income-trading-revenue-falls-at-morgan-stanley-jpmorgan-and-bank/index.html",
+    "press/former-fidelity-portfolio-manager-adam-benjamin-sues-fmr-over-compensa/index.html",
+    "press/former-justice-department-official-sarmad-khojasteh-joins-boies-schill/index.html",
+    "press/four-massachusetts-lawmakers-ask-faa-for-new-environmental-review-of-a/index.html",
+    "press/french-consumer-prices-rose-3-4-year-on-year-in-september-on-an-eu-har/index.html",
+    "press/gao-recommends-automatic-activation-for-ice-body-cameras-department-of/index.html",
+    "press/german-finance-minister-lars-klingbeil-says-german-support-for-ukraine/index.html",
+    "press/ghana-international-bank-chief-executive-says-bank-seeks-more-capital/index.html",
+    "press/gift-nifty-futures-at-22-606-5-indicate-a-lower-open-for-indian-shares/index.html",
+    "press/globalfoundries-plans-two-factories-in-malta-new-york-with-about-10-bi/index.html",
+    "press/government-accountability-office-report-released-wednesday-addresses-i/index.html",
+    "press/government-plan-sets-an-ambition-to-increase-the-share-of-english-land/index.html",
+    "press/grand-traverse-county-man-wins-6-79-million-lotto-47-jackpot-and-choos/index.html",
+    "press/green-party-of-england-and-wales-passes-zionism-is-racism-motion/index.html",
+    "press/guyanese-opposition-leader-azruddin-mohamed-arrested-after-gunfire-out/index.html",
+    "press/health-secretary-says-subsidy-payments-will-be-halted-for-189-000-affo/index.html",
+    "press/hochul-assigns-cornell-case-to-attorney-general-james-as-special-prose/index.html",
+    "press/hong-kong-securities-regulator-directs-suspension-of-baicha-baidao-h-s/index.html",
+    "press/house-speaker-mike-johnson-campaigns-in-maine-s-second-district-for-pa/index.html",
+    "press/houthis-say-they-struck-saudi-aramco-facilities-and-airports-saudi-led/index.html",
+    "press/howard-miller-closes-zeeland-factory-and-lays-off-nearly-200-workers/index.html",
+    "press/huntington-beach-fire-department-closes-water-from-seapoint-street-to/index.html",
+    "press/huron-township-police-search-for-a-43-year-old-southgate-woman-last-se/index.html",
+    "press/i-was-a-hamas-hostage-for-728-days/index.html",
+    "press/idbi-bank-shares-fall-nearly-3-on-thursday-after-government-approves-s/index.html",
+    "press/illinois-school-maintenance-worker-arrested-in-livonia-and-charged-wit/index.html",
+    "press/imf-forecasts-a-1-3-contraction-in-the-middle-east-north-africa-and-pa/index.html",
+    "press/imf-managing-director-kristalina-georgieva-addresses-u-s-national-debt/index.html",
+    "press/imf-official-says-china-needs-larger-fiscal-stimulus-imf-projects-chin/index.html",
+    "press/imf-projects-asia-growth-of-4-8-in-2026-and-4-4-in-2027-down-from-5-0/index.html",
+    "press/index.html",
+    "press/indonesia-attributes-peatland-degradation-for-its-wildfires-air-pollut/index.html",
+    "press/indonesia-state-utility-pln-replaces-ceo-darmawan-prasodjo-with-suroso/index.html",
+    "press/industry-minister-adolfo-urso-says-no-turnkey-auto-plants-are-availabl/index.html",
+    "press/inkster-announces-flock-safety-partnership-with-20-license-plate-reade/index.html",
+    "press/inter-parliamentary-alliance-on-china-publishes-a-53-page-report-on-th/index.html",
+    "press/istanbul-governor-s-office-suspends-school-for-thursday-after-flooding/index.html",
+    "press/italy-plans-to-raise-0-44-of-gdp-from-the-financial-sector-over-2027-2/index.html",
+    "press/itv-undercover-documentary-records-reform-uk-candidates-and-councillor/index.html",
+    "press/japan-to-invest-up-to-21-billion-in-two-new-york-chip-factories-to-be/index.html",
+    "press/jio-platforms-ipo-to-launch-october-21-filing-shows-target-valuation-o/index.html",
+    "press/jio-platforms-sets-ipo-price-band-at-1-065-to-1-119-rupees-per-share/index.html",
+    "press/jupiter-fund-management-reports-third-quarter-net-inflows-of-700-milli/index.html",
+    "press/kamala-harris-adds-new-hampshire-wisconsin-and-mississippi-stops-and-a/index.html",
+    "press/kenya-raises-petrol-prices-by-6-and-diesel-by-4-5-diesel-set-at-227-76/index.html",
+    "press/kff-affordable-care-act-enrollment-fell-to-20-5-million-in-june/index.html",
+    "press/land-registry-spokespersons-said-in-july-and-august-that-plans-to-lift/index.html",
+    "press/legislation-would-prohibit-facility-fees-for-off-site-telemedicine-and/index.html",
+    "press/liberal-democrats-write-to-the-speaker-on-wednesday-urging-action-on-s/index.html",
+    "press/lions-wide-receiver-jameson-williams-wins-appeal-of-14-926-and-11-941/index.html",
+    "press/lisa-cook-s-lawyer-writes-that-she-cannot-participate-in-a-november-5/index.html",
+    "press/lseg-smartestimate-puts-tsmc-third-quarter-net-profit-at-t-746-3-billi/index.html",
+    "press/mark-broadhurst-sentenced-to-three-years-and-10-months-at-sheffield-cr/index.html",
+    "press/mcgurk-book-recounts-final-hostage-negotiations-and-release-of-33/index.html",
+    "press/media-kit.html",
+    "press/mi5-director-general-sir-ken-mccallum-announces-an-ai-threat-assessmen/index.html",
+    "press/miami-freshman-golfer-kai-trump-says-she-had-surgery-to-repair-a-left/index.html",
+    "press/michigan-announces-89-million-for-detroit-kalamazoo-and-other-river-cl/index.html",
+    "press/mississauga-council-approves-ban-on-national-flags-at-celebration-squa/index.html",
+    "press/mit-professor-yossi-sheffi-publishes-book-on-antisemitism-at-mit/index.html",
+    "press/more-than-167-000-michiganders-left-snap-between-june-2025-and-august/index.html",
+    "press/more-than-300-donations-totaling-more-than-20-000-made-to-leptomeninge/index.html",
+    "press/nalp-more-than-94-of-white-2025-law-graduates-were-employed-within-10/index.html",
+    "press/national-weather-service-averages-put-detroit-s-first-measurable-snowf/index.html",
+    "press/nepal-and-world-bank-sign-mandate-agreement-to-explore-an-earthquake-c/index.html",
+    "press/netflix-is-laying-off-6-of-its-workforce-roughly-1-000-employees-accor/index.html",
+    "press/neuropsychologist-test-accommodation-evaluations-can-cost-over-10-000/index.html",
+    "press/new-book-on-biden-administration-s-gaza-policy-debates-published/index.html",
+    "press/new-world-development-expects-to-issue-about-189-1-million-in-new-secu/index.html",
+    "press/new-york-city-council-is-expected-to-vote-next-week-on-a-bill-to-end-c/index.html",
+    "press/news-briefs-carmon-report-on-pre-october-7-warnings-b-1-bombers-withdr/index.html",
+    "press/news-briefs-cornell-7-lawsuit-200-quarantined-in-siberia/index.html",
+    "press/news-briefs-douthat-joins-the-free-press-cornell-7-civil-suit/index.html",
+    "press/news-briefs-eleven-arrested-at-london-demonstrations-mamdani-attends-v/index.html",
+    "press/news-briefs-guilfoyle-resigns-as-ambassador-to-greece-cornell-suspends/index.html",
+    "press/news-briefs-hegseth-visits-uss-abraham-lincoln-russian-barrage-in-ukra/index.html",
+    "press/news-briefs-iran-war-cost-per-household-near-2-000-prediction-market-p/index.html",
+    "press/news-briefs-two-films-about-tech-figures-released-this-week/index.html",
+    "press/nidal-hasan-execution-set-for-december-3-at-fort-hood/index.html",
+    "press/nikkei-225-gains-0-6-and-kospi-rises-2-0-in-early-wednesday-trading-in/index.html",
+    "press/nordea-reports-third-quarter-operating-profit-below-market-expectation/index.html",
+    "press/north-korea-says-it-tested-two-types-of-submarine-launched-cruise-miss/index.html",
+    "press/norway-commission-findings-on-wealth-fund-ethical-rules-due-government/index.html",
+    "press/norwegian-nobel-committee-awards-2026-peace-prize-to-navi-pillay/index.html",
+    "press/nvidia-reports-96-billion-revenue-60-billion-profit-in-quarter/index.html",
+    "press/occ-says-nine-largest-u-s-banks-had-policies-between-2020-and-2025-tha/index.html",
+    "press/ohio-wesleyan-chi-phi-president-on-cornell-chapter-lawsuit/index.html",
+    "press/openai-filing-alleges-former-employee-sent-more-than-100-files-about-a/index.html",
+    "press/oracle-five-year-credit-default-swap-spreads-widen-26-basis-points-to/index.html",
+    "press/pakistan-emergency-suspends-pti-led-government-in-khyber-pakhtunkhwa-p/index.html",
+    "press/patrick-bryant-john-douglas-osborne-and-eric-bernard-bowman-are-charge/index.html",
+    "press/pennsylvania-reports-1-222-measles-cases-up-86-from-a-week-earlier/index.html",
+    "press/perella-weinberg-and-piper-sandler-abandon-all-stock-merger-talks-fina/index.html",
+    "press/pernod-ricard-reports-first-quarter-sales-of-2-234-billion-euros-an-or/index.html",
+    "press/perrigo-agrees-to-pay-10-million-to-settle-us-class-action-over-infant/index.html",
+    "press/petrochina-international-to-carry-out-its-first-lng-bunker-fuelling-in/index.html",
+    "press/phillip-picardi-35-is-editor-in-chief-of-playboy/index.html",
+    "press/prime-minister-andy-burnham-is-to-visit-scotland-this-week-during-the/index.html",
+    "press/prosecutors-seek-life-sentences-and-the-defense-seeks-15-year-terms-fo/index.html",
+    "press/publisher-withdraws-sally-rooney-novels-from-sale-in-britain-after-roy/index.html",
+    "press/questions-raised-about-white-house-press-secretary-katie-zacharia-s-le/index.html",
+    "press/ram-rez-s-nchez-arrived-in-beirut-in-1970-biography-recounts/index.html",
+    "press/rand-trades-at-16-5575-against-the-dollar-at-0638-gmt-on-thursday-abou/index.html",
+    "press/regional-governor-says-attack-on-lutsk-killed-three-and-injured-at-lea/index.html",
+    "press/registration-records-show-boats-registered-in-maryland-to-mike-rogers/index.html",
+    "press/reliance-industries-shares-rise-2-8-on-thursday-after-jio-platforms-se/index.html",
+    "press/republican-convention-speakers-single-out-senate-nominee-abdul-el-saye/index.html",
+    "press/rocket-lab-delays-neutron-rocket-s-first-flight-to-2027/index.html",
+    "press/ross-douthat-i-m-writing-a-column-for-the-free-press/index.html",
+    "press/rubio-announces-sanctions-on-transactions-with-the-icc/index.html",
+    "press/san-francisco-fed-president-daly-says-further-rate-increases-are-likel/index.html",
+    "press/saritha-komatireddy-runs-for-new-york-attorney-general/index.html",
+    "press/saudi-led-coalition-says-it-shot-down-a-ballistic-missile-aimed-at-riy/index.html",
+    "press/separatist-party-returns-to-power-in-quebec/index.html",
+    "press/sibanye-stillwater-approved-a-restart-of-the-mt-lyell-copper-mine-in-s/index.html",
+    "press/singapore-flagged-container-ship-gfs-pride-capacity-2-824-teu-sinks-ne/index.html",
+    "press/singapore-flagged-container-ship-gfs-pride-sinks-near-the-strait-of-ho/index.html",
+    "press/smartasset-ranks-detroit-11th-of-100-largest-u-s-metros-for-paycheck-r/index.html",
+    "press/social-democrats-say-they-will-join-prime-minister-designate-luca-nicu/index.html",
+    "press/social-security-administration-announces-3-6-percent-benefit-increase/index.html",
+    "press/social-security-administration-projects-a-3-6-cost-of-living-adjustmen/index.html",
+    "press/south-african-mining-deaths-reach-53-as-of-october-12-minerals-council/index.html",
+    "press/south-african-regulators-revise-standards-and-guidelines-for-compoundi/index.html",
+    "press/south-haven-water-tank-ranked-third-in-tnemec-people-s-choice-tank-of/index.html",
+    "press/south-korea-defence-ministry-spokesperson-says-changing-transfer-requi/index.html",
+    "press/south-korea-s-kospi-falls-8-on-thursday-triggering-a-circuit-breaker/index.html",
+    "press/southern-california-edison-says-power-shutoffs-are-under-consideration/index.html",
+    "press/spot-gold-rises-1-3-to-4-158-63-an-ounce-on-thursday-after-a-one-week/index.html",
+    "press/sri-lanka-encounters-killed-an-average-of-138-people-and-402-elephants/index.html",
+    "press/student-protests-reported-in-france-madrid-and-brussels/index.html",
+    "press/student-protests-spread-across-france-hundreds-of-schools-to-close/index.html",
+    "press/study-finds-climate-change-and-el-ni-o-combined-to-intensify-hurricane/index.html",
+    "press/supreme-court-hears-arguments-on-wednesday-in-a-case-over-the-video-pr/index.html",
+    "press/supreme-court-lets-fcc-avoid-lower-court-deadline-on-democratic-challe/index.html",
+    "press/suspect-arrested-tuesday-afternoon-in-shooting-of-29-year-old-woman-an/index.html",
+    "press/symposium-on-netanyahu-s-record-ahead-of-israel-s-election/index.html",
+    "press/ten-largest-michigan-health-systems-decline-to-disclose-facility-fee-a/index.html",
+    "press/the-knot-worldwide-agrees-to-acquire-zola-two-people-familiar-with-the/index.html",
+    "press/three-shootings-in-detroit-this-week-involved-child-victims-on-october/index.html",
+    "press/tommasino-offer-18-of-washington-township-killed-by-a-train-in-wheaton/index.html",
+    "press/tomtom-announces-a-reorganization-affecting-about-200-roles-targeting/index.html",
+    "press/totalenergies-expects-a-third-quarter-refining-margin-of-33-2-per-barr/index.html",
+    "press/traders-expect-rupee-to-open-at-95-02-to-95-06-per-dollar-on-thursday/index.html",
+    "press/travis-perkins-reports-a-1-3-fall-in-third-quarter-like-for-like-sales/index.html",
+    "press/trump-announces-plan-for-defense-test-range-in-montana-for-advanced-we/index.html",
+    "press/trump-said-he-hopes-pope-leo-will-get-better-vatican-said-recovery-fro/index.html",
+    "press/tsa-gateside-program-at-detroit-metro-airport-allows-tsa-precheck-memb/index.html",
+    "press/tsmc-reports-third-quarter-net-profit-of-t-763-1-billion-up-69/index.html",
+    "press/two-children-ages-3-and-6-found-safe-in-ohio-after-being-taken-from-in/index.html",
+    "press/two-inkster-boys-ages-6-and-4-found-safe-in-norwalk-ohio-on-wednesday/index.html",
+    "press/two-sources-say-sk-hynix-linked-a-planned-u-s-factory-to-u-s-approval/index.html",
+    "press/two-upper-peninsula-wildfires-have-burned-more-than-800-acres-in-barag/index.html",
+    "press/u-s-10-year-treasury-yield-falls-8-4-basis-points-to-5-105-on-thursday/index.html",
+    "press/u-s-changes-method-for-including-measles-deaths-in-the-national-publis/index.html",
+    "press/u-s-district-judge-jesse-furman-blocks-sanctions-enforcement-against-t/index.html",
+    "press/u-s-official-administration-considering-easing-sanctions-on-shadow-fle/index.html",
+    "press/u-s-treasury-secretary-scott-bessent-issues-demands-for-world-bank-and/index.html",
+    "press/uk-government-to-provide-17-million-for-repairs-to-the-chornobyl-nucle/index.html",
+    "press/uk-gross-domestic-product-grew-0-1-in-august-official-data-show/index.html",
+    "press/ukraine-says-spacex-restricted-military-grade-starlink-services-musk-s/index.html",
+    "press/ukrainian-adviser-serhiy-beskrestnov-says-starlink-terminals-travellin/index.html",
+    "press/ukrainian-officials-say-starlink-service-was-limited-without-warning-a/index.html",
+    "press/un-official-says-hormuz-fertilizer-mechanism-could-be-activated-within/index.html",
+    "press/un-peacekeeping-chief-urges-security-council-to-begin-talks-on-future/index.html",
+    "press/united-states-proposed-unfreezing-some-russian-sovereign-assets-to-rev/index.html",
+    "press/university-of-detroit-mercy-cancels-classes-for-remainder-of-october-1/index.html",
+    "press/vanda-says-drug-vqw-765-failed-main-goal-of-late-stage-social-anxiety/index.html",
+    "press/vatican-says-pope-leo-had-a-good-night-in-hospital-and-has-eaten-break/index.html",
+    "press/vatican-says-pope-leo-spent-a-peaceful-night-in-hospital-after-lung-ca/index.html",
+    "press/wayne-county-prosecutor-s-office-says-evidence-in-taylor-target-lotion/index.html",
+    "press/whistleblower-in-new-york-times-lawsuit-gives-interview/index.html",
+    "press/zelenskiy-says-ukraine-will-resume-strikes-on-russian-refineries-the-f/index.html",
+    "signal/detroit-2126-01/index.html",
+    "signal/detroit-2126-02/index.html",
+    "signal/edition-01/index.html",
+    "signal/edition-02/index.html",
+    "signal/edition-03/index.html",
+    "signal/edition-04/index.html",
+    "signal/edition-05/index.html",
+    "signal/edition-06/index.html",
+    "signal/edition-07/index.html",
+    "signal/index.html",
+    "signal/relaunch/index.html",
+    "signal/special-accessibility/index.html",
+    "signal/special-food-coop/index.html",
+    "signal/special-live-transit/index.html",
+    "signal/special-shut-down-by-the-meter/index.html",
+    "signal/special-the-trip-your-app-doesnt-show-you/index.html",
+    "signal/special-triumphant-return/index.html",
+    "signal/special-uplift-defined/index.html",
+    "the-index/index.html"
+   ],
+   "repo": "smit4786/detroit-automation-academy-staging",
+   "total_blobs": 342,
+   "tree": "fa1d5e6fc2fb3aa40ceceed217426f08796f4fa8",
+   "truncated": false
+  }
+ },
+ "sources": [
+  "GitHub Projects \u2014 every board under smit4786, read live at generation",
+  "Repository trees \u2014 production and UAT, read live at generation (sitemap census)",
+  "Module pins \u2014 MD5 measured from the archived Core v2.3 tree and the restoration build tree",
+  "Decision gates + implementations \u2014 curated from the estate's records; refreshed by hand at delivery"
+ ]
+}

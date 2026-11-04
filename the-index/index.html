@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<title>The Index — Detroit Automation Academy</title>
+<meta name="description" content="The Index: projects, decision gates, and implementations for the Detroit Automation Academy domain — the state of the work, on the record.">
+<style>
+  :root{
+    --ink:#111; --body:#222; --muted:#5a5a5a; --faint:#8a8a8a;
+    --line:#d8d8d8; --line-strong:#a8a8a8; --band:#f2f2f2; --band-2:#e8e8e8;
+    --page-margin:16px; --panel-pad:12px; --gap:12px;
+  }
+  *{box-sizing:border-box}
+  html{background:#fff}
+  body{margin:0;color:var(--body);background:#fff;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;line-height:1.45}
+  a{color:var(--ink);text-underline-offset:2px}
+
+  /* Shared domain nav (chrome only — this page's masthead is its own) */
+  .nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:10px var(--page-margin);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);
+    font-weight:700;letter-spacing:.01em}
+  .brand em{font-style:normal;font-weight:400}
+  .nav-links{display:flex;gap:4px 14px;flex-wrap:wrap;margin-left:auto}
+  .nav-links a{text-decoration:none;color:var(--body);padding:6px 2px}
+  .nav-links a[aria-current="page"]{font-weight:700;text-decoration:underline}
+
+  main{max-width:960px;margin:0 auto;padding:0 var(--page-margin) 48px}
+
+  /* Own masthead (REQ-ID-1: every view carries its own name) */
+  .masthead{padding:28px 0 16px;border-bottom:3px solid var(--ink)}
+  .wordmark{font-size:clamp(2rem,6vw,3.25rem);font-weight:800;letter-spacing:.04em;
+    color:var(--ink);line-height:1;margin:0}
+  .wordmark small{display:block;font-size:.95rem;font-weight:600;letter-spacing:.14em;
+    color:var(--muted);margin-top:8px;text-transform:uppercase}
+  .tagline{margin:12px 0 0;font-size:1.05rem;color:var(--body);max-width:62ch}
+
+  .stamp{margin-top:var(--gap);background:var(--band);border-left:4px solid var(--ink);
+    padding:var(--panel-pad)}
+  .stamp strong{color:var(--ink)}
+  .stamp .when{font-size:1.05rem;font-weight:700;color:var(--ink)}
+  .counts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;color:var(--body)}
+  .counts b{color:var(--ink)}
+
+  section{margin-top:28px}
+  h2{font-size:1.3rem;color:var(--ink);margin:0 0 4px;padding-bottom:6px;
+    border-bottom:2px solid var(--ink)}
+  h3{font-size:1.05rem;color:var(--ink);margin:18px 0 6px}
+  .lede{color:var(--muted);margin:0 0 10px;max-width:70ch}
+  .panel{border:1px solid var(--line);padding:var(--panel-pad);margin-top:var(--gap)}
+  .panel h3{margin-top:0}
+
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.95rem}
+  th,td{text-align:left;vertical-align:top;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--ink);font-weight:700;border-bottom:2px solid var(--line-strong);white-space:nowrap}
+  tr{min-height:44px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .state{font-weight:700;color:var(--ink);white-space:nowrap}
+  .open{font-weight:700;color:var(--ink)}
+  .src{color:var(--muted);font-size:.88rem}
+  .route{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9rem;white-space:nowrap}
+  ul.tight{margin:6px 0 0;padding-left:20px}
+  ul.tight li{margin:4px 0}
+  .fail{border:2px solid var(--ink);padding:var(--panel-pad);margin-top:var(--gap)}
+  footer{border-top:1px solid var(--line);margin-top:36px;padding-top:12px;
+    color:var(--muted);font-size:.92rem}
+  footer nav{margin:0 0 8px}
+  .scroll{overflow-x:auto}
+  @media (max-width:640px){ .nav-links{margin-left:0} th,td{padding:8px 6px} }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="../" aria-label="Detroit Automation Academy — home"><span>Detroit Automation <em>Academy</em></span></a>
+  <nav class="nav-links" id="daaNavLinks" aria-label="Primary">
+    <a class="lane" data-audience="user" href="../live-transit.html">Live Map</a>
+    <a class="lane" data-audience="user" href="../live-transit/">Cities</a>
+    <a class="lane" data-audience="visitor" href="../programs.html">Programs</a>
+    <a class="lane" data-audience="visitor" href="../voter-guide.html">Voter Guide</a>
+    <a class="lane" data-audience="reader" href="../signal/">The Signal</a>
+    <a class="lane" data-audience="reader" href="./" aria-current="page">The Index</a>
+    <a class="lane" data-audience="visitor" href="../inquire.html">Contact</a>
+    <a class="lane" data-audience="visitor" href="../find.html">Find</a>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="masthead">
+    <h1 class="wordmark">THE INDEX<small>Detroit Automation Academy</small></h1>
+    <p class="tagline" id="tagline">Projects, decision gates, and implementations for this domain — the state of the work, on the record.</p>
+  </div>
+
+  <div class="stamp" id="stamp" role="status">
+    <span class="when">Loading the registry…</span>
+  </div>
+
+  <noscript><div class="fail"><strong>The Index is a dynamic page.</strong> It reads its registry (registry.json, beside this page) and renders it. With scripts off, read the registry file directly — it is plain JSON.</div></noscript>
+
+  <section id="views"><h2>The views</h2>
+    <p class="lede">Every view in the V2 set, at sitemap level, with its state in production and in UAT. Names are the names the views carry in production and UAT.</p>
+    <div class="scroll"><table id="views-table"></table></div>
+  </section>
+
+  <section id="sitemaps"><h2>Sitemaps</h2>
+    <p class="lede">The two repositories as they stand, counted from their file trees at generation time. Production's tree advances continuously because the live data plane publishes into it.</p>
+    <div id="sitemap-blocks"></div>
+  </section>
+
+  <section id="projects"><h2>Projects</h2>
+    <p class="lede">Every project board on file, with the state of its items at generation time.</p>
+    <div class="scroll"><table id="projects-table"></table></div>
+    <p class="src" id="projects-excluded"></p>
+  </section>
+
+  <section id="gates"><h2>Decision gates</h2>
+    <p class="lede">Decisions that are open, and the record of decisions made. Each entry names what the gate controls and the record it comes from.</p>
+    <h3>Open</h3>
+    <div class="scroll"><table id="gates-open"></table></div>
+    <h3>Decided</h3>
+    <div class="scroll"><table id="gates-decided"></table></div>
+    <p class="src" id="gates-excluded"></p>
+  </section>
+
+  <section id="implementations"><h2>Implementations</h2>
+    <p class="lede">What has shipped, what is staged, what is built, and what was rolled back — with the commit or record that pins each state.</p>
+    <div class="scroll"><table id="impl-table"></table></div>
+    <p class="src" id="impl-excluded"></p>
+  </section>
+
+  <section id="modularity"><h2>Modularity track — Live Transit Core</h2>
+    <div id="modularity-body"></div>
+  </section>
+
+  <footer>
+    <nav aria-label="Site"><a href="../live-transit.html">Live Map</a> · <a href="../live-transit/">Cities</a> · <a href="../programs.html">Programs</a> · <a href="../voter-guide.html">Voter Guide</a> · <a href="../signal/">The Signal</a> · <a href="./" aria-current="page">The Index</a> · <a href="../inquire.html">Contact</a> · <a href="../find.html">Find</a></nav>
+    <p>The Index · Detroit Automation Academy. Figures on this page come from the registry stamped above; board and sitemap figures are live reads at generation, and gate and implementation entries are curated from the domain's records.</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  function el(tag, text){ var n=document.createElement(tag); if(text!=null) n.textContent=text; return n; }
+  function cell(text, cls){ var td=el('td', text); if(cls) td.className=cls; return td; }
+  function baseName(p){ var parts=String(p).split('/'); return parts[parts.length-1]; }
+  function tableInto(id, headers, rows){
+    var t=document.getElementById(id); t.textContent='';
+    var thead=el('thead'), tr=el('tr');
+    headers.forEach(function(h){ var th=el('th', h.t); if(h.num) th.className='num'; tr.appendChild(th); });
+    thead.appendChild(tr); t.appendChild(thead);
+    var tb=el('tbody');
+    rows.forEach(function(r){ tb.appendChild(r); });
+    t.appendChild(tb);
+  }
+  function fail(msg){
+    var s=document.getElementById('stamp'); s.textContent='';
+    var d=el('div'); d.className='fail';
+    d.appendChild(el('strong','Registry unavailable. '));
+    d.appendChild(el('span', msg));
+    s.appendChild(d);
+  }
+
+  fetch('registry.json', {cache:'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('registry.json returned HTTP '+r.status);
+    return r.json();
+  }).then(function(reg){
+    /* Stamp band */
+    var s=document.getElementById('stamp'); s.textContent='';
+    var when=el('div'); when.className='when';
+    when.textContent='Generated '+reg.generated_at_local+' — registry '+(reg.generated_at||'');
+    s.appendChild(when);
+    var srcs=el('div'); srcs.textContent='Sources: '+reg.sources.join(' · ')+'.';
+    s.appendChild(srcs);
+    var note=el('div'); note.textContent=reg.page.note; s.appendChild(note);
+    if(reg.errors && reg.errors.length){
+      var e=el('div'); e.appendChild(el('strong','Partial refresh: '));
+      e.appendChild(el('span', reg.errors.join('; '))); s.appendChild(e);
+    }
+    var c=reg.counts||{};
+    var cb=el('div'); cb.className='counts';
+    [['Project boards',c.boards],['Board items',c.board_items],['Gates open',c.gates_open],
+     ['Gates decided',c.gates_decided],['Implementations',c.implementations],['Core modules',c.modules]
+    ].forEach(function(pair){
+      var span=el('span'); span.appendChild(el('b', String(pair[1]))); span.appendChild(el('span',' '+pair[0])); cb.appendChild(span);
+    });
+    s.appendChild(cb);
+    document.getElementById('tagline').textContent=reg.page.tagline;
+
+    /* Views */
+    tableInto('views-table',
+      [{t:'View'},{t:'Route'},{t:'Production'},{t:'UAT'},{t:'Note'}],
+      reg.release_views.map(function(v){
+        var tr=el('tr');
+        var name=cell(null); name.appendChild(el('strong', v.name));
+        name.appendChild(el('div', v.id)).className=''; tr.appendChild(name);
+        tr.appendChild(cell(v.route,'route'));
+        tr.appendChild(cell(v.production)); tr.appendChild(cell(v.uat)); tr.appendChild(cell(v.note));
+        return tr;
+      }));
+
+    /* Sitemaps */
+    var blocks=document.getElementById('sitemap-blocks'); blocks.textContent='';
+    [['production','Production'],['uat','UAT (staging)']].forEach(function(pair){
+      var sm=reg.sitemaps[pair[0]]; if(!sm) return;
+      var panel=el('div'); panel.className='panel';
+      var h=el('h3', pair[1]+' — '+sm.repo); panel.appendChild(h);
+      if(sm.error){ panel.appendChild(el('p','Read failed at generation: '+sm.error)); blocks.appendChild(panel); return; }
+      var meta=el('p');
+      meta.textContent='Head '+sm.head_short+' · committed '+sm.commit_date+' · '+sm.total_blobs+' files in the tree.';
+      panel.appendChild(meta);
+      var routes=sm.html_routes.filter(function(p){
+        return p==='index.html'||p==='404.html'||p==='press/index.html'||p==='press/media-kit.html';
+      }).map(function(p){
+        return p==='index.html'?'/':(p==='404.html'?'/404.html':'/'+p.replace(/index\.html$/,''));
+      });
+      var rp=el('p'); rp.appendChild(el('strong','Pages: '));
+      rp.appendChild(el('span', routes.join(' · ')+(pair[0]==='uat'?' · plus 248 brief pages under /press/':'')));
+      panel.appendChild(rp);
+      var t=el('table'), tb=el('tbody');
+      Object.keys(sm.groups).forEach(function(g){
+        var tr=el('tr'); tr.appendChild(cell(g)); tr.appendChild(cell(String(sm.groups[g]),'num')); tb.appendChild(tr);
+      });
+      var th=el('thead'), htr=el('tr'); htr.appendChild(el('th','Contents')); var n=el('th','Files'); n.className='num'; htr.appendChild(n); th.appendChild(htr);
+      t.appendChild(th); t.appendChild(tb); panel.appendChild(t);
+      blocks.appendChild(panel);
+    });
+
+    /* Projects — internal boards never render (existence-count only) */
+    var pubBoards=reg.projects.filter(function(b){ return !b.internal; });
+    tableInto('projects-table',
+      [{t:'№'},{t:'Project'},{t:'Items',num:1},{t:'Done',num:1},{t:'In progress',num:1},{t:'To do',num:1},{t:'Board'}],
+      pubBoards.map(function(b){
+        var tr=el('tr');
+        tr.appendChild(cell(String(b.number)));
+        var name=cell(null); var a=el('a', b.title); a.href=b.url; name.appendChild(a); tr.appendChild(name);
+        var bs=b.by_status||{};
+        tr.appendChild(cell(String(b.items_total==null?'—':b.items_total),'num'));
+        tr.appendChild(cell(String(bs['Done']||0),'num'));
+        tr.appendChild(cell(String(bs['In Progress']||0),'num'));
+        tr.appendChild(cell(String(bs['Todo']||0),'num'));
+        tr.appendChild(cell(b.closed?'Closed':'Open'));
+        return tr;
+      }));
+    var exB=reg.projects.length-pubBoards.length;
+    document.getElementById('projects-excluded').textContent =
+      exB>0 ? exB+' further project boards are internal working records and are not published on this page.' : '';
+
+    /* Gates — internal entries never render */
+    var pub=reg.gates.filter(function(g){ return !g.internal; });
+    function gateRows(list, decided){
+      return list.map(function(g){
+        var tr=el('tr');
+        tr.appendChild(cell(g.name));
+        tr.appendChild(cell(g.gates));
+        tr.appendChild(cell(g.anchor));
+        if(decided){ tr.appendChild(cell((g.date||'')+' · '+g.decider)); }
+        tr.appendChild(cell(baseName(g.source),'src'));
+        return tr;
+      });
+    }
+    tableInto('gates-open', [{t:'Gate'},{t:'What it decides'},{t:'Anchored to'},{t:'Record'}],
+      gateRows(pub.filter(function(g){return g.state==='OPEN';}), false));
+    tableInto('gates-decided', [{t:'Gate'},{t:'What it decided'},{t:'Anchored to'},{t:'Decided'},{t:'Record'}],
+      gateRows(pub.filter(function(g){return g.state==='DECIDED';}), true));
+    var ex=reg.gates.length-pub.length;
+    document.getElementById('gates-excluded').textContent =
+      ex>0 ? ex+' further gate entries are internal working records and are not published on this page.' : '';
+
+    /* Implementations */
+    var pubI=reg.implementations.filter(function(i){ return !i.internal; });
+    tableInto('impl-table',
+      [{t:'Implementation'},{t:'State'},{t:'Pin / record'},{t:'Evidence'},{t:'Anchored to'}],
+      pubI.map(function(i){
+        var tr=el('tr');
+        tr.appendChild(cell(i.name));
+        var st=cell(i.state); st.className='state'; tr.appendChild(st);
+        tr.appendChild(cell(i.pin)); tr.appendChild(cell(i.evidence)); tr.appendChild(cell(i.anchor));
+        return tr;
+      }));
+    var exI=reg.implementations.length-pubI.length;
+    document.getElementById('impl-excluded').textContent =
+      exI>0 ? exI+' further implementation entry is an internal working record and is not published on this page.' : '';
+
+    /* Modularity */
+    var mb=document.getElementById('modularity-body'); mb.textContent='';
+    var mod=reg.modularity;
+    var h=el('h3', mod.program); mb.appendChild(h);
+    mb.appendChild(el('p', mod.summary));
+    var lh=el('h3','Lineage'); mb.appendChild(lh);
+    var ul=el('ul'); ul.className='tight';
+    mod.lineage.forEach(function(l){ ul.appendChild(el('li', l)); });
+    mb.appendChild(ul);
+    var vh=el('h3','Version names in use'); mb.appendChild(vh);
+    var vt=el('table'), vtb=el('tbody');
+    mod.versions.forEach(function(v){
+      var tr=el('tr'); tr.appendChild(cell(v.name)); var vc=cell(v.version); vc.className='state'; tr.appendChild(vc); tr.appendChild(cell(v.note)); vtb.appendChild(tr);
+    });
+    vt.appendChild(vtb); mb.appendChild(vt);
+    var mh=el('h3','Modules — Core v2.3 set, pins as recorded'); mb.appendChild(mh);
+    mb.appendChild(el('p','Pins are the first eight characters of each module\'s MD5, measured from the archived tree and from the restoration build tree. A module whose pins match is byte-identical to the archive.'));
+    var wrap=el('div'); wrap.className='scroll';
+    var mt=el('table'); wrap.appendChild(mt); mb.appendChild(wrap);
+    mt.textContent='';
+    var mth=el('thead'), mtr=el('tr');
+    ['Module','Archive pin','Build pin','State in the restoration build'].forEach(function(x){ mtr.appendChild(el('th',x)); });
+    mth.appendChild(mtr); mt.appendChild(mth);
+    var mtb=el('tbody');
+    mod.modules.forEach(function(m){
+      var tr=el('tr');
+      tr.appendChild(cell(m.path,'route'));
+      tr.appendChild(cell(m.archive_md5,'route'));
+      tr.appendChild(cell(m.build_md5||'—','route'));
+      tr.appendChild(cell(m.change_class ? (m.state+' — '+m.change_class) : m.state));
+      mtb.appendChild(tr);
+    });
+    mt.appendChild(mtb);
+  }).catch(function(err){ fail(String(err && err.message || err)); });
+})();
+</script>
+</body>
+</html>
