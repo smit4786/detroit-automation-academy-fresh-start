@@ -15,7 +15,6 @@
     { label: 'Live Map', href: '/live-transit.html', audience: 'user' },
     { label: 'Cities', href: '/live-transit/', audience: 'user' },
     { label: 'Programs', href: '/programs.html', audience: 'visitor' },
-    { label: 'Voter Guide', href: '/voter-guide.html', audience: 'visitor' },
     { label: 'The Signal', href: '/signal/', audience: 'reader' },
     { label: 'The Index', href: '/the-index/', audience: 'reader' },
     { label: 'Contact', href: '/inquire.html', audience: 'visitor' },
@@ -73,7 +72,6 @@
     if (/^\/live-transit\.html/.test(path) || /^\/board\//.test(path)) return 'Live Map';
     if (/^\/live-transit\//.test(path)) return 'Cities';
     if (/^\/programs\.html/.test(path) || /^\/curriculum\//.test(path)) return 'Programs';
-    if (/^\/voter-guide/.test(path)) return 'Voter Guide';
     if (/^\/signal\//.test(path)) return 'The Signal';
     if (/^\/the-index\//.test(path)) return 'The Index';
     if (/^\/inquire\.html/.test(path)) return 'Contact';
