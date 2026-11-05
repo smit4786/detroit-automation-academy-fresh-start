@@ -2973,6 +2973,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var _ns = pickStopScreenD(e.clientX, e.clientY, _r, isTouch ? 44 : 22);
     if (_nb && (!_ns || _nb.score <= _ns.score + 6)) { showBus(_nb.vehicle); return; }
     if (_ns) { showStop(_ns.stop); return; }
+    // Route pick (2026-11-05): a tap no bus or stop claimed can still
+    // land on a route — its label, or its guideway line. Sparse
+    // corridors (Downriver 160) have nothing else to answer a tap.
+    if (!(typeof tripMode !== 'undefined' && tripMode) && !rideMode) {
+      var _rp = pickRouteLabel(e.clientX, e.clientY, isTouch) || pickRouteLine(e.clientX, e.clientY, isTouch);
+      if (_rp) { showRoute(_rp); return; }
+    }
+    if (selectedRoute) clearRouteSelection();
     hideBus(); hideStop();
   });
   renderer.domElement.addEventListener('pointermove', function (e) {
@@ -3065,7 +3073,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       : name === 'browse' ? 'browse-panel' : name + '-card';
   }
   function visibleSurface() {
-    var names = ['stop', 'bus', 'trip', 'ride', 'filter', 'browse'];
+    var names = ['stop', 'bus', 'trip', 'ride', 'filter', 'browse', 'route'];
     for (var i = 0; i < names.length; i++) {
       var el = $(_surfaceElId(names[i]));
       if (el && !el.hidden) return names[i];
@@ -3089,6 +3097,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     if (name === 'bus') return !!selectedVehicleId;
     if (name === 'trip') return typeof tripMode !== 'undefined' && !!tripMode;
     if (name === 'ride') return !!rideMode;
+    if (name === 'route') return !!selectedRoute;
     return false;
   }
   // Called at the top of every surface's own open path (the opener then
@@ -4011,7 +4020,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   document.addEventListener('keydown', function (e) {
     var tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
-    if (e.key === 'Escape') { hideBus(); hideStop(); return; }
+    if (e.key === 'Escape') { hideBus(); hideStop(); hideRoute(); return; }
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     var dir = e.key === 'ArrowRight' ? 1 : -1;
     if (selectedVehicleId && busSlots.length) {
@@ -7641,6 +7650,152 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     }
   }
 
+  // --- route selection (owner directive 2026-11-05) -------------------
+  // Route labels and guideway lines are pick targets: a tap that no bus
+  // or stop claims resolves to a route (label first, then the line
+  // under the tap), which highlights the route (every other shown route
+  // dims through applyDim) and opens its details card. Before this,
+  // canvas taps resolved only to buses and stops, so a tap on a route
+  // label in a sparse corridor — Downriver 160 is the reported case —
+  // produced no feedback at all: at district zoom the corridor's stops
+  // are not drawn and no bus sits within the arbitration radii. Dense
+  // routes masked the gap because their labels sit on top of pickable
+  // buses and stops. (The data files' geometry_pending flag is never
+  // read by this code; it gates nothing.)
+  var selectedRoute = null;
+  var _routeStopsCache = {};
+  var _routeLenCache = {};
+  function routeStopsCount(rid) {
+    if (_routeStopsCache[rid] != null) return _routeStopsCache[rid];
+    var n = 0;
+    if (stopData) for (var i = 0; i < stopData.length; i++) {
+      if ((stopData[i].r || []).indexOf(rid) >= 0) n++;
+    }
+    _routeStopsCache[rid] = n;
+    return n;
+  }
+  function routeLengthKm(rid) {
+    if (_routeLenCache[rid] != null) return _routeLenCache[rid];
+    var r = routeById[rid], best = 0;
+    if (r && r.paths) r.paths.forEach(function (p) {
+      var len = 0;
+      for (var i = 1; i < p.length; i++) len += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+      if (len > best) best = len;
+    });
+    _routeLenCache[rid] = best / 1000;
+    return _routeLenCache[rid];
+  }
+  var _routeV3 = null;
+  function pickRouteLabel(cx, cy, isTouch) {
+    var r = renderer.domElement.getBoundingClientRect();
+    if (!_routeV3) _routeV3 = new THREE.Vector3();
+    var best = null, bestScore = Infinity;
+    for (var i = 0; i < labelSprites.length; i++) {
+      var L = labelSprites[i];
+      if (!L.sprite.visible) continue;
+      var grp = routeGroups[L.routeId];
+      if (!grp || !grp.visible) continue;
+      _routeV3.copy(L.sprite.position);
+      var dist = camera.position.distanceTo(_routeV3);
+      _routeV3.project(camera);
+      if (_routeV3.z > 1 || _routeV3.z < -1) continue;
+      var px = (_routeV3.x * 0.5 + 0.5) * r.width;
+      var py = (-_routeV3.y * 0.5 + 0.5) * r.height;
+      var wpp = (2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) / r.height;
+      if (!(wpp > 0)) continue;
+      var halfW = (L.sprite.scale.x / 2) / wpp + (isTouch ? 10 : 4);
+      var halfH = (L.sprite.scale.y / 2) / wpp + (isTouch ? 10 : 4);
+      var dx = Math.abs(px - (cx - r.left)), dy = Math.abs(py - (cy - r.top));
+      if (dx <= halfW && dy <= halfH) {
+        var score = Math.max(dx / halfW, dy / halfH);
+        if (score < bestScore) { bestScore = score; best = L.routeId; }
+      }
+    }
+    return best;
+  }
+  function pickRouteLine(cx, cy, isTouch) {
+    var r = renderer.domElement.getBoundingClientRect();
+    pointerNDC.set(((cx - r.left) / r.width) * 2 - 1, -(((cy - r.top) / r.height) * 2 - 1));
+    raycaster.setFromCamera(pointerNDC, camera);
+    var o = raycaster.ray.origin, d = raycaster.ray.direction;
+    if (Math.abs(d.y) < 1e-9) return null;
+    var t = (72 - o.y) / d.y;
+    if (t < 0) return null;
+    var px = o.x + d.x * t, pz = o.z + d.z * t;
+    var distC = Math.sqrt((camera.position.x - px) * (camera.position.x - px) +
+      (camera.position.y - 72) * (camera.position.y - 72) +
+      (camera.position.z - pz) * (camera.position.z - pz));
+    var wpp = (2 * distC * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) / r.height;
+    var thresh = 36 + (isTouch ? 26 : 14) * (wpp > 0 ? wpp : 0);
+    var best = null, bestD = thresh;
+    for (var ri = 0; ri < routeOrder.length; ri++) {
+      var rid = routeOrder[ri];
+      if (!routeShown(rid)) continue;
+      var rec = routeById[rid];
+      if (!rec || !rec.paths) continue;
+      for (var pi = 0; pi < rec.paths.length; pi++) {
+        var p = rec.paths[pi];
+        for (var si = 1; si < p.length; si++) {
+          var ax = p[si - 1][0], az = p[si - 1][1], bx = p[si][0], bz = p[si][1];
+          var abx = bx - ax, abz = bz - az;
+          var l2 = abx * abx + abz * abz;
+          var u = l2 ? ((px - ax) * abx + (pz - az) * abz) / l2 : 0;
+          u = u < 0 ? 0 : (u > 1 ? 1 : u);
+          var qx = ax + abx * u - px, qz = az + abz * u - pz;
+          var dd = Math.sqrt(qx * qx + qz * qz);
+          if (dd < bestD) { bestD = dd; best = rid; }
+        }
+      }
+    }
+    return best;
+  }
+  function renderRouteCard(rid) {
+    var rec = routeById[rid];
+    if (!rec) return;
+    $('route-title').textContent = routeLabel(rid);
+    var st = runningState[rid];
+    $('route-status').textContent = st === 'running' ? 'Running now'
+      : st === 'not-running' ? 'Not running now' : 'Awaiting live data';
+    var n = (typeof liveCounts !== 'undefined' && liveCounts && liveCounts[rid]) || 0;
+    $('route-live').textContent = n + (n === 1 ? ' bus' : ' buses') + ' on the road now';
+    $('route-stops').textContent = routeStopsCount(rid) + ' stops';
+    var km = routeLengthKm(rid);
+    $('route-len').textContent = km ? km.toFixed(1) + ' km' : '–';
+    var al = (typeof alertsForRoute === 'function') ? alertsForRoute(rid) : [];
+    var aEl = $('route-alerts');
+    if (aEl) {
+      if (al.length) {
+        aEl.hidden = false;
+        aEl.textContent = al.length + (al.length === 1 ? ' active service alert' : ' active service alerts') + ' on this route.';
+      } else aEl.hidden = true;
+    }
+  }
+  function showRoute(rid) {
+    if (!routeById[rid]) return;
+    setFollow(null);
+    exclCover('route');
+    tapBuzz();
+    selectedRoute = rid;
+    routeOrder.forEach(applyDim);
+    renderRouteCard(rid);
+    $('route-card').hidden = false;
+    if (document.activeElement && !$('route-card').contains(document.activeElement)) $('route-card').focus();
+    announceSr('Route details opened. ' + routeLabel(rid) + '.');
+  }
+  function clearRouteSelection() {
+    var c = $('route-card');
+    if (!selectedRoute) { if (c) c.hidden = true; return; }
+    selectedRoute = null;
+    routeOrder.forEach(applyDim);
+    if (c) c.hidden = true;
+  }
+  function hideRoute() {
+    clearRouteSelection();
+    exclRestore();
+  }
+  $('route-close').addEventListener('click', hideRoute);
+  $('route-card').addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); hideRoute(); } });
+
   function applyDim(rid) {
     var g = routeGroups[rid];
     if (!g) return;
@@ -7653,7 +7808,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     // alpha uniform — same rule, same composition, no material to touch
     // (the pre-merge code flipped per-route materials here, and a
     // material touch forced a shader recompile).
-    var dim = (runningState[rid] !== 'running' && g.visible) || itineraryDims(rid);
+    var dim = rid !== selectedRoute &&
+      ((runningState[rid] !== 'running' && g.visible) || itineraryDims(rid) || !!selectedRoute);
     if (routeDimmed[rid] === dim) return; // unchanged: never rewrite the uniform
     routeDimmed[rid] = dim;
     refreshRouteAlpha(rid);
@@ -7759,6 +7915,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
 
   function applyFilters() {
+    if (selectedRoute && !routeIsOn(selectedRoute)) clearRouteSelection();
     routeOrder.forEach(function (rid) {
       if (routeGroups[rid]) routeGroups[rid].visible = routeShown(rid);
       // Phase 1: the merged guideways read the same gate result from the
@@ -9747,6 +9904,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           syncFilterUI();
         }
         refreshFilterCounts();
+        if (selectedRoute) renderRouteCard(selectedRoute);
         lastTotal = n;
         setHeader(n, 'updated ' + fmtTime(d.generated_at ? new Date(d.generated_at) : null), false);
         svcFeedOk(d); // service degradation notice: evaluate source states + freshness
