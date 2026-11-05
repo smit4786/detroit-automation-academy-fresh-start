@@ -1,42 +1,434 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>feed diag</title></head>
-<body><pre id="out">RUNNING</pre>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Domain Diagnostic — Live Transit Detroit estate</title>
+<style>
+body{background:#0b0b0c;color:#e8e8e8;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:16px}
+h1{font-size:16px;margin:0 0 4px} h2{font-size:13px;margin:18px 0 4px;color:#9ad}
+pre{background:#141416;border:1px solid #2a2a2e;padding:10px;white-space:pre-wrap;word-break:break-word}
+button{background:#1d1d20;color:#e8e8e8;border:1px solid #3a3a40;padding:5px 10px;margin:2px;cursor:pointer}
+.pass{color:#7d7}.warn{color:#fd7}.fail{color:#f77}.dim{color:#999}
+</style></head>
+<body>
+<h1>Domain Diagnostic — Live Transit Detroit estate</h1>
+<div class="dim">Read-only browser's-eye probes. Groups run from URL parameters: ?only=feeds,matrix,csp,inventory,assets,env,perf,plumbing (default: all). Failures first in the summary.</div>
+<div style="margin:8px 0">
+<button id="rerun">Re-run</button>
+<button id="copyjson">Copy JSON</button>
+<button id="dljson">Download JSON</button>
+<span id="clock" class="dim"></span>
+</div>
+<pre id="summary">RUNNING…</pre>
+<div id="groups"></div>
 <script>
-var out = [];
-function line(s){ out.push(s); document.getElementById('out').textContent = out.join('\n'); }
-var BASE = 'https://www.detroitautomationacademy.com/live-data';
-function appFetch(label, url){
+'use strict';
+/* ================= configuration ================= */
+var PROD = 'https://www.detroitautomationacademy.com';
+var FEED = PROD + '/live-data';
+var STAGING_ORIGIN = location.origin; // wherever this page is served from
+var params = new URLSearchParams(location.search);
+var ONLY = (params.get('only') || 'feeds,matrix,csp,inventory,assets,env,perf,plumbing').split(',').map(function(s){return s.trim();});
+var CONCURRENCY = 6, TIMEOUT_MS = 8000;
+
+/* ================= tiny framework ================= */
+var results = []; // {group,id,name,status,ms,detail}
+var startedAt = Date.now();
+function rec(group, id, name, status, ms, detail){
+  results.push({group:group, id:id, name:name, status:status, ms:Math.round(ms), detail:String(detail||'')});
+  renderSummary(false);
+}
+function withTimeout(p, ms){
+  return Promise.race([p, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout ' + ms + 'ms')); }, ms); })]);
+}
+function timed(fn){ var t0 = performance.now(); return fn().then(function(r){ r.ms = performance.now() - t0; return r; }, function(e){ return {status:'fail', detail:(e && e.name) + ': ' + (e && e.message), ms: performance.now() - t0}; }); }
+var queue = [], active = 0;
+function schedule(job){ return new Promise(function(res){ queue.push({job:job, res:res}); pump(); }); }
+function pump(){
+  while (active < CONCURRENCY && queue.length){
+    var item = queue.shift(); active++;
+    item.job().then(function(){ active--; item.res(); pump(); }, function(){ active--; item.res(); pump(); });
+  }
+}
+function check(group, id, name, fn){
+  return schedule(function(){
+    return timed(fn).then(function(r){ rec(group, id, name, r.status, r.ms, r.detail); });
+  });
+}
+/* fetch helpers — appFetch mirrors the live app's poll options exactly */
+function appFetch(url){
   var ctrl = new AbortController();
   var timer = setTimeout(function(){ ctrl.abort(); }, 20000);
-  return fetch(url, { cache: 'no-store', signal: ctrl.signal })
-    .then(function(r){
-      clearTimeout(timer);
-      line(label + ': HTTP ' + r.status + ' ok=' + r.ok);
-      if (!r.ok) return null;
-      return r.json().then(function(d){
-        if (d && Array.isArray(d.vehicles)) line(label + ': JSON ok, vehicles array, count=' + d.vehicles.length + ', generated_at=' + d.generated_at);
-        else line(label + ': JSON ok, vehicles NOT array, keys=' + (d ? Object.keys(d).join(',') : 'null'));
-        return d;
-      }, function(e){ line(label + ': JSON PARSE FAIL ' + (e && e.name) + ': ' + (e && e.message)); });
-    }, function(e){
-      clearTimeout(timer);
-      line(label + ': FETCH REJECTED ' + (e && e.name) + ': ' + (e && e.message));
+  return fetch(url, { cache: 'no-store', signal: ctrl.signal }).then(function(r){ clearTimeout(timer); return r; }, function(e){ clearTimeout(timer); throw e; });
+}
+function plainFetch(url){ return fetch(url); }
+function statusOnly(url){
+  return withTimeout(fetch(url).then(function(r){ if (r.body) { try { r.body.cancel(); } catch(e){} } return r.status; }), TIMEOUT_MS);
+}
+function textOf(url){ return withTimeout(fetch(url).then(function(r){ return r.text(); }), TIMEOUT_MS); }
+function jsonOf(url, appStyle){
+  var f = appStyle ? appFetch(url) : fetch(url);
+  return withTimeout(f.then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }), TIMEOUT_MS);
+}
+function ageMin(iso){ var t = new Date(iso).getTime(); if (isNaN(t)) return null; return (Date.now() - t) / 60000; }
+function ok(status, detail){ return {status:status, detail:detail}; }
+
+/* ================= group: feeds ================= */
+var FEED_FILES = [
+  {f:'vehicles.json', shape:function(d){ return Array.isArray(d.vehicles) ? d.vehicles.length : null; }, maxAge:20},
+  {f:'smart-display.json', shape:function(d){ return Array.isArray(d.vehicles) ? d.vehicles.length : null; }, maxAge:20},
+  {f:'smart-trip-updates.json', shape:function(d){ return Array.isArray(d.trips) ? d.trips.length : null; }, maxAge:20},
+  {f:'alerts.json', shape:function(d){ return Array.isArray(d.alerts) ? d.alerts.length : null; }, maxAge:75},
+  {f:'smart-tu/index.json', shape:function(d){ return (d && d.source_ok === true) ? (d.routes ? d.routes.length : 0) : null; }, maxAge:20}
+];
+function groupFeeds(){
+  var jobs = [];
+  FEED_FILES.forEach(function(spec){
+    var url = FEED + '/' + spec.f, cache = {};
+    jobs.push(check('feeds', spec.f + ':fetch', spec.f + ' reachable + CORS readable', function(){
+      return jsonOf(url, true).then(function(d){ cache.d = d; return ok('pass', 'HTTP 200, JSON object, keys: ' + Object.keys(d).slice(0,6).join(',')); });
+    }));
+    jobs.push(check('feeds', spec.f + ':shape', spec.f + ' payload shape', function(){
+      if (!cache.d) return Promise.resolve(ok('fail', 'no payload (fetch check failed)'));
+      var n = spec.shape(cache.d);
+      return Promise.resolve(n == null ? ok('fail', 'expected array/flag missing') : ok('pass', 'items: ' + n));
+    }));
+    jobs.push(check('feeds', spec.f + ':fresh', spec.f + ' freshness ≤ ' + spec.maxAge + 'm', function(){
+      if (!cache.d) return Promise.resolve(ok('fail', 'no payload'));
+      var a = ageMin(cache.d.generated_at);
+      if (a == null) return Promise.resolve(ok('warn', 'no generated_at in payload'));
+      return Promise.resolve(ok(a <= spec.maxAge ? 'pass' : 'fail', 'generated_at ' + cache.d.generated_at + ', age ' + a.toFixed(1) + 'm'));
+    }));
+    jobs.push(check('feeds', spec.f + ':count', spec.f + ' count consistency', function(){
+      if (!cache.d) return Promise.resolve(ok('fail', 'no payload'));
+      var n = spec.shape(cache.d);
+      if (cache.d.count == null || n == null) return Promise.resolve(ok('warn', 'no count field to compare'));
+      return Promise.resolve(ok(cache.d.count === n ? 'pass' : 'warn', 'count field ' + cache.d.count + ' vs items ' + n));
+    }));
+  });
+  jobs.push(check('feeds', 'smart-headsigns:status', 'smart-headsigns.json status (404 = known absent)', function(){
+    return statusOnly(FEED + '/smart-headsigns.json').then(function(s){
+      return ok(s === 200 ? 'pass' : 'warn', 'HTTP ' + s + (s === 404 ? ' — absent; app treats as null by design' : ''));
     });
+  }));
+  jobs.push(check('feeds', 'timetable:fetch', 'planner timetable reachable', function(){
+    return jsonOf(PROD + '/planner-timetable-S1000182-S1000147.json', false).then(function(d){
+      return ok('pass', 'keys: ' + Object.keys(d).slice(0,8).join(','));
+    });
+  }));
+  jobs.push(check('feeds', 'timetable:shape', 'planner timetable shape', function(){
+    return jsonOf(PROD + '/planner-timetable-S1000182-S1000147.json', false).then(function(d){
+      var has = ('stops' in d) || ('trips' in d) || ('routes' in d);
+      return ok(has ? 'pass' : 'fail', 'stops/trips/routes key present: ' + has);
+    });
+  }));
+  return jobs;
 }
-function plainFetch(label, url){
-  return fetch(url)
-    .then(function(r){ line(label + ': HTTP ' + r.status + ' ok=' + r.ok); return r.json().then(function(d){ line(label + ': JSON ok, vehicles=' + (d && d.vehicles ? d.vehicles.length : 'n/a')); }, function(e){ line(label + ': PARSE FAIL ' + (e && e.message)); }); },
-          function(e){ line(label + ': FETCH REJECTED ' + (e && e.name) + ': ' + (e && e.message)); });
+
+/* ================= group: matrix ================= */
+function groupMatrix(){
+  var urls = FEED_FILES.map(function(s){ return s.f; }).concat(['smart-headsigns.json']);
+  var jobs = [];
+  urls.forEach(function(f){
+    jobs.push(check('matrix', f + ':app', f + ' app-style fetch (no-store + abort)', function(){
+      return jsonOf(FEED + '/' + f, true).then(function(){ return ok('pass', 'read ok'); }, function(e){
+        if (f === 'smart-headsigns.json') return ok('warn', 'expected: ' + e.message);
+        throw e;
+      });
+    }));
+    jobs.push(check('matrix', f + ':plain', f + ' plain fetch', function(){
+      return jsonOf(FEED + '/' + f, false).then(function(){ return ok('pass', 'read ok'); }, function(e){
+        if (f === 'smart-headsigns.json') return ok('warn', 'expected: ' + e.message);
+        throw e;
+      });
+    }));
+  });
+  return jobs;
 }
-line('origin: ' + location.origin);
-appFetch('T1 vehicles app-style', BASE + '/vehicles.json')
-.then(function(){ return plainFetch('T2 vehicles plain', BASE + '/vehicles.json'); })
-.then(function(){ return appFetch('T3 smart-display app-style', BASE + '/smart-display.json'); })
-.then(function(){ return appFetch('T4 smart-trip-updates app-style', BASE + '/smart-trip-updates.json'); })
-.then(function(){
-  return fetch('ddot-routes-3d.json?v=diag', { cache: 'no-store' })
-    .then(function(r){ line('T5 same-origin routes file: HTTP ' + r.status + ' ok=' + r.ok); },
-          function(e){ line('T5 same-origin routes file: REJECTED ' + (e && e.name) + ': ' + (e && e.message)); });
-})
-.then(function(){ line('ALL-DONE'); });
-</script></body></html>
+
+/* ================= group: csp ================= */
+function cspChecks(pageLabel, pageUrl, pageOrigin){
+  var jobs = [], store = {};
+  jobs.push(check('csp', pageLabel + ':fetch', pageLabel + ' page HTML readable', function(){
+    return textOf(pageUrl).then(function(t){ store.html = t; return ok('pass', t.length + ' bytes'); });
+  }));
+  function parse(){
+    if (store.dirs) return store.dirs;
+    var m = /<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]+content=["']([^"']+)["']/i.exec(store.html || '');
+    if (!m) { var m2 = /<meta[^>]+content=["']([^"']+)["'][^>]+http-equiv=["']Content-Security-Policy["']/i.exec(store.html || ''); if (m2) m = m2; }
+    if (!m) return null;
+    var dirs = {};
+    m[1].split(';').forEach(function(part){ var p = part.trim().split(/\s+/); if (p[0]) dirs[p[0]] = p.slice(1); });
+    store.dirs = dirs; return dirs;
+  }
+  jobs.push(check('csp', pageLabel + ':present', pageLabel + ' CSP meta present', function(){
+    var d = parse();
+    return Promise.resolve(d ? ok('pass', 'directives: ' + Object.keys(d).join(', ')) : ok('warn', 'no meta CSP (server headers not visible to a page)'));
+  }));
+  jobs.push(check('csp', pageLabel + ':connect-feed', pageLabel + ' connect-src covers the feed origin', function(){
+    var d = parse(); if (!d) return Promise.resolve(ok('warn', 'no CSP to audit'));
+    var cs = d['connect-src'] || d['default-src'] || [];
+    var covered = pageOrigin === PROD || cs.indexOf(PROD) >= 0 || cs.indexOf('https:') >= 0 || cs.indexOf('*') >= 0;
+    return Promise.resolve(ok(covered ? 'pass' : 'fail', 'connect-src: ' + cs.join(' ') + (pageOrigin === PROD ? ' (feed is same-origin here)' : '')));
+  }));
+  jobs.push(check('csp', pageLabel + ':connect-segments', pageLabel + ' connect-src covers raw.githubusercontent.com (timing segments)', function(){
+    var d = parse(); if (!d) return Promise.resolve(ok('warn', 'no CSP to audit'));
+    var cs = d['connect-src'] || d['default-src'] || [];
+    var covered = cs.indexOf('https://raw.githubusercontent.com') >= 0 || cs.indexOf('https:') >= 0 || cs.indexOf('*') >= 0;
+    return Promise.resolve(ok(covered ? 'pass' : 'warn', 'connect-src: ' + cs.join(' ') + (covered ? '' : ' — segments fetch is CSP-blocked (enhancement degrades silently)')));
+  }));
+  jobs.push(check('csp', pageLabel + ':script', pageLabel + ' script-src present, no unsafe-eval', function(){
+    var d = parse(); if (!d) return Promise.resolve(ok('warn', 'no CSP to audit'));
+    var ss = d['script-src'] || [];
+    return Promise.resolve(ok(ss.length && ss.indexOf("'unsafe-eval'") < 0 ? 'pass' : 'warn', 'script-src: ' + ss.join(' ')));
+  }));
+  jobs.push(check('csp', pageLabel + ':object', pageLabel + " object-src 'none'", function(){
+    var d = parse(); if (!d) return Promise.resolve(ok('warn', 'no CSP to audit'));
+    var os = d['object-src'] || [];
+    return Promise.resolve(ok(os.indexOf("'none'") >= 0 ? 'pass' : 'warn', 'object-src: ' + os.join(' ')));
+  }));
+  jobs.push(check('csp', pageLabel + ':base', pageLabel + ' base-uri restricted', function(){
+    var d = parse(); if (!d) return Promise.resolve(ok('warn', 'no CSP to audit'));
+    var b = d['base-uri'] || [];
+    return Promise.resolve(ok(b.length ? 'pass' : 'warn', 'base-uri: ' + b.join(' ')));
+  }));
+  return jobs;
+}
+function groupCsp(){
+  return cspChecks('staging-page', STAGING_ORIGIN + '/live-transit.html', STAGING_ORIGIN)
+    .concat(cspChecks('production-page', PROD + '/live-transit.html', PROD));
+}
+
+/* ================= group: inventory ================= */
+function groupInventory(){
+  var jobs = [], locs = [];
+  jobs.push(check('inventory', 'sitemap:parse', 'production sitemap parses', function(){
+    return textOf(PROD + '/sitemap.xml').then(function(t){
+      var m = t.match(/<loc>([^<]+)<\/loc>/g) || [];
+      locs = m.map(function(x){ return x.replace(/<\/?loc>/g, ''); });
+      return ok(locs.length ? 'pass' : 'fail', locs.length + ' URLs listed');
+    });
+  }));
+  var stagingPaths = ['', 'live-transit.html', 'signal/', 'press/', 'feed-diag.html'];
+  stagingPaths.forEach(function(p){
+    jobs.push(check('inventory', 'staging:' + (p || 'root'), 'staging /' + p + ' alive', function(){
+      return statusOnly(STAGING_ORIGIN + '/' + p).then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
+    }));
+  });
+  // sitemap member checks are scheduled after the parse job resolves (see main)
+  return {jobs: jobs, locs: function(){ return locs; }};
+}
+
+/* ================= group: assets ================= */
+function groupAssets(){
+  var jobs = [], cssText = '';
+  function asset(path, minBytes){
+    return check('assets', 'asset:' + path, path + ' served', function(){
+      return withTimeout(fetch(STAGING_ORIGIN + '/' + path).then(function(r){
+        return r.arrayBuffer().then(function(b){ return {s: r.status, n: b.byteLength, t: r.headers.get('content-type')}; });
+      }), TIMEOUT_MS).then(function(x){
+        return ok(x.s === 200 && (!minBytes || x.n >= minBytes) ? 'pass' : 'fail', 'HTTP ' + x.s + ', ' + x.n + ' B, ' + x.t);
+      });
+    });
+  }
+  jobs.push(asset('styles.css', 1000));
+  jobs.push(asset('live-transit.js', 100000));
+  jobs.push(asset('nav.js', 100));
+  jobs.push(asset('ride-along.js', 100));
+  jobs.push(asset('assets/measure.js', 10));
+  jobs.push(asset('assets/three.module.min.js', 100000));
+  jobs.push(asset('assets/logo.webp', 100));
+  jobs.push(asset('assets/live-transit-og.jpg', 1000));
+  jobs.push(asset('favicon.ico', 10));
+  jobs.push(check('assets', 'fonts:from-css', 'font files referenced by styles.css served', function(){
+    return textOf(STAGING_ORIGIN + '/styles.css').then(function(t){
+      cssText = t;
+      var urls = [], m, re = /url\(([^)]+)\)/g;
+      while ((m = re.exec(t))){ var u = m[1].replace(/["']/g, ''); if (/woff2?$/.test(u)) urls.push(u); }
+      if (!urls.length) return ok('warn', 'no font urls found in styles.css');
+      return Promise.all(urls.map(function(u){
+        var abs = u.indexOf('http') === 0 ? u : STAGING_ORIGIN + '/' + u.replace(/^\.\//, '').replace(/^\//, '');
+        return statusOnly(abs).then(function(s){ return u + '=' + s; });
+      })).then(function(list){ var bad = list.filter(function(x){ return !/=200$/.test(x); });
+        return ok(bad.length ? 'fail' : 'pass', list.join(' ')); });
+    });
+  }));
+  jobs.push(check('assets', 'sentinel:stops', 'staging page copy carries 10,629 stops', function(){
+    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+      return ok(t.indexOf('10,629') >= 0 ? 'pass' : 'fail', 'occurrences: ' + t.split('10,629').length - 1 + '');
+    });
+  }));
+  jobs.push(check('assets', 'sentinel:feedbase', 'staging page sets the live-data base', function(){
+    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+      return ok(t.indexOf('FORGE_LIVE_DATA_URL') >= 0 && t.indexOf(FEED) >= 0 ? 'pass' : 'fail', 'assignment present: ' + (t.indexOf('FORGE_LIVE_DATA_URL') >= 0));
+    });
+  }));
+  jobs.push(check('assets', 'sentinel:stamp', 'staging page script stamp readable', function(){
+    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+      var m = /live-transit\.js\?v=([0-9a-z-]+)/i.exec(t);
+      return ok(m ? 'pass' : 'warn', m ? 'stamp ' + m[1] : 'no versioned script tag found');
+    });
+  }));
+  return jobs;
+}
+
+/* ================= group: env ================= */
+function groupEnv(){
+  var jobs = [];
+  function env(id, name, fn){ jobs.push(check('env', id, name, function(){ try { return Promise.resolve(fn()); } catch(e){ return Promise.resolve(ok('warn', e.message)); } })); }
+  env('env:ua', 'user agent', function(){ return ok('pass', navigator.userAgent); });
+  env('env:viewport', 'viewport + DPR', function(){ return ok('pass', innerWidth + 'x' + innerHeight + ' @' + (window.devicePixelRatio || 1)); });
+  env('env:webgl', 'WebGL context available', function(){
+    var c = document.createElement('canvas');
+    var gl = c.getContext('webgl2') || c.getContext('webgl');
+    return ok(gl ? 'pass' : 'fail', gl ? gl.getParameter(gl.VERSION) : 'no WebGL context');
+  });
+  env('env:webgl-renderer', 'WebGL renderer string', function(){
+    var c = document.createElement('canvas');
+    var gl = c.getContext('webgl2') || c.getContext('webgl');
+    if (!gl) return ok('warn', 'no WebGL');
+    var ext = gl.getExtension('WEBGL_debug_renderer_info');
+    return ok('pass', ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  });
+  env('env:importmap', 'importmap support', function(){
+    var s = (window.HTMLScriptElement && HTMLScriptElement.supports) ? HTMLScriptElement.supports('importmap') : false;
+    return ok(s ? 'pass' : 'warn', 'HTMLScriptElement.supports(importmap) = ' + s);
+  });
+  env('env:modules', 'ES module support', function(){ return ok('noModule' in HTMLScriptElement.prototype ? 'warn' : 'pass', 'module scripts ' + ('noModule' in HTMLScriptElement.prototype ? 'NOT supported' : 'supported')); });
+  env('env:localstorage', 'localStorage writable', function(){
+    try { localStorage.setItem('__diag', '1'); localStorage.removeItem('__diag'); return ok('pass', 'read/write ok'); }
+    catch(e){ return ok('warn', e.message); }
+  });
+  env('env:cookies', 'cookies enabled', function(){ return ok(navigator.cookieEnabled ? 'pass' : 'warn', 'cookieEnabled=' + navigator.cookieEnabled); });
+  env('env:online', 'navigator online', function(){ return ok(navigator.onLine ? 'pass' : 'fail', 'onLine=' + navigator.onLine); });
+  env('env:touch', 'touch support', function(){ return ok('pass', 'maxTouchPoints=' + (navigator.maxTouchPoints || 0)); });
+  env('env:motion', 'reduced-motion preference', function(){ return ok('pass', 'prefers-reduced-motion: ' + (matchMedia('(prefers-reduced-motion: reduce)').matches)); });
+  env('env:scheme', 'color scheme preference', function(){ return ok('pass', 'prefers-color-scheme: dark = ' + matchMedia('(prefers-color-scheme: dark)').matches); });
+  return jobs;
+}
+
+/* ================= group: perf (warn-only thresholds) ================= */
+function perfFrom(group, id, name, maxMs){
+  return check('perf', id, name, function(){
+    var rows = results.filter(function(r){ return r.group === group && r.id === id; });
+    if (!rows.length) return Promise.resolve(ok('warn', 'source check did not run (group not selected)'));
+    var ms = rows[0].ms;
+    return Promise.resolve(ok(ms <= maxMs ? 'pass' : 'warn', ms + ' ms (warn above ' + maxMs + ')'));
+  });
+}
+function groupPerf(){
+  return [
+    perfFrom('feeds', 'vehicles.json:fetch', 'vehicles fetch duration', 3000),
+    perfFrom('feeds', 'timetable:fetch', 'timetable fetch duration', 5000),
+    perfFrom('assets', 'asset:styles.css', 'styles.css load duration', 2000),
+    perfFrom('assets', 'asset:live-transit.js', 'live-transit.js load duration', 5000),
+    perfFrom('inventory', 'sitemap:parse', 'sitemap fetch duration', 3000),
+    check('perf', 'perf:nav', 'this page navigation timing', function(){
+      var n = performance.getEntriesByType('navigation')[0];
+      if (!n) return Promise.resolve(ok('warn', 'no navigation entry'));
+      return Promise.resolve(ok(n.domContentLoadedEventEnd <= 3000 ? 'pass' : 'warn', 'DOMContentLoaded ' + Math.round(n.domContentLoadedEventEnd) + ' ms, response ' + Math.round(n.responseEnd) + ' ms'));
+    })
+  ];
+}
+
+/* ================= group: plumbing ================= */
+function groupPlumbing(){
+  var jobs = [];
+  jobs.push(check('plumbing', 'apex:root', 'apex root resolves', function(){
+    return withTimeout(fetch('https://detroitautomationacademy.com/').then(function(r){
+      if (r.body) { try { r.body.cancel(); } catch(e){} }
+      return ok(r.status === 200 ? 'pass' : 'warn', 'HTTP ' + r.status + ', final URL ' + r.url);
+    }), TIMEOUT_MS);
+  }));
+  jobs.push(check('plumbing', 'www:root', 'www root resolves', function(){
+    return statusOnly(PROD + '/').then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
+  }));
+  jobs.push(check('plumbing', 'robots', 'robots.txt served', function(){
+    return statusOnly(PROD + '/robots.txt').then(function(s){ return ok(s === 200 ? 'pass' : 'warn', 'HTTP ' + s); });
+  }));
+  jobs.push(check('plumbing', '404:branded', 'unknown path returns the branded 404', function(){
+    return textOf(PROD + '/definitely-not-a-page-diag.html').then(function(t){
+      return ok(/detroit/i.test(t) ? 'pass' : 'warn', 'body carries brand text: ' + /detroit/i.test(t) + ' (' + t.length + ' B)');
+    }, function(e){ return ok('warn', e.message); });
+  }));
+  jobs.push(check('plumbing', 'canonical', 'staging page canonical points at production', function(){
+    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+      var m = /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i.exec(t) || /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i.exec(t);
+      return ok(m && m[1].indexOf(PROD) === 0 ? 'pass' : 'warn', m ? m[1] : 'no canonical link found');
+    });
+  }));
+  jobs.push(check('plumbing', 'staging:root', 'staging root resolves over HTTPS', function(){
+    return statusOnly(STAGING_ORIGIN + '/').then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
+  }));
+  return jobs;
+}
+
+/* ================= rendering ================= */
+function renderSummary(done){
+  var by = {pass:0, warn:0, fail:0};
+  results.forEach(function(r){ by[r.status] = (by[r.status] || 0) + 1; });
+  var lines = [];
+  if (done) lines.push('DIAG-DONE total=' + results.length + ' pass=' + (by.pass||0) + ' warn=' + (by.warn||0) + ' fail=' + (by.fail||0) + ' elapsed=' + (Date.now() - startedAt) + 'ms');
+  else lines.push('RUNNING… ' + results.length + ' checks so far (pass ' + (by.pass||0) + ', warn ' + (by.warn||0) + ', fail ' + (by.fail||0) + ')');
+  lines.push('origin: ' + STAGING_ORIGIN + ' · groups: ' + ONLY.join(','));
+  var fails = results.filter(function(r){ return r.status === 'fail'; });
+  var warns = results.filter(function(r){ return r.status === 'warn'; });
+  if (fails.length){ lines.push('FAILURES:'); fails.forEach(function(r){ lines.push('FAIL ' + r.group + '/' + r.id + ' ' + r.name + ' — ' + r.detail); }); }
+  if (warns.length){ lines.push('WARNINGS:'); warns.forEach(function(r){ lines.push('WARN ' + r.group + '/' + r.id + ' ' + r.name + ' — ' + r.detail); }); }
+  document.getElementById('summary').textContent = lines.join('\n');
+  var g = document.getElementById('groups');
+  var html = '', lastGroup = '';
+  results.forEach(function(r){
+    if (r.group !== lastGroup){ html += '<h2>' + r.group + '</h2>'; lastGroup = r.group; }
+    html += '<div class="' + r.status + '">' + r.status.toUpperCase() + ' ' + r.id + ' — ' + r.name + ' (' + r.ms + ' ms) ' + r.detail + '</div>';
+  });
+  g.innerHTML = html;
+}
+
+/* ================= main ================= */
+function main(){
+  results = []; startedAt = Date.now();
+  document.getElementById('summary').textContent = 'RUNNING…';
+  document.getElementById('clock').textContent = 'started ' + new Date().toISOString();
+  var pending = [];
+  var inv = null;
+  if (ONLY.indexOf('feeds') >= 0) pending = pending.concat(groupFeeds());
+  if (ONLY.indexOf('matrix') >= 0) pending = pending.concat(groupMatrix());
+  if (ONLY.indexOf('csp') >= 0) pending = pending.concat(groupCsp());
+  if (ONLY.indexOf('inventory') >= 0){ inv = groupInventory(); pending = pending.concat(inv.jobs); }
+  if (ONLY.indexOf('assets') >= 0) pending = pending.concat(groupAssets());
+  if (ONLY.indexOf('env') >= 0) pending = pending.concat(groupEnv());
+  if (ONLY.indexOf('plumbing') >= 0) pending = pending.concat(groupPlumbing());
+  Promise.all(pending).then(function(){
+    var extra = [];
+    if (inv){ // one check per sitemap URL, now that the list exists
+      inv.locs().forEach(function(u, i){
+        extra.push(check('inventory', 'sitemap:' + i, u, function(){
+          return statusOnly(u).then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
+        }));
+      });
+    }
+    return Promise.all(extra);
+  }).then(function(){
+    if (ONLY.indexOf('perf') >= 0) return Promise.all(groupPerf());
+  }).then(function(){
+    renderSummary(true);
+    window.__diag = { origin: STAGING_ORIGIN, at: new Date().toISOString(), results: results };
+  });
+}
+document.getElementById('rerun').addEventListener('click', main);
+document.getElementById('copyjson').addEventListener('click', function(){
+  if (window.__diag && navigator.clipboard) navigator.clipboard.writeText(JSON.stringify(window.__diag, null, 1));
+});
+document.getElementById('dljson').addEventListener('click', function(){
+  if (!window.__diag) return;
+  var a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(window.__diag, null, 1));
+  a.download = 'domain-diag.json'; a.click();
+});
+main();
+</script>
+</body></html>
