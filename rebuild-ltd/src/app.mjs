@@ -1240,7 +1240,11 @@ if (LT_BOOTABLE) {
         mounts,
         gl,
         glRenderer,
-        liveBase: window.FORGE_LIVE_DATA_URL,
+        // R-07 seam: the shell's boot-config.js sets
+        // FORGE_LIVE_DATA_URL; fall back to the same published
+        // origin when the seam is undefined, so a config-script
+        // failure can never brick the boot on its own (DV-T10-2).
+        liveBase: window.FORGE_LIVE_DATA_URL ?? `${ORIGIN}/live-data`,
         dataBase,
         timetableUrl: `${ORIGIN}/planner-timetable-S1000182-S1000147.json`,
         fleetUrl: `${ORIGIN}/ddot-fleet.json`,
