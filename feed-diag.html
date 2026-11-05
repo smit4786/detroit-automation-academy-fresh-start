@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>feed diag</title></head>
+<body><pre id="out">RUNNING</pre>
+<script>
+var out = [];
+function line(s){ out.push(s); document.getElementById('out').textContent = out.join('\n'); }
+var BASE = 'https://www.detroitautomationacademy.com/live-data';
+function appFetch(label, url){
+  var ctrl = new AbortController();
+  var timer = setTimeout(function(){ ctrl.abort(); }, 20000);
+  return fetch(url, { cache: 'no-store', signal: ctrl.signal })
+    .then(function(r){
+      clearTimeout(timer);
+      line(label + ': HTTP ' + r.status + ' ok=' + r.ok);
+      if (!r.ok) return null;
+      return r.json().then(function(d){
+        if (d && Array.isArray(d.vehicles)) line(label + ': JSON ok, vehicles array, count=' + d.vehicles.length + ', generated_at=' + d.generated_at);
+        else line(label + ': JSON ok, vehicles NOT array, keys=' + (d ? Object.keys(d).join(',') : 'null'));
+        return d;
+      }, function(e){ line(label + ': JSON PARSE FAIL ' + (e && e.name) + ': ' + (e && e.message)); });
+    }, function(e){
+      clearTimeout(timer);
+      line(label + ': FETCH REJECTED ' + (e && e.name) + ': ' + (e && e.message));
+    });
+}
+function plainFetch(label, url){
+  return fetch(url)
+    .then(function(r){ line(label + ': HTTP ' + r.status + ' ok=' + r.ok); return r.json().then(function(d){ line(label + ': JSON ok, vehicles=' + (d && d.vehicles ? d.vehicles.length : 'n/a')); }, function(e){ line(label + ': PARSE FAIL ' + (e && e.message)); }); },
+          function(e){ line(label + ': FETCH REJECTED ' + (e && e.name) + ': ' + (e && e.message)); });
+}
+line('origin: ' + location.origin);
+appFetch('T1 vehicles app-style', BASE + '/vehicles.json')
+.then(function(){ return plainFetch('T2 vehicles plain', BASE + '/vehicles.json'); })
+.then(function(){ return appFetch('T3 smart-display app-style', BASE + '/smart-display.json'); })
+.then(function(){ return appFetch('T4 smart-trip-updates app-style', BASE + '/smart-trip-updates.json'); })
+.then(function(){
+  return fetch('ddot-routes-3d.json?v=diag', { cache: 'no-store' })
+    .then(function(r){ line('T5 same-origin routes file: HTTP ' + r.status + ' ok=' + r.ok); },
+          function(e){ line('T5 same-origin routes file: REJECTED ' + (e && e.name) + ': ' + (e && e.message)); });
+})
+.then(function(){ line('ALL-DONE'); });
+</script></body></html>
