@@ -3672,6 +3672,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var r = renderer.domElement.getBoundingClientRect();
     if (pickNearestScreenD(e.clientX, e.clientY, r, 48)) return;
     if (pickStopScreenD(e.clientX, e.clientY, r, 44)) return;
+    if (pickRouteLabel(e.clientX, e.clientY, true) || pickRouteLine(e.clientX, e.clientY, true)) return;
     dollyAroundPoint(e.clientX, e.clientY, e.shiftKey ? 1.25 : 0.8);
     e.preventDefault();
   });
@@ -7729,20 +7730,28 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     raycaster.setFromCamera(pointerNDC, camera);
     var o = raycaster.ray.origin, d = raycaster.ray.direction;
     if (Math.abs(d.y) < 1e-9) return null;
-    var t = (72 - o.y) / d.y;
-    if (t < 0) return null;
-    var px = o.x + d.x * t, pz = o.z + d.z * t;
-    var distC = Math.sqrt((camera.position.x - px) * (camera.position.x - px) +
-      (camera.position.y - 72) * (camera.position.y - 72) +
-      (camera.position.z - pz) * (camera.position.z - pz));
-    var wpp = (2 * distC * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) / r.height;
-    var thresh = 36 + (isTouch ? 26 : 14) * (wpp > 0 ? wpp : 0);
-    var best = null, bestD = thresh;
+    var best = null, bestD = Infinity;
     for (var ri = 0; ri < routeOrder.length; ri++) {
       var rid = routeOrder[ri];
       if (!routeShown(rid)) continue;
       var rec = routeById[rid];
       if (!rec || !rec.paths) continue;
+      // Deck-plane accuracy (camera pass, 2026-11-05): each route's
+      // guideway deck floats at its own level (66 + route index x 1.2 in
+      // buildRouteGroup's layer cake), so the tap ray meets THIS route's
+      // deck plane and the pixel allowance is measured at that point. A
+      // single shared plane misplaces the tap by the height difference
+      // x tan(polar) — up to ~90 m for the highest decks at max tilt.
+      var rIdx = routeIndexById[rid];
+      var yDeck = 66 + (typeof rIdx === 'number' ? rIdx : 0) * 1.2 + 0.6;
+      var t = (yDeck - o.y) / d.y;
+      if (t < 0) continue;
+      var px = o.x + d.x * t, pz = o.z + d.z * t;
+      var distC = Math.sqrt((camera.position.x - px) * (camera.position.x - px) +
+        (camera.position.y - yDeck) * (camera.position.y - yDeck) +
+        (camera.position.z - pz) * (camera.position.z - pz));
+      var wpp = (2 * distC * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) / r.height;
+      var thresh = 36 + (isTouch ? 26 : 14) * (wpp > 0 ? wpp : 0);
       for (var pi = 0; pi < rec.paths.length; pi++) {
         var p = rec.paths[pi];
         for (var si = 1; si < p.length; si++) {
@@ -7753,7 +7762,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           u = u < 0 ? 0 : (u > 1 ? 1 : u);
           var qx = ax + abx * u - px, qz = az + abz * u - pz;
           var dd = Math.sqrt(qx * qx + qz * qz);
-          if (dd < bestD) { bestD = dd; best = rid; }
+          if (dd <= thresh && dd < bestD) { bestD = dd; best = rid; }
         }
       }
     }
