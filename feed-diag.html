@@ -26,7 +26,8 @@ button{background:#1d1d20;color:#e8e8e8;border:1px solid #3a3a40;padding:5px 10p
 /* ================= configuration ================= */
 var PROD = 'https://www.detroitautomationacademy.com';
 var FEED = PROD + '/live-data';
-var STAGING_ORIGIN = location.origin; // wherever this page is served from
+var STAGING_ORIGIN = location.origin; // scheme + host
+var BASE = location.href.replace(/[^/]*$/, ''); // directory URL incl. repo path prefix on project Pages
 var params = new URLSearchParams(location.search);
 var ONLY = (params.get('only') || 'feeds,matrix,csp,inventory,assets,env,perf,plumbing').split(',').map(function(s){return s.trim();});
 var CONCURRENCY = 6, TIMEOUT_MS = 8000;
@@ -41,7 +42,7 @@ function rec(group, id, name, status, ms, detail){
 function withTimeout(p, ms){
   return Promise.race([p, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout ' + ms + 'ms')); }, ms); })]);
 }
-function timed(fn){ var t0 = performance.now(); return fn().then(function(r){ r.ms = performance.now() - t0; return r; }, function(e){ return {status:'fail', detail:(e && e.name) + ': ' + (e && e.message), ms: performance.now() - t0}; }); }
+function timed(fn){ var t0 = performance.now(); return fn().then(function(r){ if (r && r.status && typeof r.detail === 'string') { r.ms = performance.now() - t0; return r; } return {status:'pass', detail:'', ms: performance.now() - t0, value: r}; }, function(e){ return {status:'fail', detail:(e && e.name) + ': ' + (e && e.message), ms: performance.now() - t0}; }); }
 var queue = [], active = 0;
 function schedule(job){ return new Promise(function(res){ queue.push({job:job, res:res}); pump(); }); }
 function pump(){
@@ -87,26 +88,20 @@ var FEED_FILES = [
 function groupFeeds(){
   var jobs = [];
   FEED_FILES.forEach(function(spec){
-    var url = FEED + '/' + spec.f, cache = {};
-    jobs.push(check('feeds', spec.f + ':fetch', spec.f + ' reachable + CORS readable', function(){
-      return jsonOf(url, true).then(function(d){ cache.d = d; return ok('pass', 'HTTP 200, JSON object, keys: ' + Object.keys(d).slice(0,6).join(',')); });
-    }));
-    jobs.push(check('feeds', spec.f + ':shape', spec.f + ' payload shape', function(){
-      if (!cache.d) return Promise.resolve(ok('fail', 'no payload (fetch check failed)'));
-      var n = spec.shape(cache.d);
-      return Promise.resolve(n == null ? ok('fail', 'expected array/flag missing') : ok('pass', 'items: ' + n));
-    }));
-    jobs.push(check('feeds', spec.f + ':fresh', spec.f + ' freshness ≤ ' + spec.maxAge + 'm', function(){
-      if (!cache.d) return Promise.resolve(ok('fail', 'no payload'));
-      var a = ageMin(cache.d.generated_at);
-      if (a == null) return Promise.resolve(ok('warn', 'no generated_at in payload'));
-      return Promise.resolve(ok(a <= spec.maxAge ? 'pass' : 'fail', 'generated_at ' + cache.d.generated_at + ', age ' + a.toFixed(1) + 'm'));
-    }));
-    jobs.push(check('feeds', spec.f + ':count', spec.f + ' count consistency', function(){
-      if (!cache.d) return Promise.resolve(ok('fail', 'no payload'));
-      var n = spec.shape(cache.d);
-      if (cache.d.count == null || n == null) return Promise.resolve(ok('warn', 'no count field to compare'));
-      return Promise.resolve(ok(cache.d.count === n ? 'pass' : 'warn', 'count field ' + cache.d.count + ' vs items ' + n));
+    var url = FEED + '/' + spec.f;
+    jobs.push(schedule(function(){
+      return timed(function(){ return jsonOf(url, true); }).then(function(fr){
+        rec('feeds', spec.f + ':fetch', spec.f + ' reachable + CORS readable', fr.status === 'fail' ? 'fail' : 'pass', fr.ms, fr.status === 'fail' ? fr.detail : 'HTTP 200, JSON read');
+        var d = fr.value;
+        if (!d){ rec('feeds', spec.f + ':shape', spec.f + ' payload shape', 'fail', 0, 'no payload (fetch failed)');
+                  rec('feeds', spec.f + ':fresh', spec.f + ' freshness', 'fail', 0, 'no payload');
+                  rec('feeds', spec.f + ':count', spec.f + ' count consistency', 'fail', 0, 'no payload'); return; }
+        var n = spec.shape(d);
+        rec('feeds', spec.f + ':shape', spec.f + ' payload shape', n == null ? 'fail' : 'pass', 0, n == null ? 'expected array/flag missing' : 'items: ' + n + ', keys: ' + Object.keys(d).slice(0,6).join(','));
+        var a = ageMin(d.generated_at);
+        rec('feeds', spec.f + ':fresh', spec.f + ' freshness \u2264 ' + spec.maxAge + 'm', a == null ? 'warn' : (a <= spec.maxAge ? 'pass' : 'fail'), 0, a == null ? 'no generated_at' : 'generated_at ' + d.generated_at + ', age ' + a.toFixed(1) + 'm');
+        rec('feeds', spec.f + ':count', spec.f + ' count consistency', (d.count == null || n == null) ? 'warn' : (d.count === n ? 'pass' : 'warn'), 0, (d.count == null || n == null) ? 'no count field to compare' : 'count field ' + d.count + ' vs items ' + n);
+      });
     }));
   });
   jobs.push(check('feeds', 'smart-headsigns:status', 'smart-headsigns.json status (404 = known absent)', function(){
@@ -198,7 +193,7 @@ function cspChecks(pageLabel, pageUrl, pageOrigin){
   return jobs;
 }
 function groupCsp(){
-  return cspChecks('staging-page', STAGING_ORIGIN + '/live-transit.html', STAGING_ORIGIN)
+  return cspChecks('staging-page', BASE + 'live-transit.html', STAGING_ORIGIN)
     .concat(cspChecks('production-page', PROD + '/live-transit.html', PROD));
 }
 
@@ -215,7 +210,7 @@ function groupInventory(){
   var stagingPaths = ['', 'live-transit.html', 'signal/', 'press/', 'feed-diag.html'];
   stagingPaths.forEach(function(p){
     jobs.push(check('inventory', 'staging:' + (p || 'root'), 'staging /' + p + ' alive', function(){
-      return statusOnly(STAGING_ORIGIN + '/' + p).then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
+      return statusOnly(BASE + p).then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
     }));
   });
   // sitemap member checks are scheduled after the parse job resolves (see main)
@@ -227,7 +222,7 @@ function groupAssets(){
   var jobs = [], cssText = '';
   function asset(path, minBytes){
     return check('assets', 'asset:' + path, path + ' served', function(){
-      return withTimeout(fetch(STAGING_ORIGIN + '/' + path).then(function(r){
+      return withTimeout(fetch(BASE + path).then(function(r){
         return r.arrayBuffer().then(function(b){ return {s: r.status, n: b.byteLength, t: r.headers.get('content-type')}; });
       }), TIMEOUT_MS).then(function(x){
         return ok(x.s === 200 && (!minBytes || x.n >= minBytes) ? 'pass' : 'fail', 'HTTP ' + x.s + ', ' + x.n + ' B, ' + x.t);
@@ -244,30 +239,30 @@ function groupAssets(){
   jobs.push(asset('assets/live-transit-og.jpg', 1000));
   jobs.push(asset('favicon.ico', 10));
   jobs.push(check('assets', 'fonts:from-css', 'font files referenced by styles.css served', function(){
-    return textOf(STAGING_ORIGIN + '/styles.css').then(function(t){
+    return textOf(BASE + 'styles.css').then(function(t){
       cssText = t;
       var urls = [], m, re = /url\(([^)]+)\)/g;
       while ((m = re.exec(t))){ var u = m[1].replace(/["']/g, ''); if (/woff2?$/.test(u)) urls.push(u); }
       if (!urls.length) return ok('warn', 'no font urls found in styles.css');
       return Promise.all(urls.map(function(u){
-        var abs = u.indexOf('http') === 0 ? u : STAGING_ORIGIN + '/' + u.replace(/^\.\//, '').replace(/^\//, '');
+        var abs = u.indexOf('http') === 0 ? u : BASE + u.replace(/^\.\//, '').replace(/^\//, '');
         return statusOnly(abs).then(function(s){ return u + '=' + s; });
       })).then(function(list){ var bad = list.filter(function(x){ return !/=200$/.test(x); });
         return ok(bad.length ? 'fail' : 'pass', list.join(' ')); });
     });
   }));
   jobs.push(check('assets', 'sentinel:stops', 'staging page copy carries 10,629 stops', function(){
-    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
-      return ok(t.indexOf('10,629') >= 0 ? 'pass' : 'fail', 'occurrences: ' + t.split('10,629').length - 1 + '');
+    return textOf(BASE + 'live-transit.html').then(function(t){
+      return ok(t.indexOf('10,629') >= 0 ? 'pass' : 'fail', 'occurrences: ' + (t.split('10,629').length - 1));
     });
   }));
   jobs.push(check('assets', 'sentinel:feedbase', 'staging page sets the live-data base', function(){
-    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+    return textOf(BASE + 'live-transit.html').then(function(t){
       return ok(t.indexOf('FORGE_LIVE_DATA_URL') >= 0 && t.indexOf(FEED) >= 0 ? 'pass' : 'fail', 'assignment present: ' + (t.indexOf('FORGE_LIVE_DATA_URL') >= 0));
     });
   }));
   jobs.push(check('assets', 'sentinel:stamp', 'staging page script stamp readable', function(){
-    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+    return textOf(BASE + 'live-transit.html').then(function(t){
       var m = /live-transit\.js\?v=([0-9a-z-]+)/i.exec(t);
       return ok(m ? 'pass' : 'warn', m ? 'stamp ' + m[1] : 'no versioned script tag found');
     });
@@ -297,7 +292,7 @@ function groupEnv(){
     var s = (window.HTMLScriptElement && HTMLScriptElement.supports) ? HTMLScriptElement.supports('importmap') : false;
     return ok(s ? 'pass' : 'warn', 'HTMLScriptElement.supports(importmap) = ' + s);
   });
-  env('env:modules', 'ES module support', function(){ return ok('noModule' in HTMLScriptElement.prototype ? 'warn' : 'pass', 'module scripts ' + ('noModule' in HTMLScriptElement.prototype ? 'NOT supported' : 'supported')); });
+  env('env:modules', 'ES module support', function(){ var s = (window.HTMLScriptElement && HTMLScriptElement.supports) ? HTMLScriptElement.supports('module') : null; return ok(s === false ? 'warn' : 'pass', 'HTMLScriptElement.supports(module) = ' + s); });
   env('env:localstorage', 'localStorage writable', function(){
     try { localStorage.setItem('__diag', '1'); localStorage.removeItem('__diag'); return ok('pass', 'read/write ok'); }
     catch(e){ return ok('warn', e.message); }
@@ -341,7 +336,11 @@ function groupPlumbing(){
     return withTimeout(fetch('https://detroitautomationacademy.com/').then(function(r){
       if (r.body) { try { r.body.cancel(); } catch(e){} }
       return ok(r.status === 200 ? 'pass' : 'warn', 'HTTP ' + r.status + ', final URL ' + r.url);
-    }), TIMEOUT_MS);
+    }), TIMEOUT_MS).then(null, function(){
+      return fetch('https://detroitautomationacademy.com/', { mode: 'no-cors' }).then(function(){
+        return ok('warn', 'reachable, but the redirect chain is not CORS-readable from a page (top-level navigation unaffected)');
+      });
+    });
   }));
   jobs.push(check('plumbing', 'www:root', 'www root resolves', function(){
     return statusOnly(PROD + '/').then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
@@ -355,13 +354,13 @@ function groupPlumbing(){
     }, function(e){ return ok('warn', e.message); });
   }));
   jobs.push(check('plumbing', 'canonical', 'staging page canonical points at production', function(){
-    return textOf(STAGING_ORIGIN + '/live-transit.html').then(function(t){
+    return textOf(BASE + 'live-transit.html').then(function(t){
       var m = /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i.exec(t) || /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i.exec(t);
       return ok(m && m[1].indexOf(PROD) === 0 ? 'pass' : 'warn', m ? m[1] : 'no canonical link found');
     });
   }));
   jobs.push(check('plumbing', 'staging:root', 'staging root resolves over HTTPS', function(){
-    return statusOnly(STAGING_ORIGIN + '/').then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
+    return statusOnly(BASE).then(function(s){ return ok(s === 200 ? 'pass' : 'fail', 'HTTP ' + s); });
   }));
   return jobs;
 }
