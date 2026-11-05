@@ -149,7 +149,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   });
   // Step 4a: input heartbeat stamps (passive, capture-phase so a handler
   // that stops propagation cannot hide the input from the heartbeat).
-  ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(function (type) {
+  ['pointerdown', 'pointermove', 'touchstart', 'wheel', 'keydown'].forEach(function (type) {
     window.addEventListener(type, function () {
       lastInputAt = performance.now();
       inputSeq++;
@@ -404,6 +404,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // instead of looping. If the platform restores the context before the
   // reload fires, the reload stands down.
   var recovering = false;
+  var flStateProvider = null; // boot scope registers a camera+selection snapshot for recovery reloads
   function recoverReload(reason) {
     if (recovering) return;
     recovering = true;
@@ -425,6 +426,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // the one automatic recovery and a genuine failure within 30 s
       // went straight to the terminal fallback.
       try { sessionStorage.setItem('fl-recover-at', '' + Date.now()); } catch (e) {}
+      // State preservation (2026-11-05, owner directive): a recovery
+      // reload must not destroy the rider's place — snapshot camera and
+      // route selection; the boot scope restores them (10 min window).
+      try {
+        if (typeof flStateProvider === 'function') {
+          var flSt = flStateProvider();
+          if (flSt) { flSt.at = Date.now(); sessionStorage.setItem('fl-state', JSON.stringify(flSt)); }
+        }
+      } catch (e) {}
       location.reload();
     }, 600);
   }
@@ -7794,6 +7804,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     exclRestore();
   }
   $('route-close').addEventListener('click', hideRoute);
+  flStateProvider = function () {
+    try {
+      return { cam: camera.position.toArray(), tgt: controls.target.toArray(), route: selectedRoute || null };
+    } catch (e) { return null; }
+  };
   $('route-card').addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); hideRoute(); } });
 
   function applyDim(rid) {
@@ -12708,6 +12723,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       });
       var lastBusMode = null;
       var lastFrameAt = performance.now();
+      var wdDeferStreak = 0;
       var ehStuckSince = 0; // step 4a: when the stuck-interaction condition began
       var frameErrStreak = 0;
       var frameErrLogged = false;
@@ -12891,6 +12907,23 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           if (frameErrStreak >= 120) ladderReload('frames');
         }
       });
+      // Restore the camera + route selection a recovery reload saved
+      // (2026-11-05): one-shot, 10-minute freshness window.
+      try {
+        var flSaved = sessionStorage.getItem('fl-state');
+        if (flSaved) {
+          sessionStorage.removeItem('fl-state');
+          var flSs = JSON.parse(flSaved);
+          if (flSs && Date.now() - (flSs.at || 0) < 600000) {
+            if (flSs.cam && flSs.tgt) {
+              camera.position.fromArray(flSs.cam);
+              controls.target.fromArray(flSs.tgt);
+              controls.update();
+            }
+            if (flSs.route && routeById[flSs.route] && routeShown(routeById[flSs.route])) showRoute(routeById[flSs.route]);
+          }
+        }
+      } catch (e) {}
       // Frame watchdog (2026-10-16, crash fix F2): covers what the
       // context listener and the frame guard cannot — a context lost
       // without an event, or a loop that stopped producing frames.
@@ -12901,7 +12934,22 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         var gl = null;
         try { gl = renderer.getContext(); } catch (e) {}
         if (gl && gl.isContextLost()) { ladderReload('watchdog'); return; }
-        if (lastFrameAt && performance.now() - lastFrameAt > 5000) { ladderReload('watchdog'); return; }
+        if (lastFrameAt && performance.now() - lastFrameAt <= 5000) wdDeferStreak = 0;
+        if (lastFrameAt && performance.now() - lastFrameAt > 5000) {
+          // Interaction guard (2026-11-05, owner directive): a frame gap
+          // during or just after active input is jank under the rider's
+          // hand, not a dead loop — defer the reload and hand the loop a
+          // fresh window. Four consecutive deferrals (a >20 s gap with
+          // fresh input) still reload: genuine-hang recovery is intact,
+          // and any reload that does fire now restores camera+selection.
+          if (performance.now() - lastInputAt < 10000 && wdDeferStreak < 4) {
+            wdDeferStreak++;
+            lastFrameAt = performance.now();
+            errLog('watchdog', 'frame-gap reload deferred during interaction (#' + wdDeferStreak + ')');
+            return;
+          }
+          ladderReload('watchdog'); return;
+        }
         // Step 4a: stuck-interaction detector. Frames are fresh (the
         // checks above passed) yet controls are disabled with no
         // animation owning the camera, held for > 10 s: a path disabled
