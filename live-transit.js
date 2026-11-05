@@ -8179,9 +8179,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             ['#include <color_fragment>',
              '\tvec2 shoreUv = (vWPos - uShoreBounds.xy) / uShoreBounds.zw;',
              '\tfloat shoreD = texture2D(uShoreTex, shoreUv).r * 650.0;',
-             '\tvec3 waterCol = vec3(0.05098, 0.05098, 0.20000);',
-             '\tif (shoreD < 300.0) waterCol = vec3(0.05882, 0.13333, 0.20000);',
-             '\tif (shoreD < 60.0) waterCol = vec3(0.10980, 0.10980, 0.43137) * (1.0 + 0.04 * sin(uTime * 0.35));',
+             '\tvec3 waterCol = vec3(0.12157, 0.12157, 0.12157);',
+             '\tif (shoreD < 300.0) waterCol = vec3(0.14510, 0.14510, 0.14510);',
+             '\tif (shoreD < 60.0) waterCol = vec3(0.17647, 0.17647, 0.17647) * (1.0 + 0.04 * sin(uTime * 0.35));',
              '\tdiffuseColor.rgb = waterCol;'].join('\n'));
       };
       m.customProgramCacheKey = function () { return 'waterBand'; };
@@ -12139,24 +12139,24 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   window.addEventListener('resize', resize);
 
   Promise.all([
-    fetch('ddot-routes-3d.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('ddot-routes-3d.json?v=' + STAMP)
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }),
-    fetch('ddot-fleet.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('ddot-fleet.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }),
-    fetch('assets/detroit-streets.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('assets/detroit-streets.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }),
-    fetch('assets/detroit-street-names.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('assets/detroit-street-names.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }),
-    fetch('peoplemover-3d.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('peoplemover-3d.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }), // static layer is optional: map works without it
-    fetch('smart-routes-3d.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('smart-routes-3d.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }), // SMART layer is optional: map works without it, see the merge below
-    fetch('qline-3d.json?v=' + STAMP, { cache: 'no-store' })
+    fetch('qline-3d.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }) // QLINE layer is optional
   ])
@@ -12465,7 +12465,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
       // Belle Isle static layer: built once from the OSM island outline.
       // Absent (fetch failed) the map simply has no island landmass.
-      fetch('assets/belle-isle.json?v=' + STAMP, { cache: 'no-store' })
+      fetch('assets/belle-isle.json?v=' + STAMP)
         .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
         .then(function (B) { buildBelleIsle(B); })
         .catch(function () { /* island is a bonus; map works without it */ });
@@ -12473,7 +12473,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // Water + far-shore static layer (project 16): built once from
       // TIGER+OSM geometry. Absent (fetch failed) the map simply has
       // no water layer.
-      fetch('assets/detroit-water.json?v=' + STAMP, { cache: 'no-store' })
+      fetch('assets/detroit-water.json?v=' + STAMP)
         .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
         .then(function (W) { buildWater(W); })
         .catch(function () { /* water is a bonus; map works without it */ });
@@ -12484,7 +12484,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
          landmarks.json. */
       (function () {
         if (window.__landmarksA) return; window.__landmarksA = true;
-        fetch('landmarks.json?v=' + STAMP, { cache: 'no-store' })
+        fetch('landmarks.json?v=' + STAMP)
           .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
           .then(function (L) {
             var g = new THREE.BufferGeometry();
