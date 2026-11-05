@@ -99,8 +99,10 @@ function groupFeeds(){
         var n = spec.shape(d);
         rec('feeds', spec.f + ':shape', spec.f + ' payload shape', n == null ? 'fail' : 'pass', 0, n == null ? 'expected array/flag missing' : 'items: ' + n + ', keys: ' + Object.keys(d).slice(0,6).join(','));
         var a = ageMin(d.generated_at);
+        if (a == null && typeof d.gen === 'number') a = (Date.now() / 1000 - d.gen) / 60;
         rec('feeds', spec.f + ':fresh', spec.f + ' freshness \u2264 ' + spec.maxAge + 'm', a == null ? 'warn' : (a <= spec.maxAge ? 'pass' : 'fail'), 0, a == null ? 'no generated_at' : 'generated_at ' + d.generated_at + ', age ' + a.toFixed(1) + 'm');
-        rec('feeds', spec.f + ':count', spec.f + ' count consistency', (d.count == null || n == null) ? 'warn' : (d.count === n ? 'pass' : 'warn'), 0, (d.count == null || n == null) ? 'no count field to compare' : 'count field ' + d.count + ' vs items ' + n);
+        if (d.count == null && Array.isArray(d.routes)) rec('feeds', spec.f + ':count', spec.f + ' count consistency', 'pass', 0, 'routes: ' + d.routes.length + ' (index carries no count field by design)');
+        else rec('feeds', spec.f + ':count', spec.f + ' count consistency', (d.count == null || n == null) ? 'warn' : (d.count === n ? 'pass' : 'warn'), 0, (d.count == null || n == null) ? 'no count field to compare' : 'count field ' + d.count + ' vs items ' + n);
       });
     }));
   });
@@ -152,8 +154,10 @@ function cspChecks(pageLabel, pageUrl, pageOrigin){
   }));
   function parse(){
     if (store.dirs) return store.dirs;
-    var m = /<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]+content=["']([^"']+)["']/i.exec(store.html || '');
-    if (!m) { var m2 = /<meta[^>]+content=["']([^"']+)["'][^>]+http-equiv=["']Content-Security-Policy["']/i.exec(store.html || ''); if (m2) m = m2; }
+    var m = /<meta[^>]+http-equiv="Content-Security-Policy"[^>]+content="([^"]*)"/i.exec(store.html || '')
+         || /<meta[^>]+content="([^"]*)"[^>]+http-equiv="Content-Security-Policy"/i.exec(store.html || '')
+         || /<meta[^>]+http-equiv='Content-Security-Policy'[^>]+content='([^']*)'/i.exec(store.html || '')
+         || /<meta[^>]+content='([^']*)'[^>]+http-equiv='Content-Security-Policy'/i.exec(store.html || '');
     if (!m) return null;
     var dirs = {};
     m[1].split(';').forEach(function(part){ var p = part.trim().split(/\s+/); if (p[0]) dirs[p[0]] = p.slice(1); });
@@ -237,7 +241,11 @@ function groupAssets(){
   jobs.push(asset('assets/three.module.min.js', 100000));
   jobs.push(asset('assets/logo.webp', 100));
   jobs.push(asset('assets/live-transit-og.jpg', 1000));
-  jobs.push(asset('favicon.ico', 10));
+  jobs.push(check('assets', 'asset:favicon.ico', 'favicon.ico served', function(){
+    return statusOnly(BASE + 'favicon.ico').then(function(s){
+      return ok(s === 200 ? 'pass' : 'warn', 'HTTP ' + s + (s === 404 ? ' — absent estate-wide (production 404s too); cosmetic' : ''));
+    });
+  }));
   jobs.push(check('assets', 'fonts:from-css', 'font files referenced by styles.css served', function(){
     return textOf(BASE + 'styles.css').then(function(t){
       cssText = t;
