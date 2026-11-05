@@ -115,9 +115,13 @@ html, body {
    F-1): rail 4 · control bar 5 · first-view sheet 6 · panels and
    cards 7 · notice bar 8 · toasts 9. An open panel therefore
    paints above the sheet (and the host occludes the sheet while
-   any panel or card is open); the notice bar sits above panels
-   exactly as the LKG's does, its Dismiss always in its first
-   row. */
+   any panel or card is open). The bar keeps z 8 above panels,
+   as the LKG's does — but z-order alone left a present bar
+   painting over the head of any top-anchored panel (T10
+   Addendum 10: heading and close control covered). The F-2b
+   clearance rules below restore the LKG's actual composition —
+   its panel head always lands below its notice strip's bottom
+   edge — for this bar's taller, content-driven height. */
 #svc-notice {
   position: fixed;
   top: 3.25rem; left: 0; right: 0;
@@ -155,6 +159,30 @@ html, body {
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* F-2b — notice clearance (T10 Addendum 10). While the notice
+   bar is present, the host marks the body .notice-on and
+   publishes the bar's measured height as --notice-h on the
+   root element (app.mjs syncNoticeClearance — re-measured on
+   every status render and on viewport resize). Top-anchored
+   surfaces then start below the bar: the browse/filter panels
+   and the top cards drop by the bar's full height under the
+   same 0.75rem gap their resting offsets keep from the
+   control bar, and the bottom-anchored planner's height cap
+   shrinks by the same amount so its head clears the bar too.
+   Invariant: with the notice visible, every open panel's
+   heading and close control remain fully reachable. */
+body.notice-on #panel-browse,
+body.notice-on #panel-filter {
+  top: calc(3.25rem + var(--notice-h, 0px) + 0.75rem);
+}
+body.notice-on #card-bus,
+body.notice-on #card-ride {
+  top: calc(3.25rem + var(--notice-h, 0px) + 0.75rem);
+}
+body.notice-on #planner-panel {
+  max-height: calc(100% - 3.25rem - var(--notice-h, 0px) - 1.75rem);
 }
 
 #panel-browse, #panel-filter {
@@ -473,6 +501,23 @@ button.f-group-head { cursor: pointer; text-align: left; font: inherit; }
 .f-near { margin-bottom: 0.6rem; }
 .f-near[aria-pressed="false"] .f-box { background: transparent; }
 .f-near b { font-weight: 600; }
+
+/* ---- panel layer rows (F-2): People Mover / MoGo / Places toggles,
+   rendered by the host into the panel through the controller's
+   extra-rows slot; same row vocabulary as the near-me row ---- */
+.f-layers { margin-top: 0.7rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.f-layer b { font-weight: 600; }
+.f-layer[aria-pressed="false"] .f-box { background: transparent; }
+.f-note { margin: 0.35rem 0.1rem 0; font-size: 0.68rem; color: #9f9f9f; line-height: 1.35; }
+.sponsored-tag {
+  color: #b4b4b4;
+  font-size: 0.68rem;
+  border: 1px solid rgba(180, 180, 180, 0.45);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  white-space: nowrap;
+}
+.sponsored-tag[hidden] { display: none; }
 .f-foot { display: flex; gap: 0.5rem; margin-top: 0.7rem; }
 .f-foot button {
   flex: 1;

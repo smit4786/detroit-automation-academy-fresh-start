@@ -396,8 +396,21 @@ export function renderFilterPanel({ doc, filters, counts, names, handlers = {} }
   return root;
 }
 
-/** Signature-gated panel controller, on the stop card's pattern. */
-export function createFilterPanel({ doc, mount, filters, names, getCounts, handlers = {} }) {
+/**
+ * Signature-gated panel controller, on the stop card's pattern.
+ *
+ * `extraRows(doc)` is the assembly's slot (F-2): the layer rows
+ * owned by other modules (People Mover, MoGo, Places) render into
+ * the same panel through it — the header contract at the top of
+ * this file. The controller invokes it on every rebuild and
+ * appends the returned nodes after the filter-owned root, so the
+ * rows survive the signature-gated re-renders that would wipe
+ * anything the host appended to the mount directly. Between
+ * rebuilds the rows are live nodes; their owners keep their own
+ * pressed/count state current (the panel signature does not cover
+ * layer state).
+ */
+export function createFilterPanel({ doc, mount, filters, names, getCounts, handlers = {}, extraRows = null }) {
   let signature = null;
   let renders = 0;
   // Group expansion is panel state, owned here (F-1): the render
@@ -457,6 +470,12 @@ export function createFilterPanel({ doc, mount, filters, names, getCounts, handl
     const root = renderFilterPanel({ doc, filters, counts, names, handlers: wiredHandlers });
     applyExpansion(root);
     mount.appendChild(root);
+    if (typeof extraRows === "function") {
+      const extra = extraRows(doc);
+      for (const n of Array.isArray(extra) ? extra : [extra]) {
+        if (n) mount.appendChild(n);
+      }
+    }
     renders++;
     return true;
   }

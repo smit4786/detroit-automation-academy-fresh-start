@@ -55,9 +55,9 @@ import { createRideAlong } from "./ride-along.mjs";
 import { createRideBindings, createTimesProvider, createRideHost } from "./ride-host.mjs";
 import { createAlertService, applyChipBadges } from "./alerts.mjs";
 import { createAlertLayer } from "./alert-layer.mjs";
-import { createStatusMonitor, applyNotice } from "./status.mjs";
+import { createStatusMonitor, applyNotice, fillSmartAgeSlots } from "./status.mjs";
 import { createPeopleMover } from "./peoplemover.mjs";
-import { createMogoService, createMogoLayer, mogoCardProvider } from "./mogo.mjs";
+import { createMogoService, createMogoLayer, mogoCardProvider, mogoPanelTally } from "./mogo.mjs";
 import { createPlacesService, buildPlacesMeshes, placeCardProvider, placesMarkerDescriptors } from "./places.mjs";
 import { createFirstView, renderFirstView } from "./first-view.mjs";
 import { createLocate } from "./locate.mjs";
@@ -189,6 +189,15 @@ export async function createApp(env = {}) {
   const placesUrl = env.placesUrl ?? null;
   const fleetUrl = env.fleetUrl ?? null;
   const viewportOf = env.viewport ?? (() => ({ w: 1280, h: 800 }));
+  // The device class, from the host's environment — the LKG's
+  // DisplayBounds rule (MOBILE_MAX_W 768: a viewport narrower
+  // than 768 is the mobile class). Measured live at each use, as
+  // DisplayBounds.get() is; the bus card's D1a compact path keys
+  // on it (F-2, host defect c).
+  const MOBILE_MAX_W = 768;
+  function deviceClass() {
+    return viewportOf().w < MOBILE_MAX_W ? "mobile" : "desktop";
+  }
 
   const state = {
     booted: false,
@@ -365,7 +374,7 @@ export async function createApp(env = {}) {
     }
     renderer.setSmartExtensionShown(filters.routeOn("261") || filters.groupState("smart") !== "none");
     stopLayer.setGoverned(governedStops());
-    if (filterPanel) filterPanel.sync();
+    syncFilterPanel();
   }
 
   const filterPanel = doc && mounts.panelFilter
@@ -397,8 +406,119 @@ export async function createApp(env = {}) {
           onHideIdleToggle: () => { filters.setHideIdle(!filters.state.hideIdle); applyFilters(); },
           onClose: () => setSurface("filters", mounts.panelFilter, false),
         },
+        // F-2 (host defect b): the layer rows (below) render into
+        // the panel through the controller's extra-rows slot.
+        extraRows: (d) => buildLayerRows(d),
       })
     : null;
+
+  /* ---------- panel layer rows (F-2, host defect b) -----------------
+   * The LKG carries the People Mover, MoGo, and Places toggles as
+   * f-group-head rows inside the routes panel, state-synced by
+   * their own sync functions. At T10 the rebuild rendered none of
+   * them: setLayer worked and was handle-exposed, but no surface
+   * control reached it. The rows are built here, at assembly (the
+   * filters module's stated ownership), from each module's own
+   * panel model, and rendered through the panel controller's
+   * extra-rows slot so they survive its signature-gated rebuilds.
+   * Between rebuilds a row repaints itself from its model on
+   * click, the LKG's sync discipline; the MoGo count also follows
+   * the service's poll subscription. */
+  const layerRowRefs = { mogoCount: null };
+  function mogoCountText() {
+    // The LKG's toggle-count rule: unavailable when the feed has
+    // failed, the panel tally once a layer exists, loading before.
+    const { ok, layer } = mogoService.state();
+    if (ok === false) return "unavailable";
+    return layer ? mogoPanelTally(layer.summary) : "loading";
+  }
+  mogoService.subscribe(() => {
+    if (layerRowRefs.mogoCount) layerRowRefs.mogoCount.textContent = mogoCountText();
+  });
+  function layerRow(d, { id, label, title, countId = null, model, onToggle }) {
+    const m = model();
+    const b = el(d, "button", "f-group-head f-layer");
+    b.setAttribute("type", "button");
+    b.setAttribute("id", id);
+    b.setAttribute("aria-pressed", String(!!m.pressed));
+    if (title) b.setAttribute("title", title);
+    b.appendChild(el(d, "span", "f-box"));
+    b.appendChild(el(d, "b", null, label));
+    const cnt = el(d, "span", "f-count", m.countText ?? "");
+    if (countId) {
+      cnt.setAttribute("id", countId);
+      if (countId === "mogo-count") layerRowRefs.mogoCount = cnt;
+    }
+    b.appendChild(cnt);
+    let tag = null;
+    if (m.sponsoredVisible !== undefined) {
+      // Gate 5 (places.mjs owns the rule): the Sponsored tag
+      // follows the layer state exactly.
+      tag = el(d, "span", "sponsored-tag", "Sponsored");
+      tag.hidden = !m.sponsoredVisible;
+      b.appendChild(tag);
+    }
+    b.addEventListener("click", () => {
+      onToggle();
+      const nm = model();
+      b.setAttribute("aria-pressed", String(!!nm.pressed));
+      cnt.textContent = nm.countText ?? "";
+      if (tag) tag.hidden = !nm.sponsoredVisible;
+    });
+    return b;
+  }
+  function buildLayerRows(d) {
+    if (!d) return [];
+    const wrap = el(d, "div", "f-layers");
+    if (peopleMover) {
+      wrap.appendChild(layerRow(d, {
+        id: "pm-toggle", label: "People Mover loop",
+        title: "Show the People Mover downtown loop and stations",
+        model: () => {
+          const pm = peopleMover.panelModel();
+          return { pressed: pm.pressed, countText: pm.countLabel };
+        },
+        onToggle: () => setLayer("peoplemover", !state.layers.peoplemover),
+      }));
+      wrap.appendChild(el(d, "p", "f-note", peopleMover.panelModel().note));
+    }
+    wrap.appendChild(layerRow(d, {
+      id: "mogo-toggle", label: "MoGo bikeshare",
+      title: "Show MoGo bikeshare stations with live bike and dock availability",
+      countId: "mogo-count",
+      model: () => ({ pressed: state.layers.mogo, countText: mogoCountText() }),
+      onToggle: () => setLayer("mogo", !state.layers.mogo),
+    }));
+    wrap.appendChild(layerRow(d, {
+      id: "places-toggle", label: "Points of interest",
+      title: "Show points of interest — Starbucks coffee shops and Planet Fitness gyms",
+      countId: "places-count",
+      model: () => {
+        const tm = placesService.toggleModel();
+        return { pressed: tm.pressed, countText: tm.countText, sponsoredVisible: tm.sponsoredVisible };
+      },
+      onToggle: () => setLayer("places", !state.layers.places),
+    }));
+    return [wrap];
+  }
+
+  /* ---------- SMART age fill (F-2, host defect a) -------------------
+   * The LKG's applySmartAgeUI discipline: the status module's
+   * SMART labeling fills the filter panel's age slots "after the
+   * filter panel is built and on every live poll". At T10 nothing
+   * called fillSmartAgeSlots, so the slots T6 rendered for it
+   * stayed empty. paintSmartAge runs from renderStatus (the poll
+   * path); syncFilterPanel is the one panel-sync path, so a
+   * signature-gated rebuild — which recreates the slots empty —
+   * is always followed by the fill. */
+  function paintSmartAge() {
+    if (doc) fillSmartAgeSlots(doc, statusMonitor.smartLabel());
+  }
+  function syncFilterPanel() {
+    if (!filterPanel) return;
+    filterPanel.sync();
+    paintSmartAge();
+  }
 
   function setLayer(layer, on) {
     state.layers[layer] = !!on;
@@ -408,16 +528,23 @@ export async function createApp(env = {}) {
       if (on) void mogoService.poll().then(() => { mogoLayer.rebuild(); mogoLayer.setVisible(true); });
     }
     if (layer === "places") {
-      if (on && !placesMeshes) {
-        void placesService.setOn(true).then(() => {
+      // The service owns this layer's state — its toggle model,
+      // the Gate 5 Sponsored tag, the card provider's enabled
+      // set — so setOn is driven on BOTH edges (its flags flip
+      // synchronously; the promise settles the data load). Before
+      // F-2 only the first enable reached setOn, so the service
+      // could never be turned off again: its model kept reporting
+      // the layer on, tag showing, places offered, forever.
+      void placesService.setOn(on).then(() => {
+        if (on && !placesMeshes) {
           placesMeshes = buildPlacesMeshes({
             gl, scene,
             descriptors: placesMarkerDescriptors(placesService.enabledPlaces(), renderer.rig.spherical.distance),
             stopScale: 1,
           });
-        }).catch(() => { /* load failure surfaces via the card provider */ });
-      }
-      if (placesMeshes) for (const m of placesMeshes) gl.setNodeVisible(m, on);
+        }
+        if (placesMeshes) for (const m of placesMeshes) gl.setNodeVisible(m, on);
+      }).catch(() => { /* load failure surfaces via the card provider */ });
     }
   }
 
@@ -517,7 +644,49 @@ export async function createApp(env = {}) {
         onDismiss: () => { statusMonitor.dismiss(); renderStatus(now()); },
       });
     }
+    // F-2 (host defect a): the SMART age fill rides every status
+    // render — the poll path, the LKG's "on every live poll" half
+    // of applySmartAgeUI. (The panel-rebuild half is syncFilterPanel.)
+    paintSmartAge();
+    syncNoticeClearance();
     return header;
+  }
+
+  /* F-2b — notice clearance (T10 Addendum 10's residual defect).
+   * The notice bar (z 8) hangs from the control bar across the
+   * full width, and its height is content-driven: headline row
+   * (the Dismiss control sets a 2.75rem floor) plus the detail
+   * tail. Top-anchored panels and cards start at a fixed 4rem /
+   * 5.5rem, so a present notice painted over their heads —
+   * heading and close control covered, unreachable. The LKG
+   * composes the same stack so the panel head always lands
+   * below its (collapsed) notice strip's bottom edge; here the
+   * host generalizes that composition to the rebuild's taller
+   * notice: while the notice is visible it publishes the bar's
+   * measured height as --notice-h on the root element and marks
+   * the body .notice-on, and the stylesheet starts every
+   * top-anchored surface below 3.25rem + --notice-h (see
+   * shell.css, "Notice clearance"). Invariant: with the notice
+   * visible, every open panel's heading and close control
+   * remain fully reachable. Re-measured on every status render
+   * (the poll path — the notice's content, hence its height,
+   * changes there) and on viewport resize via the bootstrap. */
+  function syncNoticeClearance() {
+    const el = mounts.serviceNotice;
+    const body = doc?.body ?? null;
+    const root = doc?.documentElement ?? body;
+    if (!el || !body || !root) return;
+    const visible = el.hidden === false;
+    body.classList.toggle("notice-on", visible);
+    if (root.style && typeof root.style.setProperty === "function") {
+      if (visible) {
+        const h = typeof el.offsetHeight === "number" && el.offsetHeight > 0
+          ? el.offsetHeight : 0;
+        root.style.setProperty("--notice-h", `${h}px`);
+      } else if (typeof root.style.removeProperty === "function") {
+        root.style.removeProperty("--notice-h");
+      }
+    }
   }
 
   /* ---------- poll loop ------------------------------------------- */
@@ -734,7 +903,10 @@ export async function createApp(env = {}) {
   function openBusCard(vehicle) {
     currentVehicle = vehicle;
     state.selectedVehicleKey = vehicle.key;
-    if (busCard) busCard.open(vehicle, { nowMs: now() });
+    // F-2 (host defect c): the host's device class reaches the
+    // card, as the LKG passes DisplayBounds' — without it the
+    // D1a compact open was unreachable and every card opened full.
+    if (busCard) busCard.open(vehicle, { deviceClass: deviceClass(), nowMs: now() });
     setSurface("bus", mounts.cardBus, true);
   }
   function closeAllSurfaces() {
@@ -950,7 +1122,7 @@ export async function createApp(env = {}) {
         if (host) { host.setRideMode(true); setSurface("ride", mounts.cardRide, true); }
         else toast("Ride Along loads with the timetable.");
       },
-      openRoutes: () => { setSurface("filters", mounts.panelFilter, true); if (filterPanel) filterPanel.sync(); },
+      openRoutes: () => { setSurface("filters", mounts.panelFilter, true); syncFilterPanel(); },
     },
   });
   firstViewRef = firstView;
@@ -1069,7 +1241,7 @@ export async function createApp(env = {}) {
   // an open panel's tool closes it. At T10 the tools only ever
   // showed, so an opened panel had no tool-side close path.
   const TOOLS = [
-    { id: "filters", label: "Routes", run: () => toggleSurface("filters", mounts.panelFilter, () => { if (filterPanel) filterPanel.sync(); }) },
+    { id: "filters", label: "Routes", run: () => toggleSurface("filters", mounts.panelFilter, () => syncFilterPanel()) },
     { id: "browse", label: "Browse", run: () => toggleSurface("browse", mounts.panelBrowse, () => renderBrowse()) },
     { id: "plan", label: "Plan", run: () => toggleSurface("planner", mounts.planner, () => renderPlanner()) },
     {
@@ -1300,7 +1472,7 @@ export async function createApp(env = {}) {
     applyFilters();
     renderStatus(now());
     paintFirstView();
-    if (filterPanel) filterPanel.sync();
+    syncFilterPanel();
     void pollLive();
     chain(pollLive, 60_000);
     alertService.start();
@@ -1349,6 +1521,7 @@ export async function createApp(env = {}) {
       pollAlerts,
       applyFilters,
       setLayer,
+      deviceClass,
       openStopCard,
       openBusCard,
       closeAllSurfaces,
@@ -1359,6 +1532,7 @@ export async function createApp(env = {}) {
       renderPlanner,
       renderBrowse,
       renderStatus,
+      syncNoticeClearance,
       stepFrame,
       start,
       stop,
@@ -1435,6 +1609,9 @@ if (LT_BOOTABLE) {
       const fit = () => {
         const w = stageEl.clientWidth || window.innerWidth;
         const h = stageEl.clientHeight || window.innerHeight;
+        // F-2b: a width change re-wraps the notice bar — re-publish
+        // its measured height so panel clearance tracks it.
+        if (typeof app.syncNoticeClearance === "function") app.syncNoticeClearance();
         gl.resize(glRenderer, w, h);
         const cam = app.renderer.camera;
         if (cam) {
