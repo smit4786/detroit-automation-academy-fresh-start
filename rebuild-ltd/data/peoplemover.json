@@ -1,0 +1,128 @@
+{
+ "agency": "Detroit Transportation Corporation",
+ "feed": "Detroit People Mover GTFS static (agency permalink, feed valid 2024-10-31 to 2027-12-31)",
+ "live": false,
+ "note": "No public live vehicle feed exists (verified 2026-10-05). Stations and loop are schedule geometry.",
+ "stations": [
+  {
+   "id": "1",
+   "name": "Times Square",
+   "lat": 42.333579,
+   "lon": -83.052159,
+   "x": 7924.6,
+   "z": 5296.8
+  },
+  {
+   "id": "2",
+   "name": "Michigan",
+   "lat": 42.331363,
+   "lon": -83.05212,
+   "x": 7927.8,
+   "z": 5543.5
+  },
+  {
+   "id": "3",
+   "name": "Fort/Cass",
+   "lat": 42.329505,
+   "lon": -83.05115,
+   "x": 8007.6,
+   "z": 5750.3
+  },
+  {
+   "id": "4",
+   "name": "Huntington Place",
+   "lat": 42.328212,
+   "lon": -83.049846,
+   "x": 8114.8,
+   "z": 5894.3
+  },
+  {
+   "id": "5",
+   "name": "Water Square",
+   "lat": 42.325233,
+   "lon": -83.052671,
+   "x": 7882.5,
+   "z": 6225.9
+  },
+  {
+   "id": "6",
+   "name": "Financial District",
+   "lat": 42.32868,
+   "lon": -83.04669,
+   "x": 8374.3,
+   "z": 5842.2
+  },
+  {
+   "id": "7",
+   "name": "Millender Center",
+   "lat": 42.330273,
+   "lon": -83.042001,
+   "x": 8759.9,
+   "z": 5664.9
+  },
+  {
+   "id": "8",
+   "name": "Renaissance Center",
+   "lat": 42.330157,
+   "lon": -83.039982,
+   "x": 8925.9,
+   "z": 5677.8
+  },
+  {
+   "id": "9",
+   "name": "Bricktown",
+   "lat": 42.333326,
+   "lon": -83.041194,
+   "x": 8826.3,
+   "z": 5325.0
+  },
+  {
+   "id": "10",
+   "name": "Greektown",
+   "lat": 42.334617,
+   "lon": -83.042419,
+   "x": 8725.5,
+   "z": 5181.3
+  },
+  {
+   "id": "11",
+   "name": "Cadillac Center",
+   "lat": 42.33371,
+   "lon": -83.046157,
+   "x": 8418.2,
+   "z": 5282.2
+  },
+  {
+   "id": "12",
+   "name": "Broadway",
+   "lat": 42.335449,
+   "lon": -83.048213,
+   "x": 8249.1,
+   "z": 5088.7
+  },
+  {
+   "id": "13",
+   "name": "Grand Circus Park",
+   "lat": 42.335782,
+   "lon": -83.050592,
+   "x": 8053.5,
+   "z": 5051.6
+  }
+ ],
+ "loop": null,
+ "loop_gap": {
+  "status": "open \u2014 data gap (named in the T6 delivery record)",
+  "asset_points": 173,
+  "unique_points": 92,
+  "asset_order_length_m": 27560.1,
+  "system_length_m_of_record": 4730,
+  "finding": "array interleaves two traversals of one point set; not path-ordered in whole or in either subsequence",
+  "smallest_correction": "derive the circuit from the Detroit People Mover GTFS shapes.txt in shape_pt_sequence order when the agency feed is in hand; the layer binds data.loop when present, no code change needed"
+ },
+ "provenance": {
+  "derived_by": "derive/07_peoplemover.py",
+  "input_of_record": "records/peoplemover-published-2026-11-04.json (served peoplemover-3d.json, byte snapshot)",
+  "declared_source": "Detroit People Mover GTFS static (agency permalink, feed valid 2024-10-31 to 2027-12-31)",
+  "verification": "projection block equals the rebuild plane; every station round-trips geodetic<->world within 0.15 m (max seen 0.000 m)"
+ }
+}

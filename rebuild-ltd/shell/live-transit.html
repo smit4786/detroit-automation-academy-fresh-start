@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'">
+<title>Live Transit Detroit</title>
+<link rel="stylesheet" href="shell.css?v=20261104-t3">
+<script>
+window.FORGE_LIVE_DATA_URL = "https://www.detroitautomationacademy.com/live-data";
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "../vendor/three.module.min.js",
+    "three/addons/": "../vendor/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Live Transit Detroit",
+  "description": "Live bus positions and trip planning for 83 routes and 10629 stops in the District of Detroit registry (Detroit Department of Transportation, SMART, and the QLINE streetcar)."
+}
+</script>
+</head>
+<body>
+<div id="stage" data-mount="stage"></div>
+
+<header id="control-bar" class="chrome">
+  <span class="brand">Live Transit Detroit</span>
+  <span id="live-count" data-mount="live-count"></span>
+  <span id="updated-at" data-mount="updated-at"></span>
+  <button id="fullscreen-toggle" type="button">Expand</button>
+</header>
+
+<nav id="tools-rail" class="chrome" data-mount="tools"></nav>
+
+<div id="svc-notice" data-mount="service-notice" hidden></div>
+
+<main id="card-slot">
+  <section id="card-bus" data-mount="card-bus" hidden></section>
+  <section id="card-stop" data-mount="card-stop" hidden></section>
+  <section id="card-trip" data-mount="card-trip" hidden></section>
+  <section id="card-ride" data-mount="card-ride" hidden></section>
+</main>
+
+<aside id="panel-browse" data-mount="panel-browse" hidden></aside>
+<aside id="panel-filter" data-mount="panel-filter" hidden></aside>
+<aside id="planner-panel" data-mount="planner" hidden></aside>
+<section id="sheet-first-view" data-mount="first-view-sheet" hidden></section>
+<div id="toast-region" data-mount="toasts"></div>
+<div id="sr-live" class="sr-only" aria-live="polite" data-mount="sr-live"></div>
+
+<noscript>
+  <h1>Live Transit Detroit</h1>
+  <p>The live map needs JavaScript. The registry behind it covers
+  83 routes and 10629 stops across the District of
+  Detroit. Detroit Department of Transportation routes:</p>
+  <ul>
+        <li>1 — Vernor</li>
+        <li>2 — Michigan</li>
+        <li>3 — Grand River</li>
+        <li>4 — Woodward</li>
+        <li>5 — Van Dyke-Lafayette</li>
+        <li>6 — Gratiot</li>
+        <li>7 — Seven Mile</li>
+        <li>8 — Warren</li>
+        <li>9 — Jefferson</li>
+        <li>10 — Greenfield</li>
+        <li>11 — Clairmount</li>
+        <li>12 — Conant</li>
+        <li>13 — Conner</li>
+        <li>15 — Chicago-Davison</li>
+        <li>16 — Dexter</li>
+        <li>17 — Eight Mile</li>
+        <li>18 — Fenkell</li>
+        <li>19 — Fort</li>
+        <li>23 — Hamilton</li>
+        <li>27 — Joy</li>
+        <li>29 — Linwood</li>
+        <li>30 — Livernois</li>
+        <li>31 — Mack</li>
+        <li>32 — McNichols</li>
+        <li>38 — Plymouth</li>
+        <li>39 — Puritan</li>
+        <li>40 — Russell</li>
+        <li>41 — Schaefer</li>
+        <li>42 — Mid-City Loop</li>
+        <li>43 — Schoolcraft</li>
+        <li>46 — Southfield</li>
+        <li>47 — Tireman</li>
+        <li>52 — Chene</li>
+        <li>54 — Wyoming</li>
+        <li>60 — Evergreen</li>
+        <li>67 — Cadillac-Harper</li>
+        <li>68 — Chalmers</li>
+  </ul>
+</noscript>
+
+<script type="module" src="../src/app.mjs?v=20261104-t3"></script>
+</body>
+</html>
