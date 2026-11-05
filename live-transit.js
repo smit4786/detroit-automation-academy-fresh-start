@@ -8267,6 +8267,78 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     scene.add(belleIsleTether);
   }
 
+  // Belle Isle topography (HD upgrade, 2026-11-05): USGS NED 1/3
+  // arc-second elevations on a 60 m grid (assets/belle-isle-topo.json),
+  // drawn as a monochrome relief mesh over the flat island fill —
+  // vertex grays from height + slope, heights exaggerated 4x (the
+  // island's true relief is ~5.6 m over 4.3 km; at true scale it would
+  // read as flat) — plus 1 m contour lines, the 176 m line doubling as
+  // the surveyed waterline. Optional layer: absent file = the flat
+  // island exactly as before. Static geography: never a pick target.
+  var BELLE_EXAG = 4, BELLE_BASE_Y = 3.15, BELLE_WATER = 174.9;
+  function belleY(h) { return BELLE_BASE_Y + (h - BELLE_WATER) * BELLE_EXAG; }
+  function buildBelleIsleTopo(T, B) {
+    if (!T || !T.grid || !B || !B.polygon) return;
+    var G = T.grid, nx = G.nx, nz = G.nz, step = G.step, H = G.heights;
+    if (!H || H.length < nx * nz) return;
+    var poly = B.polygon;
+    function inside(x, z) {
+      var c = false;
+      for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        var xi = poly[i][0], zi = poly[i][1], xj = poly[j][0], zj = poly[j][1];
+        if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c;
+      }
+      return c;
+    }
+    function hAt(i, j) { return H[j * nx + i]; }
+    var pos = [], col = [];
+    function vert(i, j) {
+      var x = G.x0 + i * step, z = G.z0 + j * step, h = hAt(i, j);
+      pos.push(x, belleY(h), z);
+      var gx = (hAt(Math.min(i + 1, nx - 1), j) - hAt(Math.max(i - 1, 0), j)) / (2 * step);
+      var gz = (hAt(i, Math.min(j + 1, nz - 1)) - hAt(i, Math.max(j - 1, 0))) / (2 * step);
+      var ramp = Math.max(0, Math.min(1, (h - BELLE_WATER) / 5.6));
+      var shade = Math.max(-1, Math.min(1, (gx - gz) * 6));
+      var g = 0.075 + ramp * 0.075 + shade * 0.028;
+      col.push(g, g, g);
+    }
+    for (var cj = 0; cj < nz - 1; cj++) {
+      for (var ci = 0; ci < nx - 1; ci++) {
+        var cx = G.x0 + (ci + 0.5) * step, cz = G.z0 + (cj + 0.5) * step;
+        if (!inside(cx, cz)) continue;
+        vert(ci, cj); vert(ci + 1, cj); vert(ci, cj + 1);
+        vert(ci + 1, cj); vert(ci + 1, cj + 1); vert(ci, cj + 1);
+      }
+    }
+    if (pos.length) {
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+      g.computeVertexNormals();
+      var mesh = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true }));
+      mesh.renderOrder = 1;
+      scene.add(mesh);
+    }
+    if (T.contours) {
+      var cpos = [];
+      Object.keys(T.contours).forEach(function (lv) {
+        var y = belleY(+lv) + 0.3;
+        T.contours[lv].forEach(function (s) {
+          cpos.push(s[0][0], y, s[0][1], s[1][0], y, s[1][1]);
+        });
+      });
+      if (cpos.length) {
+        var cg = new THREE.BufferGeometry();
+        cg.setAttribute('position', new THREE.Float32BufferAttribute(cpos, 3));
+        var lines = new THREE.LineSegments(cg, new THREE.LineBasicMaterial({
+          color: 0x2b2b2b, transparent: true, opacity: 0.8
+        }));
+        lines.renderOrder = 2;
+        scene.add(lines);
+      }
+    }
+  }
+
   // Project 16 (Default View Uplift): static water + far-shore layer.
   // Geometry: assets/detroit-water.json — TIGER/Line 2025 areawater and
   // OSM natural=water unioned, clipped to MOSAIC_BOUNDS, simplified at
@@ -12649,7 +12721,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // Absent (fetch failed) the map simply has no island landmass.
       fetch('assets/belle-isle.json?v=' + STAMP)
         .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-        .then(function (B) { buildBelleIsle(B); })
+        .then(function (B) {
+          buildBelleIsle(B);
+          // HD topography rides the same optional-layer discipline.
+          fetch('assets/belle-isle-topo.json?v=' + STAMP)
+            .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+            .then(function (T) { buildBelleIsleTopo(T, B); })
+            .catch(function () { /* flat island stands without it */ });
+        })
         .catch(function () { /* island is a bonus; map works without it */ });
 
       // Water + far-shore static layer (project 16): built once from
