@@ -980,6 +980,18 @@
           <div id="stop-alerts-list"></div>
         </div>
       </div>
+      <div class="bus-card" id="route-card" role="dialog" aria-label="Route details" tabindex="-1" hidden>
+        <button class="close" id="route-close" aria-label="Clear selection and close">×</button>
+        <div class="sel-eyebrow">Route</div>
+        <h2><span id="route-title">Route</span></h2>
+        <dl>
+          <dt>Status</dt><dd id="route-status">–</dd>
+          <dt>Live buses</dt><dd id="route-live">–</dd>
+          <dt>Stops</dt><dd id="route-stops">–</dd>
+          <dt>Length</dt><dd id="route-len">–</dd>
+        </dl>
+        <p class="route-alerts" id="route-alerts" hidden></p>
+      </div>
       <div class="bus-card" id="ride-card" tabindex="-1" hidden>
         <button class="close" id="ride-close" aria-label="Close ride along">×</button>
         <div id="ride-along-mount"></div>
