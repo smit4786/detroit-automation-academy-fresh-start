@@ -1,7 +1,10 @@
-/* LTD rebuild — shell chrome (Tranche T3, M1).
-   Shell-level geometry only: stage, the Direction C single control
-   bar, the card slot discipline, mounts. Card/panel internals are
-   their tranches' (T5/T6). All colors achromatic. */
+/* LTD rebuild — shell chrome (Tranche T3, M1) + the surfaces
+   stylesheet (conformance tranche F-1). The first block carries
+   shell-level geometry: stage, the Direction C single control
+   bar, the card slot discipline, mounts. The F-1 block further
+   down carries every surface-internal rule (first view, filter
+   and browse panels, chips, planner, notice) — it was missing
+   entirely at owner UAT. All colors achromatic. */
 
 :root {
   --ink: #f2f2f2;
@@ -33,21 +36,40 @@ html, body {
   user-select: text;
 }
 
-/* Direction C: one control bar carries brand, live state, tools. */
+/* Direction C: one control bar carries brand, live state, tools.
+   D-12 discipline: one line at phone width — the brand and the
+   live state never wrap; the bar's single fullscreen control is
+   a quiet chrome button. */
 #control-bar {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 3.25rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0 1rem;
+  gap: 0.6rem;
+  padding: 0 0.8rem;
   background: var(--chrome-bg);
   border-bottom: 1px solid var(--chrome-line);
   z-index: 5;
 }
-#control-bar .brand { font-family: "Space Grotesk", "Inter", sans-serif; font-weight: 600; }
-#live-count, #updated-at { color: var(--ink-dim); }
+#control-bar .brand { font-family: "Space Grotesk", "Inter", sans-serif; font-weight: 600; white-space: nowrap; flex: none; }
+#live-count, #updated-at { color: var(--ink-dim); white-space: nowrap; font-size: 0.85rem; }
+#live-count { flex: none; }
+#updated-at { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#fullscreen-toggle {
+  margin-left: auto;
+  flex: none;
+  min-height: 2.75rem;
+  background: none;
+  border: 1px solid var(--chrome-line);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
 
 #tools-rail {
   position: fixed;
@@ -61,7 +83,7 @@ html, body {
 
 /* Card slot (R-02 geometry; P-75 cover/restore: one slot, covering
    hides an element, it never clears its state). */
-#card-slot { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
+#card-slot { position: fixed; inset: 0; pointer-events: none; z-index: 7; }
 #card-slot > section {
   position: absolute;
   pointer-events: auto;
@@ -74,25 +96,77 @@ html, body {
 #card-ride { right: 1.25rem; top: 5.5rem; width: 19rem; }
 #card-slot .close {
   width: 2.75rem; height: 2.75rem; /* R-33: 44 px targets */
+  position: absolute;
+  top: 0.35rem; right: 0.35rem;
+  background: none;
+  border: 1px solid var(--chrome-line);
+  color: var(--ink);
+  border-radius: 999px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
 }
+#card-slot .sc-head, #card-slot .bus-body { position: relative; }
 
+/* The service notice is a full-width bar directly under the
+   control bar (the LKG's form), never a floating box: headline
+   and its Dismiss control share the first row, the detail tail
+   wraps below, scrollable past 38vh. Z-order rule (restated at
+   F-1): rail 4 · control bar 5 · first-view sheet 6 · panels and
+   cards 7 · notice bar 8 · toasts 9. An open panel therefore
+   paints above the sheet (and the host occludes the sheet while
+   any panel or card is open); the notice bar sits above panels
+   exactly as the LKG's does, its Dismiss always in its first
+   row. */
 #svc-notice {
   position: fixed;
-  top: 4rem; left: 50%;
-  transform: translateX(-50%);
-  z-index: 7;
+  top: 3.25rem; left: 0; right: 0;
+  z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.35rem 0.8rem;
   background: var(--chrome-bg);
+  border-bottom: 1px solid var(--chrome-line);
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+}
+#svc-notice[hidden] { display: none; }
+.svc-headline { flex: 1 1 auto; min-width: 0; margin: 0; }
+.svc-detail {
+  flex: 1 1 100%;
+  order: 3;
+  margin: 0;
+  color: var(--ink-dim);
+  line-height: 1.45;
+  max-height: 38vh;
+  overflow-y: auto;
+}
+.svc-dismiss {
+  order: 2;
+  flex: none;
+  min-height: 2.75rem;
+  background: none;
   border: 1px solid var(--chrome-line);
-  padding: 0.5rem 1rem;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 #panel-browse, #panel-filter {
   position: fixed;
   top: 4rem; bottom: 1rem;
   width: 20rem;
+  max-width: calc(100% - 2rem);
   background: var(--chrome-bg);
   border: 1px solid var(--chrome-line);
-  z-index: 6;
+  border-radius: 0.875rem;
+  padding: 0.9rem 1rem 1rem;
+  z-index: 7;
   overflow-y: auto;
 }
 #panel-browse { left: 1rem; }
@@ -102,18 +176,22 @@ html, body {
   position: fixed;
   left: 1rem; bottom: 1rem;
   width: 22rem;
+  max-width: calc(100% - 2rem);
   background: var(--chrome-bg);
   border: 1px solid var(--chrome-line);
-  z-index: 6;
+  border-radius: 0.875rem;
+  padding: 0.9rem 1rem 1rem;
+  z-index: 7;
+  max-height: calc(100% - 6rem);
+  overflow-y: auto;
 }
 
 #sheet-first-view {
   position: fixed;
   left: 50%; bottom: 1rem;
   transform: translateX(-50%);
-  z-index: 8;
-  background: var(--chrome-bg);
-  border: 1px solid var(--chrome-line);
+  width: min(27rem, calc(100% - 1rem));
+  z-index: 6;
 }
 
 #toast-region { position: fixed; bottom: 1rem; right: 1rem; z-index: 9; }
@@ -135,6 +213,415 @@ html, body {
     margin-right: 5.5rem;
   }
   #card-bus, #card-stop, #card-trip, #card-ride { width: auto; left: 0.75rem; right: 0.75rem; }
+}
+
+/* ================================================================
+   Surfaces stylesheet (F-1) — the rules the surface modules'
+   class vocabulary always required and no tranche wrote (census
+   root cause RC-1). Re-derived from the LKG build's rendered
+   treatment of the same classes: same geometry, same type scale,
+   same dimming language, monochrome throughout. Until this block
+   existed, every surface element fell back to default browser
+   button/span rendering — the fused text and white pills of the
+   owner UAT screenshots.
+   ================================================================ */
+
+/* ---- tools rail: dark pills, never default buttons ---- */
+#tools-rail .tool {
+  min-height: 2.75rem;
+  background: rgba(16, 16, 16, 0.85);
+  border: 1px solid rgba(242, 242, 242, 0.2);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#tools-rail .tool:hover { border-color: #767676; }
+
+/* ---- panel head: title + the visible close control ---- */
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.panel-title { font-family: "Space Grotesk", "Inter", sans-serif; font-size: 0.95rem; font-weight: 600; }
+.panel-close {
+  flex: none;
+  min-height: 2.75rem;
+  background: none;
+  border: 1px solid rgba(118, 118, 118, 0.6);
+  color: #b5b5b5;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.panel-close:hover { background: rgba(118, 118, 118, 0.12); }
+
+/* ---- first-view sheet (D-1, D-2, D-3) ---- */
+.fv-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: min(46dvh, 30rem);
+  background: rgba(16, 16, 16, 0.96);
+  border: 1px solid rgba(242, 242, 242, 0.18);
+  border-radius: 20px 20px 16px 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  color: var(--ink);
+  overflow: hidden;
+}
+.fv-sheet[hidden] { display: none; }
+.fv-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem 0.6rem;
+  border-bottom: 1px solid rgba(242, 242, 242, 0.1);
+}
+.fv-grab {
+  flex: none;
+  width: 2.75rem; height: 2.75rem;
+  margin: -0.35rem 0 -0.35rem -0.45rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+.fv-grab span { display: block; width: 2.25rem; height: 0.3rem; border-radius: 999px; background: rgba(242, 242, 242, 0.45); }
+.fv-grab:focus-visible { outline: 2px solid #767676; outline-offset: 2px; border-radius: 10px; }
+.fv-heading { flex: 1; min-width: 0; }
+.fv-greeting { margin: 0; font-family: "Space Grotesk", "Inter", sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #767676; }
+.fv-heading h2 { margin: 0.15rem 0 0; font-family: "Space Grotesk", "Inter", sans-serif; font-size: 1.02rem; line-height: 1.2; font-weight: 600; }
+.fv-just-map {
+  flex: none;
+  min-height: 2.75rem;
+  background: none;
+  border: 1px solid rgba(118, 118, 118, 0.6);
+  color: #b5b5b5;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fv-just-map:hover { background: rgba(118, 118, 118, 0.12); }
+.fv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem 0.85rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.fv-grid[hidden] { display: none; }
+.fv-tile {
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.18rem;
+  text-align: left;
+  background: rgba(242, 242, 242, 0.05);
+  border: 1px solid rgba(242, 242, 242, 0.14);
+  border-radius: 12px;
+  color: var(--ink);
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  font: inherit;
+}
+.fv-tile:hover { border-color: #767676; }
+.fv-tile:focus-visible { outline: 2px solid #767676; outline-offset: 2px; }
+.fv-tile-name { font-size: 0.92rem; font-weight: 700; line-height: 1.15; }
+.fv-tile-proof { font-size: 0.74rem; line-height: 1.3; color: #9f9f9f; }
+.fv-handle {
+  min-width: 10rem;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 16, 16, 0.94);
+  border: 1px solid rgba(118, 118, 118, 0.6);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fv-handle[hidden] { display: none; }
+.fv-handle:hover { border-color: #767676; }
+.fv-near { padding: 0.75rem 0.8rem 0.9rem; overflow-y: auto; overscroll-behavior: contain; }
+.fv-near[hidden] { display: none; }
+.fv-near h3 { margin: 0 0 0.3rem; font-family: "Space Grotesk", "Inter", sans-serif; font-size: 0.95rem; font-weight: 600; }
+.fv-near p { margin: 0 0 0.7rem; color: #9f9f9f; font-size: 0.8rem; line-height: 1.45; }
+.fv-near-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.fv-near-actions button {
+  min-height: 2.75rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fv-near-actions button:focus-visible { outline: 2px solid #767676; outline-offset: 2px; }
+.fv-near-primary { background: #767676; border: 1px solid #767676; color: #101010; }
+.fv-near-secondary, .fv-near-back { background: none; border: 1px solid rgba(242, 242, 242, 0.35); color: var(--ink); }
+
+/* ---- route chips (D-5): label, count, idle tag read apart ---- */
+.route-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 16, 16, 0.82);
+  border: 1px solid rgba(242, 242, 242, 0.16);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.route-chip i { width: 0.7rem; height: 0.7rem; border-radius: 3px; display: inline-block; flex: none; background: #767676; }
+.route-chip b { font-weight: 600; }
+.route-chip .cnt { color: #9f9f9f; font-variant-numeric: tabular-nums; }
+.route-chip[aria-pressed="false"] { opacity: 0.38; }
+.route-chip:hover { border-color: rgba(242, 242, 242, 0.4); }
+.route-chip.has-alert { border-color: rgba(180, 180, 180, 0.65); }
+.route-chip.alert-severe { border-color: rgba(148, 148, 148, 0.75); }
+.idle-tag {
+  color: #b4b4b4;
+  font-size: 0.68rem;
+  border: 1px solid rgba(180, 180, 180, 0.45);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  white-space: nowrap;
+}
+.idle-tag[hidden] { display: none; }
+
+/* ---- filter panel groups (D-8) ---- */
+.f-group { margin-bottom: 0.7rem; }
+.f-group:last-child { margin-bottom: 0; }
+.f-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  background: rgba(242, 242, 242, 0.04);
+  border: 1px solid rgba(242, 242, 242, 0.1);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+button.f-group-head { cursor: pointer; text-align: left; font: inherit; }
+.f-check { background: none; border: none; padding: 0.15rem; margin: -0.15rem 0 -0.15rem -0.15rem; cursor: pointer; display: flex; flex: none; }
+.f-box { width: 0.85rem; height: 0.85rem; border-radius: 4px; border: 1px solid #767676; background: #767676; flex: none; position: relative; }
+.f-check[aria-pressed="false"] .f-box { background: transparent; }
+.f-check[aria-pressed="mixed"] .f-box { background: transparent; }
+.f-check[aria-pressed="mixed"] .f-box::after {
+  content: "";
+  position: absolute;
+  left: 2px; right: 2px; top: 50%;
+  height: 2px; margin-top: -1px;
+  background: #767676;
+  border-radius: 1px;
+}
+.f-label {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+.f-label b { font-weight: 600; }
+.f-count { color: #9f9f9f; font-size: 0.75rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.f-chev { color: #9f9f9f; font-size: 0.8rem; transition: transform 0.18s; flex: none; margin-left: auto; }
+.f-group.open .f-chev { transform: rotate(180deg); }
+.f-group .f-routes { display: none; }
+.f-group.open .f-routes { display: flex; }
+.f-routes { flex-wrap: wrap; gap: 0.4rem; padding: 0.55rem 0.1rem 0; }
+.f-group.off .f-routes { opacity: 0.35; }
+.f-chip { font-size: 0.75rem; padding: 0.4rem 0.65rem; }
+.f-chip .cnt { font-size: 0.72rem; }
+.f-chip.not-running { opacity: 0.55; }
+.f-chip:focus-visible { outline: 2px solid #b4b4b4; outline-offset: 2px; }
+.f-smart-note { margin: 0.35rem 0.1rem 0; font-size: 0.68rem; color: #9f9f9f; line-height: 1.35; }
+.f-near { margin-bottom: 0.6rem; }
+.f-near[aria-pressed="false"] .f-box { background: transparent; }
+.f-near b { font-weight: 600; }
+.f-foot { display: flex; gap: 0.5rem; margin-top: 0.7rem; }
+.f-foot button {
+  flex: 1;
+  min-height: 2.75rem;
+  background: none;
+  border: 1px solid rgba(242, 242, 242, 0.2);
+  color: var(--ink);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---- browse panel ---- */
+.br-tabs { display: flex; gap: 0.5rem; margin: 0 0 0.6rem; }
+.br-tab {
+  flex: 1;
+  min-height: 2.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(242, 242, 242, 0.2);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.br-tab[aria-selected="true"] { border-color: #767676; color: #cdcdcd; background: rgba(118, 118, 118, 0.1); }
+.browse-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.browse-list button {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: left;
+  background: rgba(242, 242, 242, 0.05);
+  border: 1px solid rgba(242, 242, 242, 0.12);
+  border-radius: 10px;
+  color: var(--ink);
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.browse-list button:hover { border-color: #767676; }
+.browse-list .b-dot { width: 0.7rem; height: 0.7rem; border-radius: 3px; flex: none; background: #767676; }
+.browse-list .b-main { min-width: 0; }
+.browse-list .b-main b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browse-list .b-main span { display: block; color: #9f9f9f; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browse-list .b-main .b-adv { color: #b4b4b4; font-weight: 600; white-space: normal; }
+.browse-list .b-main .b-adv.severe { color: #a2a2a2; }
+.browse-empty { color: #9f9f9f; font-size: 0.85rem; padding: 0.8rem 0; text-align: center; }
+
+/* ---- passes pane ---- */
+.passes-note { color: #9f9f9f; font-size: 0.78rem; line-height: 1.5; margin: 0 0 0.7rem; }
+.passes-note a { color: #b5b5b5; }
+.passes-list { list-style: none; margin: 0 0 0.7rem; padding: 0; display: grid; gap: 0.35rem; }
+.pass-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(242, 242, 242, 0.05);
+  border: 1px solid rgba(242, 242, 242, 0.12);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+.pass-main { flex: 1; min-width: 0; }
+.pass-main b { display: block; font-weight: 600; font-size: 0.85rem; }
+.pass-main span { display: block; color: #9f9f9f; font-size: 0.75rem; margin-top: 0.15rem; }
+.pass-buy {
+  flex: none;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(118, 118, 118, 0.6);
+  color: #b5b5b5;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---- planner panel ---- */
+.pl-head { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+.pl-title { font-family: "Space Grotesk", "Inter", sans-serif; font-size: 0.95rem; font-weight: 600; }
+.pl-ends { display: grid; gap: 0.35rem; margin-bottom: 0.6rem; }
+.pl-end {
+  background: rgba(242, 242, 242, 0.05);
+  border: 1px solid rgba(242, 242, 242, 0.12);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pl-swap {
+  justify-self: start;
+  min-height: 2.75rem;
+  background: none;
+  border: 1px solid rgba(118, 118, 118, 0.6);
+  color: #b5b5b5;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pl-meta { color: #9f9f9f; font-size: 0.78rem; margin: 0 0 0.5rem; }
+.pl-note { color: #9f9f9f; font-size: 0.82rem; line-height: 1.45; margin: 0 0 0.5rem; }
+.pl-options { display: grid; gap: 0.35rem; }
+.pl-option {
+  width: 100%;
+  min-height: 2.75rem;
+  text-align: left;
+  background: rgba(242, 242, 242, 0.05);
+  border: 1px solid rgba(242, 242, 242, 0.12);
+  border-radius: 10px;
+  color: var(--ink);
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.pl-option:hover { border-color: #767676; }
+.pl-detail { margin-top: 0.6rem; display: grid; gap: 0.3rem; }
+.pl-row { font-size: 0.82rem; line-height: 1.45; color: var(--ink); }
+
+/* Phone form (the owner's viewport class): panels become bottom
+   sheets in the LKG's phone treatment; the sheet may use the
+   full height under the bar; tiles tighten. */
+@media (max-width: 640px) {
+  #control-bar { gap: 0.45rem; padding: 0 0.6rem; }
+  #control-bar .brand { font-size: 0.9rem; }
+  #panel-browse, #panel-filter, #planner-panel {
+    top: auto;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    max-width: none;
+    max-height: 55%;
+  }
+  .fv-sheet { max-height: calc(100dvh - 5rem); }
+  .fv-tile { min-height: 56px; }
 }
 
 /* fs-lock (R-30): while fullscreen is active, document scroll is

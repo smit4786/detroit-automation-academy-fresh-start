@@ -196,7 +196,7 @@ function on(node, type, fn) {
   if (node && typeof node.addEventListener === "function") node.addEventListener(type, fn);
 }
 
-export function renderBusCard(model, doc, { onExpand = null, onFollow = null, followState = null, renderUpcoming = null } = {}) {
+export function renderBusCard(model, doc, { onExpand = null, onFollow = null, followState = null, renderUpcoming = null, onClose = null } = {}) {
   const root = el(doc, "div", "bus-card");
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-label", "Bus details");
@@ -210,6 +210,17 @@ export function renderBusCard(model, doc, { onExpand = null, onFollow = null, fo
   root.appendChild(bar);
 
   const body = el(doc, "div", "bus-body");
+  if (onClose) {
+    // F-1: the card's visible close control (the shell reserves
+    // the 44px .close slot in every card). At T10 the bus card
+    // rendered no close affordance; its onClose fired only from
+    // route-gate reconciliation, never from a rider tap.
+    const closeBtn = el(doc, "button", "close", "✕");
+    closeBtn.setAttribute("type", "button");
+    closeBtn.setAttribute("aria-label", "Close bus card");
+    on(closeBtn, "click", () => onClose());
+    body.appendChild(closeBtn);
+  }
   body.appendChild(el(doc, "h3", "bus-title", model.title));
   const dl = el(doc, "dl", "bus-dl");
   const rows = [
@@ -267,6 +278,13 @@ export function createBusCardController({ doc, mount, buildModel, renderUpcoming
     mount.appendChild(renderBusCard(model, doc, {
       renderUpcoming,
       onExpand: () => { compact = false; signature = null; render(nowMs); },
+      onClose: onClose ? () => {
+        const vid = selectedVehicleId;
+        selectedVehicleId = null;
+        signature = null;
+        mount.textContent = "";
+        onClose(vid);
+      } : null,
     }));
     renders++;
     return true;

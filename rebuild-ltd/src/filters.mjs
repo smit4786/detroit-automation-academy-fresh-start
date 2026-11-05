@@ -400,6 +400,39 @@ export function renderFilterPanel({ doc, filters, counts, names, handlers = {} }
 export function createFilterPanel({ doc, mount, filters, names, getCounts, handlers = {} }) {
   let signature = null;
   let renders = 0;
+  // Group expansion is panel state, owned here (F-1): the render
+  // rebuilds the DOM on every signature change, so expansion kept
+  // only in DOM classes would reset on the next poll. The set
+  // survives re-renders; render() re-applies it to the fresh tree.
+  const expanded = new Set();
+  function applyExpansion(root) {
+    for (const sec of root?.children ?? []) {
+      if (!sec.className || !String(sec.className).includes("f-group")) continue;
+      const gid = typeof sec.getAttribute === "function" ? sec.getAttribute("data-group") : null;
+      if (!gid) continue;
+      const on = expanded.has(gid);
+      if (on) sec.classList?.add?.("open"); else sec.classList?.remove?.("open");
+      const head = sec.children?.[0];
+      const label = head?.children?.[1];
+      if (label && typeof label.setAttribute === "function") {
+        label.setAttribute("aria-expanded", String(on));
+      }
+    }
+  }
+  const wiredHandlers = {
+    ...handlers,
+    onGroupExpand: (gid, sec, label) => {
+      const on = !expanded.has(gid);
+      if (on) expanded.add(gid); else expanded.delete(gid);
+      if (sec) {
+        if (on) sec.classList?.add?.("open"); else sec.classList?.remove?.("open");
+      }
+      if (label && typeof label.setAttribute === "function") {
+        label.setAttribute("aria-expanded", String(on));
+      }
+      handlers.onGroupExpand?.(gid, sec, label);
+    },
+  };
   function render() {
     const counts = getCounts();
     const sig = JSON.stringify({
@@ -411,9 +444,21 @@ export function createFilterPanel({ doc, mount, filters, names, getCounts, handl
     if (sig === signature) return false;
     signature = sig;
     mount.textContent = "";
-    mount.appendChild(renderFilterPanel({ doc, filters, counts, names, handlers }));
+    if (typeof handlers.onClose === "function") {
+      const headRow = el(doc, "div", "panel-head");
+      headRow.appendChild(el(doc, "span", "panel-title", "Routes"));
+      const closeBtn = el(doc, "button", "panel-close", "Close");
+      closeBtn.setAttribute("type", "button");
+      closeBtn.setAttribute("aria-label", "Close routes panel");
+      on(closeBtn, "click", () => handlers.onClose());
+      headRow.appendChild(closeBtn);
+      mount.appendChild(headRow);
+    }
+    const root = renderFilterPanel({ doc, filters, counts, names, handlers: wiredHandlers });
+    applyExpansion(root);
+    mount.appendChild(root);
     renders++;
     return true;
   }
-  return { sync: render, renderCount: () => renders };
+  return { sync: render, renderCount: () => renders, expandedGroups: () => [...expanded] };
 }

@@ -48,14 +48,14 @@ import { StopPickGrid, arbitratePick } from "./picking.mjs";
 import { createArrivals, createTuSource, createHeadsignJoin } from "./arrivals.mjs";
 import { buildStopCardModel, createStopCardController } from "./stop-card.mjs";
 import { loadFleet, buildBusCardModel, createBusCardController } from "./bus-card.mjs";
-import { createFilters, createFilterPanel } from "./filters.mjs";
+import { createFilters, createFilterPanel, NEAR_ME_M } from "./filters.mjs";
 import { createBrowseTabs, browseBusRows, browseStopRows, renderBrowseList, renderPassesPane } from "./browse.mjs";
 import { createPlannerHost } from "./planner.mjs";
 import { createRideAlong } from "./ride-along.mjs";
 import { createRideBindings, createTimesProvider, createRideHost } from "./ride-host.mjs";
 import { createAlertService, applyChipBadges } from "./alerts.mjs";
 import { createAlertLayer } from "./alert-layer.mjs";
-import { createStatusMonitor } from "./status.mjs";
+import { createStatusMonitor, applyNotice } from "./status.mjs";
 import { createPeopleMover } from "./peoplemover.mjs";
 import { createMogoService, createMogoLayer, mogoCardProvider } from "./mogo.mjs";
 import { createPlacesService, buildPlacesMeshes, placeCardProvider, placesMarkerDescriptors } from "./places.mjs";
@@ -375,13 +375,27 @@ export async function createApp(env = {}) {
         filters,
         names,
         getCounts: () => filters.countsModel({ liveCounts, runningStates, liveEverOk }),
+        // The renderer's handler contract (renderFilterPanel):
+        // onRouteToggle / onGroupToggle / onGroupExpand /
+        // onNearMeToggle / onHideIdleToggle / onShowAll /
+        // onShowNone / onClose. The T10 assembly passed a
+        // different key set (onToggleRoute / onPressGroup /
+        // onHideIdle / onLayer), so every panel control except
+        // Show all / All off was dead in the assembled app (F-1).
+        // Group expansion is owned by the panel controller.
         handlers: {
-          onToggleRoute: (rid) => { filters.toggleRoute(rid); applyFilters(); },
-          onPressGroup: (gid) => { filters.pressGroupHeader(gid); applyFilters(); },
+          onRouteToggle: (rid) => { filters.toggleRoute(rid); applyFilters(); },
+          onGroupToggle: (gid) => { filters.pressGroupHeader(gid); applyFilters(); },
           onShowAll: () => { filters.showAll(); applyFilters(); },
           onShowNone: () => { filters.showNone(); applyFilters(); },
-          onHideIdle: (on) => { filters.setHideIdle(on); applyFilters(); },
-          onLayer: (layer, on) => setLayer(layer, on),
+          onNearMeToggle: () => {
+            if (filters.state.nearMe) filters.disengageNearMe();
+            else if (locate.userXZ()) filters.engageNearMe(locate.userXZ(), allStops);
+            else { filters.setPendingNearMe(true); void locateMe(); }
+            applyFilters();
+          },
+          onHideIdleToggle: () => { filters.setHideIdle(!filters.state.hideIdle); applyFilters(); },
+          onClose: () => setSurface("filters", mounts.panelFilter, false),
         },
       })
     : null;
@@ -492,13 +506,16 @@ export async function createApp(env = {}) {
     }
     if (mounts.updatedAt) mounts.updatedAt.textContent = header.updatedText ?? "";
     const notice = statusMonitor.notice(nowMs);
-    if (mounts.serviceNotice) {
-      if (notice) {
-        mounts.serviceNotice.textContent = notice.headline ?? notice.text ?? "";
-        show(mounts.serviceNotice, true);
-      } else if (!state.bootError) {
-        show(mounts.serviceNotice, false);
-      }
+    if (mounts.serviceNotice && doc) {
+      // F-1 (D-7): render through the status module's own DOM
+      // binding — headline + detail tail + a working Dismiss
+      // button wired to the monitor's signature dismissal. The
+      // T10 assembly set textContent directly, which produced a
+      // bare headline in a box with no dismissal path.
+      applyNotice(mounts.serviceNotice, notice, {
+        doc,
+        onDismiss: () => { statusMonitor.dismiss(); renderStatus(now()); },
+      });
     }
     return header;
   }
@@ -564,6 +581,58 @@ export async function createApp(env = {}) {
     }
   }
 
+  /* ---------- surface stack: occlusion + dismissal (F-1) ----------
+   * Every exclusion surface (panels, planner, cards, ride) opens
+   * and closes through setSurface, which keeps one stack of the
+   * open surfaces in open order. While the stack is non-empty the
+   * first-view sheet is occluded (its own setOccluded contract —
+   * transient, the rider's open/collapsed preference untouched);
+   * when the last surface closes the sheet restores. Escape closes
+   * the topmost surface; with none open it collapses the sheet
+   * (the sheet model's documented behavior). At T10 none of this
+   * was wired: surfaces stacked in shell z-order with no close
+   * path — the owner's "can't intelligently dismiss" verdict. */
+  const surfaceStack = [];
+  let firstViewRef = null; // assigned where createFirstView runs, below
+  function syncOcclusion() {
+    const occluded = surfaceStack.length > 0;
+    if (firstViewRef && firstViewRef.isOccluded() !== occluded) {
+      firstViewRef.setOccluded(occluded);
+    }
+    paintFirstView();
+  }
+  function setSurface(name, mount, on) {
+    show(mount, on);
+    const i = surfaceStack.indexOf(name);
+    if (on && i < 0) surfaceStack.push(name);
+    if (!on && i >= 0) surfaceStack.splice(i, 1);
+    syncOcclusion();
+  }
+  function toggleSurface(name, mount, onOpen) {
+    if (surfaceStack.includes(name)) setSurface(name, mount, false);
+    else { setSurface(name, mount, true); if (onOpen) onOpen(); }
+  }
+  function closeSurfaceByName(name) {
+    switch (name) {
+      case "filters": setSurface("filters", mounts.panelFilter, false); break;
+      case "browse": setSurface("browse", mounts.panelBrowse, false); break;
+      case "planner": setSurface("planner", mounts.planner, false); break;
+      case "ride": setSurface("ride", mounts.cardRide, false); break;
+      case "trip": setSurface("trip", mounts.cardTrip, false); break;
+      case "bus": setSurface("bus", mounts.cardBus, false); break;
+      case "stop": {
+        stopCardOpen = false;
+        currentStop = null;
+        state.selectedStopIdx = null;
+        stopLayer.setSelected(null);
+        if (stopCard) stopCard.close();
+        setSurface("stop", mounts.cardStop, false);
+        break;
+      }
+      default: break;
+    }
+  }
+
   /* ---------- cards ------------------------------------------------ */
   const mogoProvider = mogoCardProvider(mogoService);
   const placeProvider = placeCardProvider();
@@ -596,6 +665,7 @@ export async function createApp(env = {}) {
     ? createStopCardController({
         doc,
         mount: mounts.cardStop,
+        onClose: () => closeSurfaceByName("stop"),
         buildModel: (nowMs) => {
           if (!currentStop) return null;
           const ctx = {
@@ -648,7 +718,7 @@ export async function createApp(env = {}) {
           });
         },
         renderUpcoming: (model, d) => renderUpcomingStops(model, d),
-        onClose: () => { show(mounts.cardBus, false); },
+        onClose: () => { setSurface("bus", mounts.cardBus, false); },
       })
     : null;
 
@@ -656,14 +726,16 @@ export async function createApp(env = {}) {
     currentStop = stop;
     state.selectedStopIdx = stop.idx;
     stopLayer.setSelected(stop.idx);
-    if (stopCard) { stopCard.open(now()); show(mounts.cardStop, true); }
+    if (stopCard) stopCard.open(now());
+    setSurface("stop", mounts.cardStop, true);
     stopCardOpen = true;
     announce(`${stop.name}. ${stop.routes?.length ?? 0} routes.`);
   }
   function openBusCard(vehicle) {
     currentVehicle = vehicle;
     state.selectedVehicleKey = vehicle.key;
-    if (busCard) { busCard.open(vehicle, { nowMs: now() }); show(mounts.cardBus, true); }
+    if (busCard) busCard.open(vehicle, { nowMs: now() });
+    setSurface("bus", mounts.cardBus, true);
   }
   function closeAllSurfaces() {
     stopCardOpen = false;
@@ -677,6 +749,8 @@ export async function createApp(env = {}) {
     show(mounts.panelBrowse, false);
     show(mounts.panelFilter, false);
     show(mounts.planner, false);
+    surfaceStack.length = 0;
+    syncOcclusion();
   }
 
   /* ---------- planner view (host models -> DOM) -------------------- */
@@ -715,8 +789,13 @@ export async function createApp(env = {}) {
     const mount = mounts.planner;
     if (!doc || !mount) return;
     clearNode(mount);
-    const head = el(doc, "div", "pl-head");
-    head.appendChild(el(doc, "span", "pl-title", "Plan a trip"));
+    const head = el(doc, "div", "pl-head panel-head");
+    head.appendChild(el(doc, "span", "pl-title panel-title", "Plan a trip"));
+    const plClose = el(doc, "button", "panel-close", "Close");
+    plClose.setAttribute("type", "button");
+    plClose.setAttribute("aria-label", "Close trip planner");
+    plClose.addEventListener("click", () => setSurface("planner", mounts.planner, false));
+    head.appendChild(plClose);
     mount.appendChild(head);
     const ends = el(doc, "div", "pl-ends");
     ends.appendChild(el(doc, "div", "pl-end", `From: ${endpointLabel(state.endpoints.from)}`));
@@ -795,8 +874,8 @@ export async function createApp(env = {}) {
       intents: {
         toast: (t) => toast(t),
         follow: (vid) => { state.followVehicleKey = vid; },
-        openRideCovered: () => show(mounts.cardRide, true),
-        closeRide: () => show(mounts.cardRide, false),
+        openRideCovered: () => setSurface("ride", mounts.cardRide, true),
+        closeRide: () => setSurface("ride", mounts.cardRide, false),
       },
     });
     return rideHost;
@@ -808,6 +887,14 @@ export async function createApp(env = {}) {
     const mount = mounts.panelBrowse;
     if (!doc || !mount) return;
     clearNode(mount);
+    const head = el(doc, "div", "panel-head");
+    head.appendChild(el(doc, "span", "panel-title", "Browse"));
+    const brClose = el(doc, "button", "panel-close", "Close");
+    brClose.setAttribute("type", "button");
+    brClose.setAttribute("aria-label", "Close browse panel");
+    brClose.addEventListener("click", () => setSurface("browse", mounts.panelBrowse, false));
+    head.appendChild(brClose);
+    mount.appendChild(head);
     const tabRow = el(doc, "div", "br-tabs");
     for (const t of ["buses", "stops", "passes"]) {
       const b = el(doc, "button", "br-tab", t[0].toUpperCase() + t.slice(1));
@@ -848,13 +935,34 @@ export async function createApp(env = {}) {
   }
 
   /* ---------- first view, locate, fullscreen, tools ----------------- */
-  const firstView = createFirstView({ storage });
+  // F-1 (D-4): the sheet's entry contract is wired whole — the
+  // entries the model's tileAction() calls, tileAction itself as
+  // the tile-tap path, and the near-choice handlers. At T10 the
+  // host passed no entries, never called tileAction, and branched
+  // on action.kind over the action STRING renderFirstView passes,
+  // so no tile could ever fire.
+  const firstView = createFirstView({
+    storage,
+    entries: {
+      planTrip: () => { setSurface("planner", mounts.planner, true); renderPlanner(); },
+      rideAlong: () => {
+        const host = ensureRideHost();
+        if (host) { host.setRideMode(true); setSurface("ride", mounts.cardRide, true); }
+        else toast("Ride Along loads with the timetable.");
+      },
+      openRoutes: () => { setSurface("filters", mounts.panelFilter, true); if (filterPanel) filterPanel.sync(); },
+    },
+  });
+  firstViewRef = firstView;
   function paintFirstView() {
     const mount = mounts.firstView;
     if (!doc || !mount) return;
     const view = firstView.renderState();
-    show(mount, view.sheetVisible);
-    if (!view.sheetVisible) return;
+    // The mount carries the Explore handle as well as the sheet:
+    // it shows when either does (at T10 it keyed on sheetVisible
+    // alone, so a collapsed sheet could never be reopened).
+    show(mount, view.sheetVisible || view.handleVisible);
+    if (!view.sheetVisible && !view.handleVisible) return;
     clearNode(mount);
     mount.appendChild(renderFirstView({
       doc,
@@ -868,21 +976,49 @@ export async function createApp(env = {}) {
         alerts: alertService.fvState(now()),
       }),
       handlers: {
-        onTile: (action) => handleFirstViewAction(action),
+        onTile: (action) => {
+          const res = firstView.tileAction(action, { alerts: alertService.fvState(now()) });
+          handleTileResult(res);
+          paintFirstView();
+        },
         onCollapse: () => { firstView.setOpen(false, { persist: true }); paintFirstView(); },
         onHandle: () => { firstView.setOpen(true, { persist: false }); paintFirstView(); },
-        onNearLocation: () => { void locateMe(); },
+        onNearLocation: () => {
+          const res = firstView.chooseNearLocation({ filters, hasFix: !!locate.userXZ() });
+          if (res.kind === "already-on") { toast(res.toast.text); paintFirstView(); }
+          else if (res.kind === "engage") {
+            filters.engageNearMe(locate.userXZ(), allStops);
+            applyFilters();
+            toast(filters.nearMeToast().text);
+            paintFirstView();
+          } else if (res.kind === "request-locate") { void locateMe(); }
+        },
+        onNearCenter: () => {
+          const pose = renderer.rig.pose();
+          const res = firstView.chooseNearCenter({
+            stops: allStops,
+            center: { x: pose.target[0], z: pose.target[2] },
+            radiusM: NEAR_ME_M,
+            nearestStop: (x, z, r) => nearestOf(governedStops(), x, z, r),
+          });
+          if (res.kind === "show-stop") openStopCard(res.stop);
+          else if (res.kind === "none-near") toast(res.toast.text);
+          paintFirstView();
+        },
+        onNearBack: () => { firstView.backToTiles(); paintFirstView(); },
       },
     }));
   }
-  function handleFirstViewAction(action) {
-    if (!action) return;
-    if (action.kind === "plan") { show(mounts.planner, true); renderPlanner(); }
-    else if (action.kind === "ride") {
-      const host = ensureRideHost();
-      if (host) { host.setRideMode(true); show(mounts.cardRide, true); }
-    } else if (action.kind === "live") { firstView.setOpen(false, { persist: true }); paintFirstView(); }
-    else if (action.kind === "near-choice") { void locateMe(); }
+  function handleTileResult(res) {
+    if (!res) return;
+    // plan / ride / routes fired through the entries inside
+    // tileAction; live and near-choice are sheet-state only (the
+    // repaint in onTile renders both). Alerts speaks through the
+    // shared toast + screen-reader channel, per the model.
+    if (res.kind === "alerts") {
+      if (res.toast) toast(res.toast);
+      if (res.announce) announce(res.announce);
+    }
   }
 
   const locateState = { position: null };
@@ -929,15 +1065,19 @@ export async function createApp(env = {}) {
     mounts.fullscreenButton.addEventListener("click", () => fullscreen.toggle());
   }
 
+  // F-1 (D-6): the tools TOGGLE their surfaces — a second tap on
+  // an open panel's tool closes it. At T10 the tools only ever
+  // showed, so an opened panel had no tool-side close path.
   const TOOLS = [
-    { id: "filters", label: "Routes", run: () => { show(mounts.panelFilter, true); if (filterPanel) filterPanel.sync(); } },
-    { id: "browse", label: "Browse", run: () => { show(mounts.panelBrowse, true); renderBrowse(); } },
-    { id: "plan", label: "Plan", run: () => { show(mounts.planner, true); renderPlanner(); } },
+    { id: "filters", label: "Routes", run: () => toggleSurface("filters", mounts.panelFilter, () => { if (filterPanel) filterPanel.sync(); }) },
+    { id: "browse", label: "Browse", run: () => toggleSurface("browse", mounts.panelBrowse, () => renderBrowse()) },
+    { id: "plan", label: "Plan", run: () => toggleSurface("planner", mounts.planner, () => renderPlanner()) },
     {
       id: "ride", label: "Ride",
       run: () => {
+        if (surfaceStack.includes("ride")) { setSurface("ride", mounts.cardRide, false); return; }
         const host = ensureRideHost();
-        if (host) { host.setRideMode(true); show(mounts.cardRide, true); }
+        if (host) { host.setRideMode(true); setSurface("ride", mounts.cardRide, true); }
         else toast("Ride Along loads with the timetable.");
       },
     },
@@ -951,7 +1091,12 @@ export async function createApp(env = {}) {
       b.addEventListener("click", t.run);
       mounts.tools.appendChild(b);
     }
-    if (fullscreen) {
+    // D-12: exactly one fullscreen control. The shell's control
+    // bar already carries it (mounts.fullscreenButton, wired
+    // above); only when a shell provides none does the rail grow
+    // its own — at T10 both existed and the rail one silently
+    // replaced the mount reference.
+    if (fullscreen && !mounts.fullscreenButton) {
       const fb = el(doc, "button", "tool", "Expand");
       fb.setAttribute("type", "button");
       fb.setAttribute("data-tool", "fullscreen");
@@ -1107,6 +1252,21 @@ export async function createApp(env = {}) {
     }, { passive: false });
   }
 
+  /* Escape: close the topmost open surface; with none open,
+   * collapse the sheet (the first-view model's documented
+   * behavior, and the LKG's document-level discipline). */
+  if (doc && typeof doc.addEventListener === "function") {
+    doc.addEventListener("keydown", (e) => {
+      if (!e || e.key !== "Escape") return;
+      const top = surfaceStack[surfaceStack.length - 1];
+      if (top) closeSurfaceByName(top);
+      else if (firstView.isOpen() && !firstView.isOccluded()) {
+        firstView.setOpen(false, { persist: true });
+        paintFirstView();
+      }
+    });
+  }
+
   /* ---------- lifecycle ---------------------------------------------- */
   let running = false;
   const chains = [];
@@ -1175,6 +1335,8 @@ export async function createApp(env = {}) {
       rideWidget,
       stopCard,
       busCard,
+      firstView,
+      get surfaceStack() { return [...surfaceStack]; },
       stopLayer,
       vehicleLayer,
       alertLayer,

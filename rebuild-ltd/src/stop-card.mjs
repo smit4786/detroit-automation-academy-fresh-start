@@ -179,11 +179,23 @@ function el(doc, tag, className, text) {
   return node;
 }
 
-export function renderStopCard(model, doc) {
+export function renderStopCard(model, doc, { onClose = null } = {}) {
   const root = el(doc, "article", "stop-card");
 
   const header = el(doc, "header", "sc-head");
   header.appendChild(el(doc, "h3", "sc-name", model.name));
+  if (onClose) {
+    // F-1: the card's visible close control (the shell reserves
+    // the 44px .close slot in every card). At T10 the stop card
+    // rendered no close affordance at all.
+    const closeBtn = el(doc, "button", "close", "✕");
+    closeBtn.setAttribute("type", "button");
+    closeBtn.setAttribute("aria-label", "Close stop card");
+    if (typeof closeBtn.addEventListener === "function") {
+      closeBtn.addEventListener("click", () => onClose());
+    }
+    header.appendChild(closeBtn);
+  }
   const idLine = `Stop ${model.stopId}${model.poleCode ? ` · Pole ${model.poleCode}` : ""}`;
   header.appendChild(el(doc, "p", "sc-id", idLine));
   root.appendChild(header);
@@ -281,7 +293,7 @@ export function renderStopCard(model, doc) {
 
 /* ---- refresh controller (30 s tick, signature-gated rebuilds) ---- */
 
-export function createStopCardController({ doc, mount, buildModel }) {
+export function createStopCardController({ doc, mount, buildModel, onClose = null }) {
   let signature = null;
   let renders = 0;
   function render(nowMs) {
@@ -290,7 +302,7 @@ export function createStopCardController({ doc, mount, buildModel }) {
     if (sig === signature) return false;
     signature = sig;
     mount.textContent = "";
-    mount.appendChild(renderStopCard(model, doc));
+    mount.appendChild(renderStopCard(model, doc, { onClose }));
     renders++;
     return true;
   }
