@@ -41,7 +41,7 @@ jobs:
             python3 .github/scripts/cta_train_collect.py
             if ! git diff --quiet -- cities/chicago/live-data/vehicles.json; then
               git add cities/chicago/live-data/vehicles.json
-              git commit -m 'Chicago live-data: train positions update'
+              git commit -m 'Chicago live-data: positions update'
               git pull --rebase origin main || true
               git push origin main
             fi
