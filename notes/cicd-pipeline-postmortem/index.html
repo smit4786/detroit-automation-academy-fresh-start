@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate</title>
+<meta name="description" content="A post-mortem on recurring deployment failures — Hugo builds with missing content, uninitialized theme submodules, and the automated QA gate that caught them.">
+<meta property="og:title" content="Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate">
+<meta property="og:description" content="A post-mortem on recurring deployment failures — Hugo builds that succeeded with missing content, uninitialized theme submodules, and the automated QA gate that caught them.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate">
+<meta name="twitter:description" content="A post-mortem on recurring deployment failures — Hugo builds with missing content, uninitialized theme submodules, and the automated QA gate that caught them.">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate",
+  "description": "A post-mortem on recurring deployment failures and the architectural changes that prevented them.",
+  "url": "https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/">
+  <link rel="alternate" hreflang="de" href="https://www.detroitautomationacademy.com/notes/de/cicd-pipeline-postmortem/">
+  <link rel="alternate" hreflang="x-default" href="https://www.detroitautomationacademy.com/notes/cicd-pipeline-postmortem/">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Notes</a> · DevOps · February 2026</p>
+      <h1>Fixing Our CI/CD Pipeline: <span class="accent">Submodules, Empty Commits, and the QA Gate</span></h1>
+      <p class="fine">Published February 28, 2026 · Detroit Automation Academy · Historical engineering note — migrated from the retired blog.</p>
+      <div class="prose">
+        <p>Our site pipeline had a recurring problem: deployments that worked locally failed silently in GitHub Actions, or succeeded in Actions but produced a broken site. Here's the root cause analysis and what we changed.</p>
+        <h3>The three failure modes</h3>
+        <ol>
+          <li><strong>Build succeeds, site content missing</strong> — the output directory was generated but the git commit step failed silently because there was nothing new to commit. The deploy step ran anyway and pushed a stale build.</li>
+          <li><strong>Theme submodule not initialized</strong> — the theme is a git submodule. Fresh Actions runners clone the repo but don't automatically initialize submodules. The build proceeded with an empty theme directory, producing an unstyled build that nonetheless exited with code 0.</li>
+          <li><strong>Cache invalidation lag</strong> — CDN-cached pages served stale content after a new deployment.</li>
+        </ol>
+        <h3>Fix 1: Submodule initialization</h3>
+        <pre><code>- uses: actions/checkout@v4
+  with:
+    submodules: true        # ← this was missing
+    fetch-depth: 0</code></pre>
+        <p>Without <code>submodules: true</code>, the build finds the theme reference, looks in the theme directory, finds nothing, and falls back to default templates — completely unstyled.</p>
+        <h3>Fix 2: The empty commit guard</h3>
+        <pre><code># Before — always commits, fails when nothing changed
+git add public/
+git commit -m "Deploy"
+git push
+
+# After — skips if nothing changed
+git add public/
+git diff --staged --quiet || git commit -m "chore: deploy $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+git push</code></pre>
+        <p><code>git diff --staged --quiet</code> exits 0 (no changes) → skip commit. Exits non-zero (changes present) → commit and push.</p>
+        <h3>The automated QA gate</h3>
+        <p>To catch these failures without manual checks, we added a verification step to the pipeline:</p>
+        <ol>
+          <li>Fetches the live site URL after a deploy</li>
+          <li>Checks for the presence of the latest post title in the HTML</li>
+          <li>Verifies the <code>Last-Modified</code> response header is newer than the previous deploy timestamp</li>
+          <li>Fails the pipeline if either check doesn't pass</li>
+        </ol>
+        <p>This converts deployment verification from a manual check into an automated gate.</p>
+        <hr>
+        <p><em>Historical note: this postmortem covers the retired Hugo-based pipeline. The site has since moved to a direct-deploy model.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../" class="btn btn-ghost">← All notes</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

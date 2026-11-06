@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The People Mover Is Under Construction — Live Transit Detroit</title>
+<meta name="description" content="The Live Transit map rebuilt its People Mover layer as what the system actually is: an elevated, automated, single-track loop. Build notes on the rework.">
+<meta property="og:title" content="The People Mover Is Under Construction">
+<meta property="og:description" content="The Live Transit map rebuilt its People Mover layer as what the system actually is: an elevated, automated, single-track loop — off by default, with the real downtime and expansion plans documented.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/live-transit-detroit/people-mover-under-construction/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:image:alt" content="Detroit Automation Academy — Forge D logo">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>
+.postmeta{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.95rem;}
+.postmeta th,.postmeta td{text-align:left;padding:.55rem .75rem;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;}
+.postmeta th{white-space:nowrap;color:#9f9f9f;font-weight:500;}
+.prose code{background:rgba(255,255,255,.06);padding:.1em .35em;border-radius:4px;font-size:.92em;}
+.prose pre{background:rgba(255,255,255,.04);padding:1rem;border-radius:8px;overflow-x:auto;font-size:.88em;}
+.srclist{font-size:.9rem;color:#9f9f9f;}
+.srclist a{color:#9f9f9f;}
+h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/people-mover-under-construction/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The People Mover Is Under Construction">
+<meta name="twitter:description" content="The Live Transit map rebuilt its People Mover layer as what the system actually is: an elevated, automated, single-track loop. Build notes on the rework.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The People Mover Is Under Construction",
+  "description": "The Live Transit map rebuilt its People Mover layer as what the system actually is: an elevated, automated, single-track loop — off by default, with the real system's published downtime and proposed expansion documented.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/people-mover-under-construction/",
+  "datePublished": "2026-10-09",
+  "author": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/"},
+  "publisher": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/", "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"}
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 04 · October 2026</p>
+      <h1>The People Mover Is <span class="accent">Under Construction</span></h1>
+      <p class="fine">Published October 9, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>The Live Transit map rendered the Detroit People Mover as a 40-meter-wide concrete deck with a solid skirt wall hanging below it — a ground-level corridor drawn through downtown. The real system is none of those things. In the Detroit Transportation Corporation's own words, from its December 2025 system plan: "The DPM is an elevated rail system serving 13 stations in Downtown Detroit. As an automated people mover (APM), the system's driverless two-car trains rely on an automated train control system to complete its 2.9-mile one-way loop." The render was lying about the infrastructure. This build corrects it, and the layer now ships off by default — which is also the honest state of the real system, documented below.</p>
+
+        <figure>
+          <img src="article-assets/pm-cadillac-center.jpg" alt="A two-car Detroit People Mover train leaving the elevated Cadillac Center station in downtown Detroit" style="width:100%;border-radius:8px;">
+          <figcaption class="fine">Cadillac Center station, elevated, with a two-car train departing. Photo: 42-BRT, CC BY-SA 4.0, via Wikimedia Commons.</figcaption>
+        </figure>
+
+        <h3>What shipped</h3>
+        <table class="postmeta">
+          <tr><th>Change</th><td><strong>What it does</strong></td></tr>
+          <tr><th>Off by default</th><td>The loop no longer renders on load. The filter panel's People Mover toggle enables it. Rationale: the layer is static geometry with no live feed, and the real system has spent much of the last two years closed.</td></tr>
+          <tr><th>14 m single-track guideway</th><td>Deck narrowed from 40 m to 14 m — a single automated guideway, not a bus corridor. Narrow enough that street-level stops, buses, and buildings stay visible beneath it.</td></tr>
+          <tr><th>Skirt removed</th><td>The continuous dark wall below the deck is gone. It was the element obscuring ground objects; open air now sits under the elevated line, as it does in reality.</td></tr>
+          <tr><th>Pillars at stations only</th><td>Support columns render exclusively at station locations — the known points. No invented infill between them.</td></tr>
+          <tr><th>Station tap priority</th><td>People Mover station taps are now evaluated before the DDOT stop fallbacks. Downtown DDOT stops were stealing taps aimed at the elevated pins, which read as "stations not selectable."</td></tr>
+        </table>
+
+        <figure>
+          <img src="article-assets/pm-tracks.jpg" alt="The Detroit People Mover's elevated concrete guideway on pillars above a downtown street" style="width:100%;border-radius:8px;">
+          <figcaption class="fine">The real guideway: a narrow elevated concrete deck on pillars, open air beneath. Photo: Kyah117, CC BY 4.0, via Wikimedia Commons.</figcaption>
+        </figure>
+
+        <h3>Verification</h3>
+        <p>Served bytes confirmed: the page references JS stamp <code>v20261009-0910</code>, the served JS contains the narrowed guideway and the off-by-default flag, and the station-picking order change is present in the click handler. Syntax-checked before push; no remaining references to the old 40 m deck width.</p>
+
+        <h3>The real system's published downtime</h3>
+        <p>The render change is downstream of a physical fact: the People Mover has been under construction, repeatedly, in public view. DTC's study puts the scale in context: "In both fiscal year (FY) 2024 and 2025, over one million riders used the system to get to their destinations or to explore Downtown Detroit."</p>
+        <ul>
+          <li><strong>September 3 – November 22, 2024:</strong> an 11-week closure for track replacement — 7,000 feet of rail across nine curves, the worst wear at the Renaissance Center and Greektown curves. Only the third rail replacement in the system's 37-year history (prior: 2008, 2016). Cost near $5 million, funded by state and federal grants; the new rail is expected to last 15–30 years. Source: WDIV; DTC's own project page records it as the "Track Improvement Project and closure from September 3—November 22, 2024."</li>
+          <li><strong>March 13 – May 6, 2026:</strong> a seven-week closure after high winds drove sheet metal into the guideway, tearing track cable and damaging switch mechanisms. The system reopened May 6 after 16 days of test runs. DTC CEO and General Manager Melia Howard: "Rider safety is always at the heart of what we do, and it is our responsibility as a public transit provider." Source: Detroit Free Press.</li>
+        </ul>
+
+        <h3>The proposed expansion</h3>
+        <p>The Detroit Transportation Corporation released its People Mover system plan and downtown mobility study in August 2026 (an $800,000 MDOT grant, roughly eighteen months of work). The study's baseline framing: "Completing a full circuit takes about 15 minutes. The DPM currently runs in a counterclockwise loop but can be operated in either direction." It names three candidate corridors: west to Corktown and Michigan Central, north past the stadiums into Eastern Market, and along the west riverfront to Ralph C. Wilson Jr. Centennial Park. None has funding or a schedule; MDOT is funding the alternatives analysis that would select a route, stations, vehicle type, and payment mechanism. An earlier proposal — doubling the route up Woodward to New Center at $150–200 million — was superseded by the QLine streetcar, which opened in 2017. Separately, DTC plans to replace the 12 original 1986 Mark I cars with 12 refurbished cars of the same model from Toronto's decommissioned Scarborough RT. Sources: DTC system plan (Dec 2025); rawdetroit.org; Wikipedia.</p>
+
+        <h3>What this means for the map</h3>
+        <p>The People Mover layer is now drawn the way the system exists: elevated, narrow, automated, one direction — and switched off until the viewer asks for it. If the expansion corridors advance past study into funded construction, the layer will grow with them. Until then, the map declines to present a static loop as a live one.</p>
+
+        <h3>Simulation: real-time information, including construction</h3>
+        <p>The layer system that made this rework possible is also the platform's simulation surface. Because the People Mover is static geometry with no live feed, it is the cleanest demonstration of the principle: service states — closures, detours, construction zones, the 2024 track replacement, the 2026 wind-damage shutdown — can be modeled as layer states against the same geometry, with the same provenance labeling the map already carries. The trip planner's scheduled-vs-typical modes are the first consumer of that idea. The next step is construction-aware routing: when a guideway closes for eleven weeks, the map should show the closure, not just the absence.</p>
+
+        <h3>Sources</h3>
+        <ul class="srclist">
+          <li>Detroit Transportation Corporation: "Detroit People Mover — System Plan and Downtown Mobility Study, Existing Conditions Assessment" (final, Dec 2025; PDF author: DTC) — system characterization, ridership, loop operation quotes</li>
+          <li>DTC: 2024 Track Improvement Project page — "Track Improvement Project and closure from September 3—November 22, 2024" — <a href="https://www.thepeoplemover.com/2024-track-improvement-project-1">thepeoplemover.com</a></li>
+          <li>WDIV: "People Mover closed for track replacement project in Downtown Detroit" (Sept 3, 2024) — <a href="https://gmg-wdiv-prod.cdn.arcpublishing.com/news/local/2024/09/03/people-mover-closed-for-track-replacement-project-in-downtown-detroit/">gmg-wdiv-prod.cdn.arcpublishing.com</a></li>
+          <li>Detroit Free Press: "Detroit People Mover reopens seven weeks after wind damage" (May 6, 2026; quotes DTC CEO Melia Howard) — <a href="https://www.freep.com/story/news/local/michigan/2026/05/06/detroit-people-mover-reopens-repair-work-wind-damage/89956865007/">freep.com</a></li>
+          <li>rawdetroit.org: "People Mover Expansion: Final Plan Maps Routes to Corktown, Eastern Market and the Riverfront" (Oct 2026) — <a href="https://rawdetroit.org/people-mover-expansion-detroit/">rawdetroit.org</a></li>
+          <li>Wikipedia: "Detroit People Mover" (expansion proposals; rolling stock) — <a href="https://en.wikipedia.org/wiki/Detroit_People_Mover">en.wikipedia.org</a></li>
+        </ul>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

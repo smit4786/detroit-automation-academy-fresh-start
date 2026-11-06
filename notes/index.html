@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes — Detroit Automation Academy</title>
+<meta name="description" content="Technical notes from Detroit Automation Academy: iOS engineering, DevOps postmortems, and working practices — preserved from the retired blog.">
+<meta property="og:title" content="Notes">
+<meta property="og:description" content="Technical notes from Detroit Automation Academy: iOS engineering, DevOps postmortems, and working practices — preserved from the retired blog.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Notes">
+<meta name="twitter:description" content="Technical notes from Detroit Automation Academy: iOS engineering, DevOps postmortems, and working practices — preserved from the retired blog.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Notes",
+  "url": "https://www.detroitautomationacademy.com/notes/",
+  "description": "Technical notes from Detroit Automation Academy: iOS engineering, DevOps postmortems, and working practices — preserved from the retired blog.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/"
+  }
+}
+</script>
+<link rel="icon" type="image/webp" href="../assets/logo.webp">
+<link rel="stylesheet" href="../styles.css?v=20261031-0615">
+<link rel="canonical" href="https://www.detroitautomationacademy.com/notes/">
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://www.detroitautomationacademy.com/notes/">
+  <link rel="alternate" hreflang="de" href="https://www.detroitautomationacademy.com/notes/de/">
+  <link rel="alternate" hreflang="x-default" href="https://www.detroitautomationacademy.com/notes/">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+
+  <section class="section">
+    <div class="wrap">
+      <h1 class="kicker">Notes</h1>
+      <h2>Engineering notes, <span class="accent">kept honest.</span></h2>
+      <div class="prose">
+        <p>Technical notes from the academy's build history — iOS engineering, DevOps postmortems, and working practices. These were migrated from the retired blog in October 2026, cleaned of fabricated bylines and unverifiable claims, and preserved here as a historical record.</p>
+        <p class="fine">Available in English and Deutsch.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="latest">
+    <div class="wrap">
+      <p class="kicker">iOS engineering</p>
+      <div class="cards">
+        <article class="card">
+          <p class="fine">March 2026 · iOS</p>
+          <h3><a href="at-diary-sprint-3/">Sprint 3: Privacy-First Spatial Intelligence</a></h3>
+          <p>CoreLocation and MapKit for spatial context, Photos framework highlights, and on-device narrative generation — without sacrificing the zero-knowledge architecture.</p>
+          <a href="at-diary-sprint-3/" class="btn btn-ghost">Read the note</a>
+        </article>
+        <article class="card">
+          <p class="fine">February 2026 · iOS</p>
+          <h3><a href="at-diary-sprint-2/">Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks</a></h3>
+          <p>Why native Apple frameworks over third-party SDKs — MusicKit, EventKit, CoreData with CloudKit, and what privacy-first means in practice.</p>
+          <a href="at-diary-sprint-2/" class="btn btn-ghost">Read the note</a>
+        </article>
+        <article class="card">
+          <p class="fine">February 2026 · iOS</p>
+          <h3><a href="app-group-stability/">Stability through Shared Storage: The App Group Milestone</a></h3>
+          <p>A shared App Group architecture so an iOS app and its Home Screen widget read and write the same SwiftData store — no more empty widgets.</p>
+          <a href="app-group-stability/" class="btn btn-ghost">Read the note</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">DevOps</p>
+      <div class="cards">
+        <article class="card">
+          <p class="fine">February 2026 · DevOps</p>
+          <h3><a href="cicd-pipeline-postmortem/">Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate</a></h3>
+          <p>A post-mortem on recurring deployment failures — and the automated QA gate that turned verification from a manual check into a pipeline step.</p>
+          <a href="cicd-pipeline-postmortem/" class="btn btn-ghost">Read the note</a>
+        </article>
+        <article class="card">
+          <p class="fine">February 2026 · DevOps</p>
+          <h3><a href="daa-crm-cloud-run-deployment/">Registration Live: From Zero to Cloud Run in One Session</a></h3>
+          <p>Five consecutive build failures to a live multi-tenant deployment on Google Cloud Run — Go string literals, IAM cascades, and a missing frontend scaffold.</p>
+          <a href="daa-crm-cloud-run-deployment/" class="btn btn-ghost">Read the note</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">Practice</p>
+      <div class="cards">
+        <article class="card">
+          <p class="fine">February 2026 · Practice</p>
+          <h3><a href="pause-and-pivot-protocol/">Digital Stoicism: The Pause-and-Pivot Protocol</a></h3>
+          <p>Mastering the gap between a digital stimulus and your response — a 60-second firewall, a three-question audit, and the minimalist intervention.</p>
+          <a href="pause-and-pivot-protocol/" class="btn btn-ghost">Read the note</a>
+        </article>
+      </div>
+      <p class="fine" style="margin-top:2rem;">Deutsche Übersetzungen: <a href="de/at-diary-sprint-2/">Sprint 2</a> · <a href="de/at-diary-sprint-3/">Sprint 3</a> · <a href="de/app-group-stability/">App Groups</a> · <a href="de/cicd-pipeline-postmortem/">CI/CD</a> · <a href="de/daa-crm-cloud-run-deployment/">Cloud Run</a> · <a href="de/pause-and-pivot-protocol/">Pause-and-Pivot</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../script.js"></script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

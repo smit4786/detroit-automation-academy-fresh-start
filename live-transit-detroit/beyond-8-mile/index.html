@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond 8 Mile — Live Transit Detroit</title>
+<meta name="description" content="The Live Transit map no longer ends at the city line. The street mosaic now covers the full SMART service area, and route ribbons are smoothed at every zoom.">
+<meta property="og:title" content="Beyond 8 Mile — Live Transit Detroit">
+<meta property="og:description" content="The street mosaic now covers the full SMART service area, every SMART visual renders in one red, and route ribbons are smoothed at every zoom. Verified against served production bytes.">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/article-assets/smart-enabled.jpg">
+<meta property="og:image:alt" content="The Live Transit 3D map with SMART enabled, route content in SMART red">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Beyond 8 Mile — Live Transit Detroit">
+<meta name="twitter:description" content="The Live Transit map no longer ends at the city line. The street mosaic now covers the full SMART service area, and route ribbons are smoothed at every zoom.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/article-assets/smart-enabled.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Beyond 8 Mile",
+  "description": "The Live Transit map no longer ends at the city line: expanded street mosaic with fade transition, all-SMART red unification, off-by-default SMART beta filter, and smoothed route ribbons.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/beyond-8-mile/",
+  "datePublished": "2026-10-11",
+  "author": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/"},
+  "publisher": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/", "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"}
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 05 · October 2026</p>
+      <h1>Beyond <span class="accent">8 Mile</span></h1>
+      <p class="fine">Published October 11, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>Eight Mile Road is Detroit's most loaded boundary — the line between the city and the suburbs, and until tonight, the edge of the Live Transit map. Beyond it: nothing. Five changes shipped to production tonight, and the first is that the street mosaic now covers the full SMART service area instead of stopping at the city line. Every SMART visual renders in one red. The SMART filter ships off by default, labeled beta, with its limits stated on the panel. And route ribbons are smoothed at every zoom. Each change was verified against served bytes and live renders before shipping; the verification is documented below.</p>
+
+        <h3>What shipped</h3>
+        <table class="postmeta">
+          <tr><th>Change</th><td><strong>What it does</strong></td></tr>
+          <tr><th>Street mosaic expansion</th><td>The street layer was regenerated from TIGER/Line 2025 for a wider box — west to lon -83.385, south to lat 42.178 — reaching the western suburbs and Downriver, covering all 270 SMART stops with margin. 38,342 segments (up from ~32,618); the file shrank from 1.25&nbsp;MB to 1.2&nbsp;MB through tighter encoding. Full three-tier coverage (freeway, arterial, local) across the entire area.</td></tr>
+          <tr><th>Fade transition</th><td>Detroit streets stay always-on. The suburban layer fades in over 900&nbsp;ms when the SMART group toggles on and fades out when it toggles off — mid-fade re-toggles reverse from the current opacity, so the layer never pops. The dashed amber coverage border expands with it, and "routes near you" now works in the suburbs while SMART is on.</td></tr>
+          <tr><th>All-SMART red</th><td>Every SMART visual — route lines, bus markers, stop pylons, map labels, filter chips — now renders in SMART's brand red <code>#c30915</code>. Routes 261 and 125 previously rendered in purple (<code>#A855F7</code>) and teal (<code>#14B8A6</code>); those assignments are retired. Implemented as a single color override where the SMART data merges in, so no downstream consumer can keep an old color.</td></tr>
+          <tr><th>SMART (beta), off by default</th><td>The 45-route SMART group ships toggled off on first load, labeled "SMART (beta)", with the disclaimer: "Beta: 2 of 45 routes have map lines so far. Vehicle positions via the Transit API." The toggle choice persists between visits. When off, zero Transit-derived artifacts render — no lines, no markers, no badge. Verified: 25 buses with SMART off, 89 with it on, back to exactly 25 when toggled off again, no leftovers.</td></tr>
+          <tr><th>Ribbon smoothing</th><td>Route ribbons were built as straight segments between sparse shape points — 90.6% of joints turned more than 5°, 42% more than 30° — producing a blocky plank-joint look at intermediate zoom. Two iterations of Chaikin subdivision (4× point density) plus true angle-bisector miter joins now render every curve as a smooth continuous ribbon with constant width through bends. Colors, widths, glow, and lighting are unchanged.</td></tr>
+        </table>
+
+        <figure>
+          <img src="article-assets/smart-enabled.jpg" alt="The Live Transit 3D map with SMART enabled, route content rendering in SMART red" style="width:100%;border-radius:8px;">
+          <figcaption class="fine">SMART enabled on the production build: route content renders in SMART red. Render captured during verification.</figcaption>
+        </figure>
+
+        <h3>Verification</h3>
+        <p>Served bytes confirmed on production: <code>live-transit.js</code> stamp <code>v20261010-2345</code> containing the Chaikin/miter functions, the <code>SMART_BOUNDS</code> street partition and fade controller, the SMART-red override, and the beta filter persistence; <code>assets/detroit-streets.json</code> serving 1,198,675 bytes with the expanded bounding box and 38,342 segments. Live renders confirmed: the fade in/out with mid-fade reversal, all 45 SMART filter chips rendering <code>#c30915</code>, smooth ribbons at intermediate zoom, and the off-toggle leaving zero SMART artifacts. Syntax-checked before push; no remaining references to the old purple/teal route colors.</p>
+
+        <h3>What this means for the map</h3>
+        <p>The map no longer ends at the city line. SMART's 270 suburban stops — previously floating over unmapped dark, west and south of any road — now sit on a street grid that arrives and departs with the SMART toggle. The honest framing stays: 43 of 45 SMART routes still await line geometry, and the beta label states that on the filter panel. Route-line geometry for the remaining routes is the next backfill.</p>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

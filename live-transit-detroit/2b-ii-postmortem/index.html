@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Postmortem: Activating Empirical Timetable Substitution</title>
+<meta name="description" content="Postmortem on Phase 2b-ii of the Forge Line live transit layer: reported active, found inert, misdiagnosed twice, root-caused to a page-index/GTFS-ID gap.">
+<meta property="og:title" content="Postmortem: Activating Empirical Timetable Substitution">
+<meta property="og:description" content="How a transit timing feature was reported active, found inert, misdiagnosed twice, and finally fixed with one translation function — verified against production data.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>
+.postmeta{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.95rem;}
+.postmeta th,.postmeta td{text-align:left;padding:.55rem .75rem;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;}
+.postmeta th{white-space:nowrap;color:#9f9f9f;font-weight:500;}
+.prose code{background:rgba(255,255,255,.06);padding:.1em .35em;border-radius:4px;font-size:.92em;}
+.prose pre{background:rgba(255,255,255,.04);padding:1rem;border-radius:8px;overflow-x:auto;font-size:.88em;}
+h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/2b-ii-postmortem/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Postmortem: Activating Empirical Timetable Substitution">
+<meta name="twitter:description" content="Postmortem on Phase 2b-ii of the Forge Line live transit layer: reported active, found inert, misdiagnosed twice, root-caused to a page-index/GTFS-ID gap.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Postmortem: Activating Empirical Timetable Substitution \u2014 Live Transit Detroit \u00b7 Detroit Automation Academy",
+  "description": "How a transit timing feature was reported active, found inert, misdiagnosed twice, and finally fixed with one translation function \u2014 verified against production data.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/2b-ii-postmortem/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 01 · October 2026</p>
+      <h1>Postmortem: Activating Empirical <span class="accent">Timetable Substitution</span></h1>
+      <p class="fine">Published October 6, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>Phase 2b-ii of the Forge Line live transit layer replaces scheduled bus segment times with measured typical times, once enough observations exist. It was reported active on October 5, found completely inert on October 6, misdiagnosed twice, and finally root-caused and activated the same day. This is the record.</p>
+
+        <h3>Summary</h3>
+        <p>The timetable stores stops as <strong>page indices</strong> into <code>ddot-routes-3d.json</code>; timing cells are keyed by <strong>GTFS <code>stop_id</code></strong>. The client looked up cells with page indices, so all 154 mature cells missed on every query. One translation function (<code>ttStopId</code>) restored the lookup. Post-fix verification against production data: <strong>18,002 substitutions applied across 2,199 trips</strong>.</p>
+
+        <h3>Timeline</h3>
+        <table class="postmeta">
+          <tr><th>2026-10-05</th><td>UAT Pass 2 audit reports 2b-ii "verified and active" based on 73 mature cells in <code>segments.json</code>. No functional test performed.</td></tr>
+          <tr><th>2026-10-06 ~11:10</th><td>UAT Pass 3 finds 2b-ii inert. Defect D1: <code>fetchTimingCells()</code> stored the <code>segments.json</code> document envelope (<code>{schema, built_at, cells, segments}</code>); <code>applyEmpiricalBaseline()</code> expected the flat cell map. The <code>hasCells</code> gate could never pass.</td></tr>
+          <tr><th>2026-10-06 ~11:10</th><td>Same pass finds D2: 0 of 154 cells match schedule-adjacent stop pairs — all span multiple stops.</td></tr>
+          <tr><th>2026-10-06 ~11:20</th><td>D1 fixed (unwrap <code>d.segments</code>). D2 addressed client-side with a covering-span lookup and schedule-proportioned apportioning. Deployed as stamp <code>v20261006-1115</code> and reported as "2b-ii actually engaging."</td></tr>
+          <tr><th>2026-10-06 ~11:31</th><td>Independent accuracy review reports a stop-ID space mismatch between the detector reference and the timetable (cell <code>60|741|764</code> vs timetable stop 741 on route 68) and prescribes a pipeline rebuild.</td></tr>
+          <tr><th>2026-10-06 ~11:35</th><td>Direct GTFS verification (<code>stop_times.txt</code>, feed S1000182): GTFS stops 741 and 764 are both served by route 60. The cell was correctly keyed. The review compared timetable page indices to GTFS stop IDs as one space — the same category error as the D2 analysis.</td></tr>
+          <tr><th>2026-10-06 ~11:40</th><td>Root cause identified in <code>build-timetable.py</code>: timetable <code>stops</code> arrays store page indices (<code>stop_to_idx</code>), not GTFS IDs. Timetable page 741 = GTFS stop 846 (Freud &amp; St Jean, route 68). Client lookups used page indices against GTFS-keyed cells.</td></tr>
+          <tr><th>2026-10-06 ~11:45</th><td>Fix deployed: <code>ttStopId()</code> translates page index → GTFS <code>stop_id</code> via the loaded <code>stopData</code> array, applied to exact and spanning-span lookups. Stamp <code>v20261006-1145</code>. Served bytes verified.</td></tr>
+          <tr><th>2026-10-06 ~11:50</th><td>Node verification on production data (real timetable, real <code>stopData</code>, real cells, wkd_pm bucket): 18,002 substitutions, 2,199 trips with baselines.</td></tr>
+        </table>
+
+        <h3>Root cause</h3>
+        <p>Two distinct numeric ID spaces overlap in range but identify different stops:</p>
+        <ul>
+          <li><strong>GTFS <code>stop_id</code></strong> (e.g. <code>"741"</code> = Evergreen &amp; 10 Mile): used by the telemetry detector, <code>reference/route-stops.json</code>, and timing-cell keys (<code>route|from|to|bucket</code>).</li>
+          <li><strong>Page index</strong> (e.g. <code>741</code> = position 741 in the <code>ddot-routes-3d.json</code> stops array = GTFS <code>"846"</code>, Freud &amp; St Jean): used by <code>ddot-timetable-S1000182.json</code> trip stop lists.</li>
+        </ul>
+        <p><code>applyEmpiricalBaseline()</code> concatenated timetable page indices directly into cell keys. Every lookup missed. The failure was silent: the <code>hasCells</code> gate (fixed by D1) passed, the spanning-span scan (added by D2) ran, but <code>stopPos</code> was keyed by page index while cell keys carried GTFS IDs, so no span ever matched either.</p>
+
+        <h3>Why it took three passes</h3>
+        <ol>
+          <li><strong>Pass 2 inferred "active" from cell count</strong>, never executing the lookup path. Count of data is not evidence of function.</li>
+          <li><strong>D1 was a real bug</strong> (envelope unwrap) but fixing it only moved the failure one layer down — lookups then ran and still missed.</li>
+          <li><strong>D2 and the accuracy review both assumed the numeric IDs were one space.</strong> The D2 fix (spanning-span apportioning) was correct logic applied to wrong keys; the review's "pipeline rebuild" prescription would not have fixed anything, since the pipeline was correct.</li>
+          <li><strong>Resolution came from reading <code>build-timetable.py</code></strong> (<code>stop_to_idx</code>) and cross-checking one cell against GTFS <code>stop_times.txt</code> — from the data, not from re-reading the client code.</li>
+        </ol>
+
+        <h3>Resolution</h3>
+        <ul>
+          <li><code>live-transit.js</code>: <code>ttStopId(pageIdx)</code> → <code>String(stopData[pageIdx].id)</code>, applied in <code>applyEmpiricalBaseline()</code> exact and span lookups. <code>empiricalSpeed()</code> required no change (client map-matched segments already carry GTFS IDs). <code>raptor.js</code> required no change (already consumed <code>depL2</code>/<code>arrL2</code> and marked <code>provenance: 'empirical'</code>).</li>
+          <li><code>scripts/build_timing.py</code> (transit-data repo): ghost-route traversals no longer emitted as <code>segment.traversed</code> — a latent contamination vector from the accuracy review. Existing cells verified clean (145/145).</li>
+          <li>No reference rebuild was required. The detector reference and pipeline were correct throughout.</li>
+        </ul>
+
+        <h3>Verification</h3>
+        <ul>
+          <li><code>node --check</code> clean on both changed files.</li>
+          <li>Unit: apportioning logic produced <code>[0, 150, 390, 615]</code> on a synthetic 4-stop trip (exact cell + spanning cell).</li>
+          <li>Production data: 18,002 substitutions / 2,199 trips (40 patterns, wkd_pm). Pair-delta distribution: p50 0.0s, p90 2.0s, p99 157.3s.</li>
+          <li>Largest delta (1647.9s, route 12 pair 5664→5321, scheduled 24s) traced to cell <code>12|5664|5321|wkd_pm</code>, n=3, mean 1671.9s / p50 1723.3s / p90 1798.4s — three concordant observations of a ~28-minute dwell. The substitution is honest; the schedule was the fiction.</li>
+          <li>Served bytes verified: HTML references <code>live-transit.js?v=20261006-1145</code>; JS contains the <code>ttStopId</code> translation.</li>
+        </ul>
+
+        <h3>Lessons</h3>
+        <ol>
+          <li><strong>A count of data is not evidence of function.</strong> Pass 2's "73 mature cells, therefore active" was the original error. Functional verification — execute the lookup, count substitutions — is the bar.</li>
+          <li><strong>Overlapping numeric ranges are not one ID space.</strong> Page indices and GTFS IDs are both small integers; nothing in the client code marked which was which. The <code>ttStopId</code> comment now records the distinction at the use site.</li>
+          <li><strong>Two independent wrong diagnoses can agree.</strong> The D2 analysis and the review's defect-2 analysis made the same category error from different directions. Agreement between analyses is not validation; the GTFS cross-check was.</li>
+          <li><strong>Fix the layer that's actually broken.</strong> The pipeline-rebuild prescription was a large, disruptive change to a correct system. Reading the builder showed the translation belonged in the client.</li>
+          <li><strong>Silent fallbacks need tripwires.</strong> 2b-ii failed safe (scheduled times) for its entire life, which is why the inertness went unnoticed. A substitution counter existed but was never surfaced. Logging substitution counts where they can be observed is the follow-up.</li>
+        </ol>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

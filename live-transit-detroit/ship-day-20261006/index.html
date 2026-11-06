@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Notes: October 6 Promotion — Nine Changes to Production</title>
+<meta name="description" content="Build notes for the October 6, 2026 Live Transit promotion: transition engine, Kalman-filtered bus motion, landmark massing, and depth-ordered tap picking.">
+<meta property="og:title" content="Build Notes: October 6 Promotion — Nine Changes to Production">
+<meta property="og:description" content="Transition engine, Kalman-filtered bus motion, landmark massing, and depth-ordered tap picking — verified through two UAT levels before reaching production.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>
+.postmeta{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.95rem;}
+.postmeta th,.postmeta td{text-align:left;padding:.55rem .75rem;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;}
+.postmeta th{white-space:nowrap;color:#9f9f9f;font-weight:500;}
+.prose code{background:rgba(255,255,255,.06);padding:.1em .35em;border-radius:4px;font-size:.92em;}
+.prose pre{background:rgba(255,255,255,.04);padding:1rem;border-radius:8px;overflow-x:auto;font-size:.88em;}
+h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/ship-day-20261006/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Build Notes: October 6 Promotion — Nine Changes to Production">
+<meta name="twitter:description" content="Build notes for the October 6, 2026 Live Transit promotion: transition engine, Kalman-filtered bus motion, landmark massing, and depth-ordered tap picking.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Build Notes: October 6 Promotion \u2014 Nine Changes to Production \u2014 Live Transit Detroit \u00b7 Detroit Automation Academy",
+  "description": "Transition engine, Kalman-filtered bus motion, landmark massing, and depth-ordered tap picking \u2014 verified through two UAT levels before reaching production.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/ship-day-20261006/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 02 · October 2026</p>
+      <h1>Build Notes: October 6 <span class="accent">Promotion</span></h1>
+      <p class="fine">Published October 6, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>Nine changes moved from staging to the production Live Transit page today, in two promotions (<code>v20261006-1815</code> and <code>v20261006-2120</code>). Every change passed a 16-check staging UAT and a two-level production UAT before serving. Two defects found during UAT were fixed before promotion. This is the record.</p>
+
+        <h3>What shipped</h3>
+        <table class="postmeta">
+          <tr><th>Change</th><td><strong>What it does</strong></td></tr>
+          <tr><th>Marker redesign</th><td>Bus pillars 620m → 220m; glow, core, beacon, and ground ring rescaled to match. Pillars no longer tower over the downtown buildings they stand beside.</td></tr>
+          <tr><th>DisplayBounds</th><td>Measures viewport, device class, edge insets, and on-screen chrome per frame; exposes the safe frame every camera move must respect. Debug readout at <code>?dbdebug=1</code>, hostname-gated to staging.</td></tr>
+          <tr><th>TransitionEngine</th><td>Central camera-transition controller. Bus selection glides to a 32° vantage at the safe-frame center; pointer input cancels immediately; cancelled transitions never engage follow. Mobile gets a compact bus bar, frame-and-hold, and an explicit Follow toggle; desktop auto-follows on natural completion.</td></tr>
+          <tr><th>Minimum-jerk easing</th><td>Camera tweens now use the quintic <code>t³(6t²−15t+10)</code> profile — zero velocity and acceleration at both endpoints — replacing ease-in-out cubic.</td></tr>
+          <tr><th>Badge decluttering</th><td>Greedy screen-space placement for route badges; selected bus prioritized, stable slot order, spiral candidate search. Clustered badges stay individually legible.</td></tr>
+          <tr><th>Kalman motion + halos</th><td>Per-bus Kalman filter (arc position, velocity, covariance; 15m GPS sigma) replaces raw dead reckoning. Uncertainty renders as a soft disc of radius 3σ, clamped 15–150m, opacity 0.16.</td></tr>
+          <tr><th>Stop camera intent</th><td>Selecting a stop glides the camera to a 700m, 32° stop vantage with no follow. Previously the card opened and the camera stayed put.</td></tr>
+          <tr><th>Depth-ordered tap picking</th><td>One raycast across bus and stop meshes; the frontmost marker wins. Previously buses were tested first and always won, so a stop standing in front of a bus pillar could not be selected. Found from an on-device report, fixed same day.</td></tr>
+          <tr><th>Landmark massing (Phase A)</th><td>True-form OSM building massing for downtown Detroit — 6,981 vertices, 6,753 triangles, one merged draw call, 272KB. High fidelity reserved for close zoom; progressive detail is Phase B.</td></tr>
+        </table>
+
+        <h3>Verification</h3>
+        <p><strong>Staging UAT</strong> (16 checks, automated browser, read-only): 14 passed. One failure — stop selection never moved the camera — root-caused to an unmigrated Phase 2 intent and fixed before promotion. Mobile checks could not run (no viewport emulation in the test harness).</p>
+        <p><strong>Production UAT, Level 1</strong> (smoke): 6/6 passed — clean load, correct stamp, 72 live buses, landmarks serving, no errors, feed live. It also caught a stale hardcoded build string in the help footer, fixed in a follow-up commit.</p>
+        <p><strong>Production UAT, Level 2</strong> (interactive): bus selection, glide, follow, card close, badge legibility, and stop glide all passed. Depth-ordered picking and the trip planner received partial verification; mobile remains untested in automation.</p>
+        <p>Every deploy was verified by served bytes, not by workflow success: the HTML stamp, the JS feature markers, and the landmarks payload were each fetched from the live URL and confirmed.</p>
+
+        <h3>Also fixed today</h3>
+        <ul>
+          <li><strong>Telemetry pipeline race.</strong> The 5-minute logger and the timing-model builder both write <code>data/timing/segments.json</code>; a logger commit landing mid-build broke the builder's rebase. The commit step is now conflict-proof: on rebase conflict it aborts, rebuilds on the new tip (watermark-idempotent), and retries the push.</li>
+          <li><strong>Stop label stacking.</strong> Production screenshots showed stop name labels piling into unreadable stacks at street zoom. The greedy screen-space collision used for street labels now applies to stop labels.</li>
+          <li><strong>Build string drift.</strong> The help footer carried a hardcoded build number that went stale for days. It now derives from the cache stamp at load.</li>
+        </ul>
+
+        <h3>Open items</h3>
+        <ul>
+          <li>Mobile verification (compact bar, frame-and-hold, Follow toggle) has no automated path; on-device testing is the only coverage.</li>
+          <li>Landmark Phase B (progressive LOD) is designed, not implemented.</li>
+          <li>SMART live feed remains blocked on the Swiftly API key.</li>
+        </ul>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

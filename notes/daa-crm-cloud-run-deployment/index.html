@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration Live: From Zero to Cloud Run in One Session — Notes</title>
+<meta name="description" content="How we took a broken multi-tenant registration build — Go backend, React frontend — to a live deployment on Google Cloud Run in a single engineering session.">
+<meta property="og:title" content="Registration Live: From Zero to Cloud Run in One Session">
+<meta property="og:description" content="How we took a broken multi-tenant registration build — Go backend, React frontend — to a live deployment on Google Cloud Run in a single engineering session.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Registration Live: From Zero to Cloud Run in One Session">
+<meta name="twitter:description" content="How we took a broken multi-tenant registration build — Go backend, React frontend — to a live deployment on Google Cloud Run in a single engineering session.">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Registration Live: From Zero to Cloud Run in One Session",
+  "description": "Taking a broken multi-tenant registration build to a live Cloud Run deployment in a single engineering session.",
+  "url": "https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/">
+  <link rel="alternate" hreflang="de" href="https://www.detroitautomationacademy.com/notes/de/daa-crm-cloud-run-deployment/">
+  <link rel="alternate" hreflang="x-default" href="https://www.detroitautomationacademy.com/notes/daa-crm-cloud-run-deployment/">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Notes</a> · DevOps · February 2026</p>
+      <h1>Registration Live: <span class="accent">From Zero to Cloud Run in One Session</span></h1>
+      <p class="fine">Published February 28, 2026 · Detroit Automation Academy · Historical engineering note — migrated from the retired blog.</p>
+      <div class="prose">
+        <p>We shipped the academy registration system from a broken build to a fully deployed, publicly accessible system in a single engineering session. Here's what that actually looked like.</p>
+        <h3>Starting point: five consecutive build failures</h3>
+        <p>The <code>deploy.sh</code> script existed. The Docker images existed. What didn't exist: a working build.</p>
+        <p>The first failure was a Go syntax error in <code>backend/main.go</code> — a raw newline embedded inside a string literal:</p>
+        <pre><code>// Broken
+fmt.Printf("Detroit Automation Academy Registration Backend starting on port %s...
+", port)
+
+// Fixed
+fmt.Printf("...starting on port %s...\n", port)</code></pre>
+        <p>Go doesn't allow unescaped newlines inside string literals. The fix was one character.</p>
+        <h3>IAM permission cascade</h3>
+        <p>With the backend building, the push to Google Container Registry failed — the Compute service account had the right role but the Cloud Build service account didn't. We granted the missing role to both service accounts and the build cleared.</p>
+        <h3>The missing frontend scaffold</h3>
+        <p>The React frontend had <code>App.tsx</code> and <code>EnrollmentForm.tsx</code> — but no <code>public/index.html</code>, no <code>src/index.tsx</code>, and an invalid <code>tsconfig.json</code>. <code>react-scripts build</code> requires all three.</p>
+        <p>We also caught a TypeScript error: inside an early-return block, TypeScript narrowed a view-state variable to a literal type, making a later comparison a dead branch (TS2367). Fixed by refactoring to a single return with conditional rendering.</p>
+        <h3>Replacing Terraform with direct deployment</h3>
+        <p>The deploy script ended with <code>terraform init &amp;&amp; terraform apply</code> — but Terraform wasn't installed and the infra directory didn't exist. Rather than block, we replaced it with direct <code>gcloud run deploy</code> calls. Both backend and frontend were live in 60 seconds.</p>
+        <h3>Firestore persistence</h3>
+        <p>The original backend stored records in memory — wiped on every cold start. We rewrote the storage handler to use Firestore with a graceful in-memory fallback:</p>
+        <ul>
+          <li>Collections are tenant-namespaced</li>
+          <li>If Firestore is unreachable, the handler falls back to thread-safe in-memory storage</li>
+          <li>The <code>/health</code> endpoint reports which storage is active so you can tell at a glance</li>
+        </ul>
+        <hr>
+        <p><em>Historical note: the endpoints from this session are no longer live. This post is preserved as an engineering record of the build.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../" class="btn btn-ghost">← All notes</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

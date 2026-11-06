@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks</title>
+<meta name="description" content="Why we chose native Apple frameworks over third-party SDKs for a private on-device diary app — MusicKit, EventKit, CoreData with CloudKit.">
+<meta property="og:title" content="Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks">
+<meta property="og:description" content="Why we chose native Apple frameworks over third-party SDKs for a private on-device diary app — MusicKit, EventKit, CoreData with CloudKit, and what privacy-first means in practice.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks">
+<meta name="twitter:description" content="Why we chose native Apple frameworks over third-party SDKs for a private on-device diary app — MusicKit, EventKit, CoreData with CloudKit.">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks",
+  "description": "Why we chose native Apple frameworks over third-party SDKs for a private on-device diary app.",
+  "url": "https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/">
+  <link rel="alternate" hreflang="de" href="https://www.detroitautomationacademy.com/notes/de/at-diary-sprint-2/">
+  <link rel="alternate" hreflang="x-default" href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-2/">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Notes</a> · iOS · February 2026</p>
+      <h1>Sprint 2: Building a Privacy-First Diary <span class="accent">on Apple Native Frameworks</span></h1>
+      <p class="fine">Published February 28, 2026 · Detroit Automation Academy · Historical engineering note — migrated from the retired blog.</p>
+      <div class="prose">
+        <p>Sprint 2 of the diary app is complete with a successful build. Here's what we shipped and how the architecture decisions are holding up.</p>
+        <h3>The core premise</h3>
+        <p>Most journaling apps ask you to trust their servers with your most personal data. This one doesn't. Every piece of data it touches — music history, calendar events, location context, photos — is processed <strong>on-device</strong> and stored with iCloud encryption. Nothing phones home.</p>
+        <h3>The framework stack</h3>
+        <table>
+          <thead><tr><th>Framework</th><th>Data domain</th><th>Privacy approach</th></tr></thead>
+          <tbody>
+            <tr><td><strong>MusicKit</strong></td><td>What you're listening to</td><td>Requests user permission; no data leaves device</td></tr>
+            <tr><td><strong>EventKit</strong></td><td>Calendar &amp; reminders</td><td>Read-only access to authorized calendars</td></tr>
+            <tr><td><strong>Contacts</strong></td><td>Named entities in your day</td><td>Accessed by identifier only, never bulk imported</td></tr>
+            <tr><td><strong>CoreLocation</strong></td><td>Where you are</td><td>Significant location changes only, stored as geohash</td></tr>
+            <tr><td><strong>Photos</strong></td><td>Visual memory triggers</td><td>Thumbnails generated locally, originals never read</td></tr>
+          </tbody>
+        </table>
+        <h3>Sprint 2 deliverables</h3>
+        <p><strong>MusicKit integration.</strong> Authorization flow complete. The app captures the current track at entry creation time. Album artwork is pulled from the MusicKit catalog and displayed as a contextual thumbnail.</p>
+        <p><strong>EventKit read pipeline.</strong> Calendar events for the current day are fetched and ranked by duration and proximity to the current time. The top 3 events populate the "Today's Context" section automatically.</p>
+        <p><strong>CoreData + CloudKit persistence.</strong> All diary entries are stored in a <code>CoreData</code> stack with CloudKit sync enabled via <code>NSPersistentCloudKitContainer</code>. Entries sync across Apple devices without ever touching a third-party server.</p>
+        <p><strong>Successful build.</strong> Clean build against the iOS 18.0 target with zero warnings on all privacy-sensitive framework calls.</p>
+        <h3>What's next</h3>
+        <ul>
+          <li><strong>Entry card design:</strong> rich contextual tiles with music, location, and event context</li>
+          <li><strong>Timeline view:</strong> chronological scroll with ambient colors derived from album art</li>
+          <li><strong>On-device ML:</strong> using <code>CreateML</code> to surface recurring patterns across diary entries</li>
+        </ul>
+        <hr>
+        <p><em>This is a private project. No App Store release is planned.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../" class="btn btn-ghost">← All notes</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

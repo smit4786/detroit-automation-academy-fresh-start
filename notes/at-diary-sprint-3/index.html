@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint 3: Privacy-First Spatial Intelligence — Notes</title>
+<meta name="description" content="Sprint 3: CoreLocation and MapKit for spatial context, Photos framework highlights, and on-device narrative generation — the zero-knowledge architecture intact.">
+<meta property="og:title" content="Sprint 3: Privacy-First Spatial Intelligence">
+<meta property="og:description" content="Sprint 3: CoreLocation and MapKit integration for spatial context, Photos framework highlights, and on-device narrative generation — without sacrificing the zero-knowledge architecture.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sprint 3: Privacy-First Spatial Intelligence">
+<meta name="twitter:description" content="Sprint 3: CoreLocation and MapKit for spatial context, Photos framework highlights, and on-device narrative generation — the zero-knowledge architecture intact.">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Sprint 3: Privacy-First Spatial Intelligence",
+  "description": "CoreLocation and MapKit for spatial context, Photos framework highlights, and on-device narrative generation.",
+  "url": "https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/",
+    "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/">
+  <link rel="alternate" hreflang="de" href="https://www.detroitautomationacademy.com/notes/de/at-diary-sprint-3/">
+  <link rel="alternate" hreflang="x-default" href="https://www.detroitautomationacademy.com/notes/at-diary-sprint-3/">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+
+  <article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Notes</a> · iOS · March 2026</p>
+      <h1>Sprint 3: Privacy-First <span class="accent">Spatial Intelligence</span></h1>
+      <p class="fine">Published March 3, 2026 · Detroit Automation Academy · Historical engineering note — migrated from the retired blog.</p>
+      <div class="prose">
+        <p>A diary isn't just a list of events; it's a narrative of space and time. In Sprint 3, we bridged the gap between raw data and visual storytelling by integrating <strong>CoreLocation</strong>, <strong>MapKit</strong>, and the <strong>Photos framework</strong>.</p>
+        <h3>Spatial context: more than just coordinates</h3>
+        <p>We implemented a custom location provider that identifies significant locations visited throughout the day. Instead of just logging GPS coordinates, the local processing pipeline turns these into meaningful "Significant Locations" (e.g., "Michigan Central Station" vs. "2001 15th St").</p>
+        <p>Key achievements in Sprint 3:</p>
+        <ul>
+          <li><strong>MapKit integration:</strong> the new timeline view features an interactive map showing the day's journey.</li>
+          <li><strong>Privacy-first geofencing:</strong> all location processing happens on-device. No location data is sent to external APIs for reverse geocoding; Apple's native frameworks keep the "where" private.</li>
+        </ul>
+        <h3>Visual context: reliving the moment</h3>
+        <p>A photo is worth a thousand words, and in the diary app, it's the anchor of the narrative. We integrated the <strong>Photos framework</strong> to fetch relevant highlights from the user's library for each diary entry.</p>
+        <ul>
+          <li><strong>Dynamic highlights:</strong> the diary automatically pairs photos with the locations and events they correspond to.</li>
+          <li><strong>Zero-knowledge photos:</strong> we only store local identifiers (PHAsset IDs). The actual image data never leaves the encrypted on-device storage.</li>
+        </ul>
+        <h3>Narrative generation, on-device</h3>
+        <p>The most significant technical leap in this sprint is the upgrade to the summary service. A local model-context server now acts as a compute delegate, generating narratives that weave together:</p>
+        <ul>
+          <li>The music you listened to</li>
+          <li>The meetings you attended</li>
+          <li>The places you visited</li>
+          <li>The photos you took</li>
+        </ul>
+        <p>The result is a cohesive summary of the day that reads naturally but is entirely automated and private.</p>
+        <hr>
+        <p><em>This is a private project. No App Store release is planned.</em></p>
+      </div>
+      <div class="signal-pager">
+        <a href="../" class="btn btn-ghost">← All notes</a>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="../../script.js"></script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

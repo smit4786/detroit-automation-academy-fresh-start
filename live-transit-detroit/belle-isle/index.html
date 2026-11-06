@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belle Isle, Rendered — True-Form Island Geometry for Live Transit</title>
+<meta name="description" content="DDOT route 12 serves Belle Isle, but the Live Transit map rendered no island. Build notes on sourcing the true OSM outline, verified against GTFS stops.">
+<meta property="og:title" content="Belle Isle, Rendered — True-Form Island Geometry for Live Transit">
+<meta property="og:description" content="DDOT route 12 serves Belle Isle, but the map rendered no island. How the true OSM outline was sourced, verified against GTFS stops, and shipped.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/live-transit-detroit/belle-isle/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:image:alt" content="Detroit Automation Academy — Forge D logo">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>
+.postmeta{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.95rem;}
+.postmeta th,.postmeta td{text-align:left;padding:.55rem .75rem;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;}
+.postmeta th{white-space:nowrap;color:#9f9f9f;font-weight:500;}
+.prose code{background:rgba(255,255,255,.06);padding:.1em .35em;border-radius:4px;font-size:.92em;}
+.prose pre{background:rgba(255,255,255,.04);padding:1rem;border-radius:8px;overflow-x:auto;font-size:.88em;}
+h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/belle-isle/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Belle Isle, Rendered — True-Form Island Geometry for Live Transit">
+<meta name="twitter:description" content="DDOT route 12 serves Belle Isle, but the Live Transit map rendered no island. Build notes on sourcing the true OSM outline, verified against GTFS stops.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Belle Isle, Rendered — True-Form Island Geometry for Live Transit",
+  "description": "DDOT route 12 serves Belle Isle, but the Live Transit map rendered no island. Build notes on sourcing the true OSM outline, verifying it against GTFS stops, and shipping it as an optional static layer.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/belle-isle/",
+  "datePublished": "2026-10-07",
+  "author": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/"},
+  "publisher": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/", "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"}
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 03 · October 2026</p>
+      <h1>Belle Isle, <span class="accent">Rendered</span></h1>
+      <p class="fine">Published October 7, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>DDOT route 12 (Conant) serves Belle Isle. The GTFS data carries 24 stops in the island's bounding box, and 20 of the route's 79 path points sit on the island itself — including the Inselruhe interior stops. But the Live Transit map rendered no island at all: the ground is a single dark plane, the Detroit River is not drawn as water, and Belle Isle was not drawn as land. Route 12's ribbon drove across undifferentiated ground — service to a place that did not exist on the map.</p>
+
+        <h3>The gap, precisely</h3>
+        <p>The map's geography layers were: a uniform ground plane (<code>0x0d1319</code>), tiered OSM street geometry, route ribbons, stops, and landmark massing. Water was never rendered, so the island had no visual context — and no island polygon existed in any data file. The route and stop data were correct; the landmass was absent. This is the honest-render rule working as intended: the data said service exists, the map did not show the place, so the map was wrong.</p>
+
+        <h3>What shipped</h3>
+        <table class="postmeta">
+          <tr><th>Change</th><td><strong>What it does</strong></td></tr>
+          <tr><th>Island outline</th><td>True-form OSM boundary (Nominatim <code>leisure=nature_reserve</code>), 488 points, pre-projected to the page's coordinate system in <code>assets/belle-isle.json</code>.</td></tr>
+          <tr><th>Verification</th><td>Polygon triangulates to 486 faces; area ~3.66 km². Both island-interior GTFS stops ("Inselruhe &amp; Loiter Way", "Inselruhe &amp; Riverbank") fall inside; all mainland Jefferson stops fall outside. 20 of 79 route-12 path points land on the island.</td></tr>
+          <tr><th>Rendering</th><td>Filled landmass at y=3 — above the ground plane, below the street tiers — in dark park-green, with a shoreline stroke and a floating "Belle Isle" place label on a tether, the same label treatment as the People Mover layer.</td></tr>
+          <tr><th>Optional layer</th><td>Fetched independently of the route data. If the file is absent, the map renders without the island. No failure path, no blocking.</td></tr>
+        </table>
+
+        <h3>Verification</h3>
+        <p>Served bytes confirmed before this article published: the page references JS stamp <code>v20261007-0715</code>, the served JS contains the island builder, and <code>assets/belle-isle.json</code> serves 200 with 489 polygon points. A full two-level UAT round (smoke + interactive: island shape, label, route-12 ribbon, follow-camera behavior) ran against the production build.</p>
+
+        <h3>Shipped with</h3>
+        <p>The Belle Isle layer rode the <code>v20261007-0715</code> promotion with three follow-camera fixes from the same morning's reports: cursor-anchored zoom now disables while tracking (it was re-anchoring the orbit target off the bus), the selected bus no longer shows a redundant route badge, and the Follow OFF toggle survives re-tapping the same bus.</p>
+
+        <h3>Open items</h3>
+        <ul>
+          <li>The Detroit River itself is still not rendered as water — the island currently sits on the dark ground plane. A river polygon is the natural next geography layer.</li>
+          <li>Mobile verification of the follow-camera fixes has no automated path; on-device testing is the only coverage.</li>
+          <li>SMART live feed remains blocked on the Swiftly API key.</li>
+        </ul>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

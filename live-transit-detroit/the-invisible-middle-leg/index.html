@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Invisible Middle Leg — Live Transit Detroit</title>
+<meta name="description" content="Case study of two-transfer invisibility in Detroit transit routing: optima invisible to Google at 0.89 and to Moovit at 0.78; controls surfaced 7 of 8.">
+<meta property="og:title" content="The Invisible Middle Leg — Live Transit Detroit">
+<meta property="og:description" content="The completed Providence–Woodward & Warren case study: census, predeclared rate phase, results, integrity record, and limits. Two-transfer optima are the invisible class; the middle leg is where they fail.">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/the-invisible-middle-leg/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/live-transit-detroit/the-invisible-middle-leg/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Invisible Middle Leg — Live Transit Detroit">
+<meta name="twitter:description" content="Case study of two-transfer invisibility in Detroit transit routing: optima invisible to Google at 0.89 and to Moovit at 0.78; controls surfaced 7 of 8.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The Invisible Middle Leg",
+  "description": "A completed case study of two-transfer invisibility in Detroit transit routing: across a 630-instance census and a predeclared measurement, two-transfer optima are invisible to Google at a frame-weighted rate of 0.89 (descriptive range 0.56–0.97) and to Moovit at 0.78 (0.44–0.94), while one-transfer controls are surfaced 7 times in 8.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/the-invisible-middle-leg/",
+  "datePublished": "2026-10-16",
+  "author": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/"},
+  "publisher": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/", "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"}
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 07 · October 2026</p>
+      <h1>The Invisible <span class="accent">Middle Leg</span></h1>
+      <p class="fine">October 16, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>On the scheduled timetable, the fastest way from the Providence hospital campus at Greenfield &amp; 9 Mile to Woodward &amp; Warren leaves at 12:45 PM and arrives at 1:42 PM: three buses, two transfers, 57 minutes. No external routing engine offered that journey. Google's best arrival for the trip was 1:55 PM, the DDOT journey planner's 1:59 PM, Moovit's 2:01 PM — and DDOT route 3, the middle leg that makes the fast journey work, appeared in none of the 25 itineraries the three engines returned between them.</p>
+
+        <p>This installment is the completed case study that began with that trip. It asks whether the Providence result was an accident of one origin–destination pair, and it answers the question in three stages: a census of the whole network's optimal journeys, computed from the timetable alone; a demonstration stage that measured what engines show for the census's largest-margin journeys; and a rate phase, designed and fixed in writing before any of its captures ran, that measured how often the two-transfer class of journeys is invisible. The finding is specific. Direct and one-transfer optima are surfaced by both independent engines essentially every time they were measured — in the demonstration stage, at rank 1 in all 14 surfacings. Two-transfer optima are invisible at frame-weighted rates of 0.89 (Google; descriptive range 0.56–0.97) and 0.78 (Moovit; 0.44–0.94) — and every one of the 24 two-transfer optima in the measured sample was invisible to at least one of the two engines (24 of 24 in this sample; that disjointness is a property of the sample, not a frame rate).</p>
+
+        <h3>Defined terms</h3>
+        <p>The terms below are used in this installment only in these senses. Each definition is the study record's own (phase-rate.md §§1–5 and its addendum; rate-phase-analysis.md as corrected; phase-generalization.md for the census terms).</p>
+        <table class="postmeta">
+          <tr><th>Native planner</th><td>The Live Transit app's own planner engine, computing journeys from the DDOT GTFS timetable (feed S1000182, scheduled times) alone. Every "native" figure in this study is its output; no external engine's output enters it (§7).</td></tr>
+          <tr><th>Native journey; optimum</th><td>The journey the native planner returns for an instance: the earliest-arriving journey under the planner's own rules — at most 2 transfers, at most 30 minutes of cumulative walking, walk transfers within the feed's 400 m graph. "Optimal" throughout means planner-optimal in this sense.</td></tr>
+          <tr><th>Instance</th><td>One measurement unit of the census: a (departure slot, origin node, destination node) triple. The census holds 630 instances; the rate phase's frame, sample, and controls are all instances.</td></tr>
+          <tr><th>Leg</th><td>One route's ride within a journey, from boarding to alighting. A journey of one leg is direct; two legs make one transfer; three legs make two transfers.</td></tr>
+          <tr><th>Middle leg</th><td>In a three-leg journey, the second leg — the one between the two transfers.</td></tr>
+          <tr><th>Route sequence</th><td>A journey written as its ordered routes: 10-3-8 is route 10, then route 3, then route 8. Sequence matching ignores walk legs and presentation; an itinerary containing SMART routes is a different sequence — recorded as offered in its own right, never as a match.</td></tr>
+          <tr><th>Sequence invisibility; offered / not offered</th><td>The study's primary outcome, per instance and engine. An engine is scored <strong>offered</strong> when the native route sequence appears among its itineraries at the instance's matched departure, at any rank (for Moovit, at any display position across its sections); otherwise the native journey is <strong>invisible</strong> to that engine for that instance — recorded as <strong>not offered</strong>.</td></tr>
+          <tr><th>Leg margin</th><td>For a leg of the optimal journey: the best arrival with that leg's route removed from the timetable and the journey fully re-optimized, minus the optimal arrival. A margin of null — no journey exists without the route — is unbounded.</td></tr>
+          <tr><th>Load-bearing leg</th><td>A leg with a margin of 5 minutes or more, or with no journey existing without it (infeasible). The substitute in the margin test is the best routing the network offers without the leg, not a single named alternative.</td></tr>
+          <tr><th>Journey margin</th><td>The maximum leg margin over an optimal journey's legs; unbounded if any leg is infeasible. It is the instance-level measure the rate phase stratifies on — a maximum-leg statistic, not a whole-journey margin (§6).</td></tr>
+          <tr><th>Two-transfer optimum</th><td>An instance whose native journey has exactly two transfers (three legs). The census's 88 two-transfer optima are the class this study measures.</td></tr>
+          <tr><th>Census</th><td>The generalization phase's computation of the native journey for every instance: 15 significant nodes giving 210 directed pairs, at three departure slots (Thursday 12:45 PM, Thursday 5:15 PM, Saturday 12:45 PM) — 630 instances, computed from the timetable alone.</td></tr>
+          <tr><th>Frame</th><td>The population the rate phase estimates over: the census's 88 two-transfer optima.</td></tr>
+          <tr><th>Band</th><td>A stratum of the frame by journey margin: <strong>low</strong>, under 10 minutes (24 frame instances); <strong>median</strong>, 10 to under 30 minutes (38); <strong>high</strong>, 30 minutes or more, or unbounded (26).</td></tr>
+          <tr><th>Sample</th><td>The 24 two-transfer instances selected for capture: 8 per band, allocated between the load-bearing-middle and non-load-bearing-middle cells in the full frame's proportions for that band (low 3/5, median 5/3, high 6/2), and taken at centered systematic ranks within each cell so the picks span the cell's margin range. The selection is deterministic, with one predeclared adjustment (the Saturday floor, §3) — a stratified selection with known frame weights, not a random draw.</td></tr>
+          <tr><th>Control</th><td>One of 8 one-transfer optima matched to the two-transfer sample on margin band and departure slot, chosen by closeness of journey margin to the selected two-transfer band medians. The controls are a matched comparison set, not a probability sample of the census's 282 one-transfer optima.</td></tr>
+          <tr><th>Exhibit</th><td>An instance measured before the rate phase existed, by purposive selection: the Providence study instance and the demonstration instances D1–D8. Exhibits are reported separately, excluded from every pool, and never pooled into any rate.</td></tr>
+          <tr><th>Coverage-explained absence</th><td>An absence flagged when the engine's best bus arrival is achieved by an itinerary using SMART routes no later than the native arrival; a flag stands when any itinerary achieving that best arrival uses SMART routes. A flagged absence is a coverage case — the engine answered from a different network — not an invisibility case; the primary rate counts it regardless, and the coverage-adjusted rate excludes it.</td></tr>
+          <tr><th>Depart-at</th><td>The departure specified for an engine query. The protocol sets it to the instance's census departure exactly (Thursday instances at the mapped same-weekday date recorded in §5); when an engine substitutes a different departure, the capture is flagged and not silently scored.</td></tr>
+          <tr><th>Capture</th><td>One instance measured in one engine under the protocol: origin and destination typed verbatim from the census nodes' specs, depart-at set, and every itinerary the engine offers recorded with its rank, full route sequence, and arrival. The rate phase's workload is 64 captures.</td></tr>
+          <tr><th>Provisional capture</th><td>A capture flagged in its file as not final because a protocol condition — the departure time or date — was not met as specified. Its verdicts are not scored until a recapture resolves them.</td></tr>
+          <tr><th>Recapture</th><td>A capture run again under the protocol's exact conditions, replacing a provisional or unreadable original; the protocol allows one recapture per unreadable capture. The two provisional batches were resolved by exact-date recaptures (§5).</td></tr>
+          <tr><th>Superseded</th><td>The status of a provisional capture once its recapture is final: the provisional file is retained and marked superseded, never edited into agreement, and no superseded verdict feeds any total.</td></tr>
+          <tr><th>Frame-weighted rate (θ)</th><td>Per engine, θ = Σ (N<sub>h</sub> / 88) · (x<sub>h</sub> / n<sub>h</sub>) over the three bands, with frame counts N = (24, 38, 26): the bands' invisibility rates combined at the frame's band shares — the estimated proportion of the 88-instance frame that is sequence-invisible to that engine.</td></tr>
+          <tr><th>Descriptive range</th><td>The range attached to θ wherever it is stated, propagated from the bands' Wilson 95% bounds under the study's design-based framing: 0.56–0.97 for Google, 0.44–0.94 for Moovit. The range is part of the claim — the record supports a rate in that span, not a precise point.</td></tr>
+        </table>
+
+        <h3>1. The demonstration: Providence → Woodward &amp; Warren</h3>
+        <p>The study instance is a stop-to-stop computation on DDOT GTFS feed S1000182, run with the app's own planner engine over the scheduled timetable (Thursday service, ready at the origin stop at 12:45 PM). The origin is the stop "North Park Dr &amp; North Park Pl" on the Providence campus (registry idx 1759); the destination is the timetable-covered stop "Woodward &amp; Warren" (idx 751), which is where the deployed planner resolves the destination. Two routings were compared leg by leg:</p>
+        <ul>
+          <li><strong>10-3-8</strong> — route 10 (Greenfield) → route 3 (Grand River) → route 8 (Warren), two transfers: arrive <strong>1:42 PM, 57 minutes</strong> (ride 46 min, wait 8 min, walk 3 min).</li>
+          <li><strong>10-8</strong> — route 10 → route 8, one transfer: arrive <strong>2:11 PM, 86 minutes</strong> (ride 58 min, wait 26 min, walk 2 min).</li>
+        </ul>
+        <p>The 29-minute gap is itemized in the record: 18 minutes less waiting, 12 minutes less riding, 1 minute more walking. The wait is the mechanism. The route 10 bus reaches Greenfield &amp; Warren at 1:16 PM and the rider is ready at the route 8 stop at 1:17 PM — two minutes after route 8's 1:15 PM departure. Route 8's departures from Greenfield in the study window are irregular, roughly every 30 minutes, so the one-transfer rider waits 26 minutes for the 1:43 PM bus. The two-transfer rider instead rides route 3 — departing Grand River &amp; Greenfield every 10–12 minutes — and boards that same missed route 8 vehicle further along its run, at Grand River at 1:34 PM, reaching Woodward at 1:41 PM.</p>
+        <p>Across a 13-departure sweep (ready times every 15 minutes from 12:45 PM to 3:45 PM), 10-3-8 never loses to 10-8: it wins three departures (by 29, 26, and 20 minutes) and ties ten. The ties are structural — in those rows both routings board the same route 8 vehicle and arrive together; the wins occur exactly where the Greenfield connection misses a route 8 departure by 2–5 minutes of ready time and the route 3 path recovers it downstream.</p>
+        <p>Against the external engines, at the matched departure: Google's best arrival was <strong>1:55 PM</strong>, the DDOT planner's <strong>1:59 PM</strong>, and Moovit's <strong>2:01 PM</strong> — 13, 17, and 19 minutes after the native best. All three bests are SMART-built itineraries (a coverage difference, recorded as such in the benchmark: the native planner's column is DDOT-only, and a faster SMART answer is a coverage case, not an invisibility case). The DDOT planner is Google-based and is not an independent measurement. What no engine offered, at any rank, was the native sequence: 10-3-8 appears in zero of the 25 itineraries across the three engines, and <strong>DDOT route 3 appears in zero of 25</strong>.</p>
+        <p>One precision the generalization phase added, stated here so the demonstration is not over-read: measured against the <em>named</em> alternative 10-8, the stake at this departure is 29 minutes; measured against the best route-3-free re-optimization of the whole network (10-7-4, arriving 1:47 PM), route 3's leg margin at the study instance is 6.8 minutes. Both numbers are correct under their definitions; the study uses the second definition — margin against a fully re-optimized substitute — everywhere after this section.</p>
+
+        <h3>2. The census: how much of the network rides on journeys like this</h3>
+        <p>The generalization phase computed the network's optimal journeys from the timetable alone. Fifteen significant nodes (transit centers, radial corridor anchors, the 8 Mile crosstown line, the study's own geography) give 210 directed pairs; at three departure slots (Thursday 12:45 PM, Thursday 5:15 PM, Saturday 12:45 PM) that is <strong>630 instances</strong>, each computed with the app's planner under its own rules (at most 2 transfers, at most 30 minutes of cumulative walking, the feed's 400 m walk-transfer graph, scheduled times). Of the 630 optima, 260 are one bus leg, 282 are two legs, and <strong>88 are three legs — the two-transfer optima</strong> that form the class this study is about.</p>
+        <p>For every leg of every optimal journey the planner was re-run with that leg's route removed and the journey fully re-optimized — the re-run that produces each leg's margin and load-bearing status (Defined terms). Across the 630 optima there are 1,083 legs belonging to the optimal journey itself; <strong>752 of the 1,083 (69%) are load-bearing</strong>, with a median margin of 10.3 minutes. Most legs in an optimum are not decorative: in this network, the optimal path usually runs on infrastructure with no close substitute.</p>
+        <p>Classified by the journey that carries them, the 752 load-bearing legs divide as: direct journeys 228 (30.3%), one-transfer journeys 335 (44.5%), and <strong>two-transfer journeys 189 — 25.1% of all load-bearing legs</strong>, carrying 21.1% of the census's finite load-bearing margin. A load-bearing middle leg is the norm in that class, not the exception: 54 of the 88 two-transfer optima (61%) have one, and route 3 alone is a load-bearing middle leg in 18 of the 21 optima where it sits in the middle. The Providence anatomy recurs across the census; it is not a one-corridor accident.</p>
+        <p>The demonstration stage then measured engine behavior on eight instances (D1–D8) selected by native criteria alone — the route in the outright optimum, a large margin, dayparts and corridors spread. The result was exact: <strong>the native sequence was surfaced in 7 of 8 instances — 14 of 16 engine-measurements — at rank 1 in both engines every time it was offered</strong>, and the tested route appeared somewhere in the set in 16 of 16 measurements. The one miss was total in both engines: D6 (Gratiot &amp; 8 Mile → Woodward &amp; Warren; native 6-31-4), the demonstration pool's only two-transfer instance. Route 6 was present in both engines' sets, paired differently; <strong>route 31 appeared in no itinerary from either engine</strong>. The failure was a pairing failure — the 6→31 Mack Avenue connection that makes the native optimum is constructed by neither engine.</p>
+        <p>Adding the original study instance — also a two-transfer optimum, also invisible in every engine measured — the whole study's two-transfer demonstration record at that point was <strong>0 sequences surfaced in 5 engine-measurements</strong>, against 14 of 14 rank-1 surfacings for the direct and one-transfer classes. The refined claim from that stage, which the rate phase was designed to test, is this: direct and single-transfer load-bearing journeys are universally surfaced — at rank 1 — by every engine measured; the invisible class is the multi-transfer optimum whose connecting middle leg an engine must specifically construct and, in both exhibits on record, does not. What two exhibits could not supply was a rate: the claim rested on 2 instances, and the demonstration pool was the large-margin tail by design, so nothing estimated how engines treat median-margin optima. The rate phase exists to repair exactly those two weaknesses.</p>
+
+        <h3>3. The rate phase, designed before it was run</h3>
+        <p>The rate phase's design — estimands, frame, stratification, measurement protocol, and analysis plan — was written and fixed (phase-rate.md, §§1–9) before any capture for the phase ran. Its machine-readable selection is reproducible from the census alone by a script that reads no engine output.</p>
+        <ul>
+          <li><strong>Population and outcome.</strong> The frame is the census's <strong>88 two-transfer optima</strong>. The primary outcome, per instance and engine, is <strong>sequence invisibility</strong>: the engine, at the instance's matched departure, does not offer the native route sequence at any rank. Engine visibility is a measured outcome, never an input.</li>
+          <li><strong>Bands.</strong> Instances are stratified by journey margin — the maximum leg margin over the optimal journey's legs, unbounded if any leg is infeasible: <strong>low, under 10 minutes (24 frame instances); median, 10 to under 30 (38); high, 30 or more or unbounded (26)</strong>. Of the 88, 54 have a load-bearing middle leg.</li>
+          <li><strong>Sample.</strong> Eight instances per band (24 total), allocated between the load-bearing-middle and non-load-bearing-middle cells in the full frame's proportions for that band (low 3/5, median 5/3, high 6/2 — 14 load-bearing-middle instances in the sample), and taken at centered systematic ranks within each cell so the picks span each cell's margin range rather than repeating the demonstration stage's top-tail draw. One adjustment was declared in the design in advance — a Saturday floor, which replaces a pick when a band's frame holds at least five Saturday instances but its picks hold none; it fired once (R13, median band) and the swap is recorded in that instance's metadata.</li>
+          <li><strong>Controls.</strong> Eight one-transfer optima matched to the two-transfer sample on margin band and departure slot, chosen by closeness of journey margin to the selected two-transfer band medians. Seven of the eight match within 6.2 minutes; the eighth (C8, high band, Thursday peak) cannot match closer than 37.86 minutes — no census instance does better — and the distance is printed in the design, not hidden.</li>
+          <li><strong>Exhibits.</strong> The Providence study instance and D1–D8 are excluded from every pool. They are reported separately, and are never pooled into any rate.</li>
+          <li><strong>Protocol.</strong> Origin and destination typed verbatim from the census nodes' specs; depart-at set to the instance's census departure exactly; every itinerary the engine offers recorded with its rank, full route sequence, and arrival. An absence is flagged <strong>coverage-explained</strong> when the engine's best bus arrival is achieved by a SMART-route itinerary no later than the native arrival; the primary rate counts sequence absence regardless, and a predeclared sensitivity re-computes the rate excluding coverage-explained absences. An unreadable capture is <strong>missing, never scored as absent</strong>; one recapture is allowed. Two further sensitivities were predeclared: missing-data bounds, and an exhibits-included raw count labeled as a description, not an estimate.</li>
+          <li><strong>Primary estimand.</strong> Per engine, θ = Σ (N<sub>h</sub>/88) · (x<sub>h</sub>/n<sub>h</sub>) over the three bands with frame counts N = (24, 38, 26) — the frame-weighted proportion of the 88 two-transfer optima that is sequence-invisible — plus the paired joint rates (invisible to both engines; invisible to at least one), band rates with Wilson 95% intervals, and a cross-tabulation by middle-leg margin and load-bearing-middle status, reported as counts and labeled descriptive.</li>
+        </ul>
+        <p>The workload fixed by the design was 32 instances × 2 engines = <strong>64 captures</strong>: 48 two-transfer, 16 control. The engines are Google Maps transit directions and Moovit — the two independent engines; the DDOT planner, being Google-based, is not captured as a separate measurement.</p>
+
+        <h3>4. Results</h3>
+        <p>All 64 captures are final. Google offered the native sequence in <strong>2 of 24</strong> two-transfer instances; Moovit in <strong>5 of 24</strong>. No instance was offered by both engines — the offered sets are disjoint — so <strong>every one of the 24 sampled optima was invisible to at least one engine</strong>, and 17 of 24 were invisible to both.</p>
+
+        <p><strong>Band invisibility rates</strong> (counts, Wilson 95% intervals):</p>
+        <table class="postmeta">
+          <tr><th>Band</th><td><strong>Google invisible</strong></td><td><strong>Wilson 95%</strong></td><td><strong>Moovit invisible</strong></td><td><strong>Wilson 95%</strong></td></tr>
+          <tr><th>Low (frame 24)</th><td>8/8 = 1.000</td><td>0.676–1.000</td><td>7/8 = 0.875</td><td>0.529–0.978</td></tr>
+          <tr><th>Median (frame 38)</th><td>6/8 = 0.750</td><td>0.409–0.929</td><td>6/8 = 0.750</td><td>0.409–0.929</td></tr>
+          <tr><th>High (frame 26)</th><td>8/8 = 1.000</td><td>0.676–1.000</td><td>6/8 = 0.750</td><td>0.409–0.929</td></tr>
+        </table>
+        <p>The stake question the bands carry — does invisibility fall as the native journey's margin grows? On the point estimates, it does not: the band rates show no decline. But that is a description of the point estimates, not an estimated trend. With eight instances per band the Wilson intervals overlap almost completely, the data admit true declines of ≈ 0.35 from the low band to the high, and the design has no power for the trend in either direction. What the bands support is the level claim: invisibility is high even at the largest margins. Even in the high band, Google surfaces none of 8 and Moovit 2 of 8.</p>
+
+        <p><strong>Class rates</strong>, frame-weighted over the 88-instance census frame:</p>
+        <ul>
+          <li><strong>Google: θ = 0.89 invisible</strong> (descriptive range 0.56–0.97; frame-weighted visibility 0.11).</li>
+          <li><strong>Moovit: θ = 0.78 invisible</strong> (descriptive range 0.44–0.94; frame-weighted visibility 0.22). The ranges are part of the claim: the record supports a rate in the upper part of the scale, not a precise point.</li>
+          <li><strong>Moovit net of its two-list structure: θ = 0.821.</strong> Moovit's offered set spans two lists (Suggested and Accessible) where Google has one, and two of Moovit's five surfacings — R17 in the sample, and control C6 — exist only in its Accessible section. Rescoring Moovit on Suggested-section verdicts only gives 0.821 (high band 7 of 8 invisible), the like-for-like contrast with one-list Google.</li>
+          <li><strong>Invisible to both engines: 0.68. Invisible to at least one: 1.000 in this sample</strong> (24 of 24, because the offered sets are disjoint — a sample statement, not a frame claim: the both-visible rate is 0 of 24 in the sample, whose Wilson upper bound is ≈ 0.14, so the frame's at-least-one rate is not established at 1.000).</li>
+          <li><strong>Coverage-adjusted</strong> (predeclared sensitivity (a)): excluding absences whose engine best arrival is achieved by a SMART-route itinerary no later than the native arrival — 5 of Google's 22 absences, 6 of Moovit's 19 — the rates remain <strong>θ = 0.696 (Google)</strong> and <strong>θ = 0.517 (Moovit)</strong>. The finding survives the adjustment.</li>
+        </ul>
+
+        <p><strong>The middle-leg cross-tab.</strong> Entries are invisible counts over the cell n (descriptive, per the design):</p>
+        <table class="postmeta">
+          <tr><th>Middle-leg margin</th><td><strong>n</strong></td><td><strong>Google invisible</strong></td><td><strong>Moovit invisible</strong></td><td><strong>Both invisible</strong></td></tr>
+          <tr><th>0 to under 5 min</th><td>10</td><td>8</td><td>9</td><td>7</td></tr>
+          <tr><th>5 to under 10 min</th><td>8</td><td>8</td><td>6</td><td>6</td></tr>
+          <tr><th>10 to under 15 min</th><td>5</td><td>5</td><td>4</td><td>4</td></tr>
+          <tr><th>15 min or more</th><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+          <tr><th>Load-bearing middle</th><td>14</td><td>14</td><td>10</td><td>10</td></tr>
+          <tr><th>Non-load-bearing middle</th><td>10</td><td>8</td><td>9</td><td>7</td></tr>
+        </table>
+        <p>Google surfaced <strong>0 of the 14</strong> load-bearing-middle optima. Its only two surfacings in the sample (R14, R16 — both Providence-origin 10-17-4) sit in the zero-margin middle cell, both middle-leg margins 0.0, and both present the native sequence only on a later cycle: offered arrivals 6:30 PM and 6:49 PM against native arrivals of 6:03 PM and 6:21 PM — <strong>+27 and +28 minutes</strong>. Moovit surfaced 4 of the 14 load-bearing-middle optima (R12, middle-leg margin 13.8; R15, 7.3; R17, 6.8; R19, 32.0 — the largest middle-leg margin in the sample, offered at rank 1) and 1 of 10 non-load-bearing; its five surfacings arrive within <strong>+0 to +3 minutes</strong> of the native arrivals, two of them exactly at the native arrival. For Google, invisibility concentrates exactly on the load-bearing-middle cell; for Moovit it does not — a difference between the engines that the counts state and this study does not explain further.</p>
+        <p>A route-3 note (post-hoc and descriptive — not one of the design's predeclared cuts): the five sampled optima with route 3 as middle leg (R05, R08, R17, R19, R24) are invisible to Google in all five cases. Moovit surfaces two of them (R17 and R19 — both from Greenfield &amp; 8 Mile, both at the native arrival) and misses three: R08 (from Northland), R24 (from Providence), and R05 — which departs Greenfield &amp; 8 Mile, the same origin as the two hits. For the same origin–destination pair and the same sequence (10-3-8, Greenfield &amp; 8 Mile → Woodward &amp; Warren), Moovit offers the sequence on Thursday (R17) and misses it on Saturday (R05).</p>
+
+        <p><strong>The full verdict matrix.</strong> Offered = the native sequence offered at any rank. † marks an absence flagged coverage-explained under the design's §5 rule; the adjusted rates above re-score those absences.</p>
+        <table class="postmeta">
+          <tr><th>ID</th><td><strong>Band</strong></td><td><strong>Native</strong></td><td><strong>Middle-leg margin</strong></td><td><strong>Google</strong></td><td><strong>Moovit</strong></td></tr>
+          <tr><th>R01</th><td>low</td><td>13-32-4</td><td>0.0</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R02</th><td>low</td><td>17-41-3</td><td>3.9</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R03</th><td>low</td><td>10-7-4</td><td>4.2</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R04</th><td>low</td><td>5-8-16</td><td>5.0 (load-bearing)</td><td>not offered †</td><td>not offered †</td></tr>
+          <tr><th>R05</th><td>low</td><td>10-3-8</td><td>7.1 (load-bearing)</td><td>not offered †</td><td>not offered †</td></tr>
+          <tr><th>R06</th><td>low</td><td>10-32-5</td><td>0.0</td><td>not offered</td><td>offered, rank 2</td></tr>
+          <tr><th>R07</th><td>low</td><td>43-54-17</td><td>0.0</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R08</th><td>low</td><td>10-3-16</td><td>7.1 (load-bearing)</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R09</th><td>median</td><td>5-19-11</td><td>10.5 (load-bearing)</td><td>not offered †</td><td>not offered †</td></tr>
+          <tr><th>R10</th><td>median</td><td>6-8-10</td><td>13.0 (load-bearing)</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R11</th><td>median</td><td>23-7-10</td><td>3.0</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R12</th><td>median</td><td>2-30-43</td><td>13.8 (load-bearing)</td><td>not offered</td><td>offered, rank 2</td></tr>
+          <tr><th>R13</th><td>median</td><td>5-32-23</td><td>12.2 (load-bearing)</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R14</th><td>median</td><td>10-17-4</td><td>0.0</td><td>offered, rank 5</td><td>not offered †</td></tr>
+          <tr><th>R15</th><td>median</td><td>10-32-5</td><td>7.3 (load-bearing)</td><td>not offered</td><td>offered, rank 2</td></tr>
+          <tr><th>R16</th><td>median</td><td>10-17-4</td><td>0.0</td><td>offered, rank 6</td><td>not offered †</td></tr>
+          <tr><th>R17</th><td>high</td><td>10-3-8</td><td>6.8 (load-bearing)</td><td>not offered †</td><td>offered, Accessible position 3</td></tr>
+          <tr><th>R18</th><td>high</td><td>6-31-42</td><td>8.6 (load-bearing)</td><td>not offered</td><td>not offered †</td></tr>
+          <tr><th>R19</th><td>high</td><td>10-3-30</td><td>32.0 (load-bearing)</td><td>not offered †*</td><td>offered, rank 1</td></tr>
+          <tr><th>R20</th><td>high</td><td>23-7-10</td><td>13.0 (load-bearing)</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R21</th><td>high</td><td>10-7-4</td><td>4.2</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R22</th><td>high</td><td>10-17-23</td><td>5.1 (load-bearing)</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R23</th><td>high</td><td>10-17-30</td><td>0.0</td><td>not offered</td><td>not offered</td></tr>
+          <tr><th>R24</th><td>high</td><td>10-3-16</td><td>7.8 (load-bearing)</td><td>not offered</td><td>not offered</td></tr>
+        </table>
+
+        <p><strong>The control contrast.</strong> The one-transfer controls were invisible at <strong>1 of 8 per engine (0.125; Wilson 95% 0.022–0.471)</strong> — the same control, C3 (native 29-30, Michigan Central → Jason Hargrove Transit Center, Saturday), missed by both. Combined, the controls were offered in 14 of 16 engine-measurements. Set against the two-transfer class rates of 0.89 and 0.78, the contrast is the phase's central quantitative result: at matched bands and departure slots, one-transfer optima are surfaced by both engines in 7 of 8 cases, while two-transfer optima are invisible at frame-weighted rates of roughly 0.8–0.9. The failure is specific to two-transfer construction, not a general failure to surface low-margin optima.</p>
+
+        <h3>5. The integrity record</h3>
+        <p>A measurement is only worth its file. The rate phase's record includes its own defects, flagged by the capturing operators in the capture files at the time, labeled provisional there, and resolved by exact-date recapture — with the provisional files retained and marked superseded, not edited into agreement.</p>
+        <ul>
+          <li><strong>Google batch G2 — wrong clock time.</strong> Four Thursday 5:15 PM instances (R10, R11, R14, R16) were captured at 5:00 PM: the depart-at control would not hold 5:15 PM across more than ten attempts. The deviation was flagged in the batch file and all four verdicts marked provisional. Recaptured the same evening at the exact depart-at via the URL epoch parameter, every final page verified on-page. The recapture <strong>reversed two verdicts</strong>: R14 and R16, recorded as not offered at 5:00 PM, are offered at 5:15 PM at ranks 5 and 6 — both reversals run against the study's hypothesis and in the engines' favor. R10 and R11 were confirmed not offered.</li>
+          <li><strong>Moovit batch M2 — wrong Thursday.</strong> Seven Thursday instances were captured on Thursday, October 15 (same weekday, same clock times) instead of the mapped Thursday, October 22, because the operator did not use the URL time-parameter method the other Moovit batches used. All seven verdicts were marked provisional in the file. The exact-date recapture verified "Departure day Thu, Oct 22" and the correct time on every page before recording: <strong>all seven outcomes were confirmed</strong> (R12 and R15 offered at rank 2; the other five not offered); R15's provisional verdict — offered at rank 2 at 12:45 PM — was confirmed unchanged at the verified exact date.</li>
+          <li><strong>The epoch error.</strong> The Moovit recapture task was supplied with epoch values that encode 12:45 and 17:15 UTC; on-page they displayed as 8:45 AM and 1:15 PM EDT — four hours early. The operator caught the discrepancy on the first page, used corrected epochs, and verified the displayed departure on every page. The error and its correction are recorded in the recapture file itself.</li>
+          <li><strong>Final state of the record.</strong> 64 of 64 captures final, zero unreadable, zero missing — so the predeclared missing-data bounds collapse to the point estimates (θ<sub>G</sub> 0.89, θ<sub>M</sub> 0.78). Depart-at sensitivity is empirical fact within this phase: a departure 15 minutes early hid two sequences that the exact departure shows, and the wrong-Thursday batch's seven verdicts all had to be re-verified at the mapped date before any of them could be scored. That is why the protocol's exactness rules exist, and why provisional captures are never silently scored.</li>
+          <li><strong>Peer review.</strong> After the analysis was filed, the rate phase record was reviewed cold by three independent reviewers — statistical methods; measurement and transit-domain validity; reproducibility and record integrity. Every headline number was independently recomputed and found exact; the instance selection was reproduced bit-for-bit from the census by re-running the selection script; no verdict was found mis-scored, and the coverage rule was re-derived in all 41 determinations and found applied as written. The reviews logged 24 defects — all in documentation and claim calibration, none in data. Twenty-two were corrected in the study record: among them, descriptive uncertainty ranges attached to the class rates (§4), the margin-trend statement restated as descriptive with its power caveat (§4), the two recapture files' epoch annotations reconciled (§5), a factual error in the route-3 note's origins corrected (§4), and the R15 supersession narrative corrected to what the provisional file actually recorded (§5). Two were accepted as stated limitations and are recorded in §6. No capture was re-taken and no number moved. The reviews and the defect register are filed with the study record (<code>peer-review-r1-statistics.md</code>, <code>peer-review-r2-measurement.md</code>, <code>peer-review-r3-reproducibility.md</code>, <code>peer-review-packet.md</code>).</li>
+        </ul>
+
+        <h3>6. Limitations</h3>
+        <p>These are the limits recorded in the design and the analysis, stated without softening.</p>
+        <ul>
+          <li><strong>The rates are design-based estimates over this census frame</strong> — 15 significant nodes, three departure slots on two days (the peak slot is Thursday-only), scheduled times, the app's planner rules — under the recorded selection rule. They are not sampling-theoretic claims about all possible origin–destination pairs, and sibling-origin instances are correlated (adjacent nodes on the same corridors repeatedly produce identical downstream journeys), so the intervals are descriptive of this frame, not of a trip population.</li>
+          <li><strong>Providence concentration in the high band.</strong> 17 of the 26 high-band frame instances touch the Providence node, and 7 of the 24 selected instances do (R14, R16, R20–R24). Providence's only service is route 10, so its journey margins are driven by first- and last-leg access — up to 128.7 minutes, and unbounded on Saturday — not by the middle leg. The band therefore mixes two phenomena, access uniqueness and construction stakes; that is why the mechanism read is the middle-leg cross-tab and not the band.</li>
+          <li><strong>Journey margin is a maximum-leg statistic.</strong> It can be set by a leg other than the one whose construction is in question (R21: journey margin 115.0 minutes from its first leg; middle-leg margin 4.2). The design accepts this because it matches the study's earlier instance-margin usage, and compensates with the cross-tab; a future phase could stratify on middle-leg margin directly, at the cost of having no common metric for the one-transfer controls.</li>
+          <li><strong>Two judgment calls in the coverage analysis are recorded, not smoothed over.</strong> (1) R19 for Google is flagged coverage-explained under the rule as written, although the same best arrival is co-achieved by a DDOT itinerary (17→30) — the tie is recorded in the analysis. (2) Moovit's R10 is not flagged, because the coverage rule reads the engine's bus itineraries; a Combined-bike itinerary using SMART 561 arrives earlier than the native arrival, and if combined-bike itineraries were counted, R10 would also be coverage-explained and the adjusted Moovit rate would be 0.463 instead of 0.517.</li>
+          <li><strong>Scheduled, not realized.</strong> All native figures are timetable figures. The app shifts near-term DDOT times by measured live delay; each engine's schedule vintage and real-time adjustments are unknown throughout this study, as in every stage of it. A margin of an hour survives any plausible adjustment; a margin of five minutes may not.</li>
+          <li><strong>The controls are a matched comparison set</strong>, not a probability sample of the census's 282 one-transfer optima; their rate is a benchmark for the contrast, and the high-band control contrast carries C8's recorded 37.86-minute match distance.</li>
+          <li><strong>Result-set exhaustion was not separately demonstrated (accepted limitation, recorded in peer review).</strong> The protocol requires result sets to be read in full, but the capture files do not record per-capture itinerary totals or end-of-list confirmations. The absence verdicts rest on the displayed result sets as captured and verified on-page. In two batches the full cross-section display order is recorded (up to 8 entries including bike sections), indicating the lists were read to their ends there, and nothing in any file suggests a truncated read — but the limitation stands, and it is not retro-fixable.</li>
+          <li><strong>Exact re-execution is impossible in principle (accepted limitation, recorded in peer review).</strong> No raw engine output was archived — the captures are transcriptions — and both engines are live, non-stationary services whose schedule vintages are unknown. Every quantity the conclusions rest on is filed and recomputes from the record (the peer reviewers did exactly that), but the captures themselves cannot be re-run into the same engine state.</li>
+          <li><strong>"Optimal" means planner-optimal</strong> — at most two transfers, at most 30 minutes of cumulative walking, walk transfers within the feed's 400 m graph. A routing outside those rules is outside this census by construction.</li>
+        </ul>
+
+        <h3>7. The rule the study runs under</h3>
+        <p>External routing engines' output — Google, Moovit, the DDOT planner, Apple, the Transit app — is for efficiency comparison only. It never becomes an input to the app's native compute engine: no external suggestion, ranking, or routing is ingested, imitated, or used to steer the planner. In this study the rule is operational, not decorative: instance selection and every margin derive solely from the native timetable computation; engine visibility is a measured outcome, never an input; and per the analysis plan's no-feedback clause, nothing in these results alters the selection, the native engine, or any later phase's inputs. Benchmarks measure the difference. They do not close it by contamination.</p>
+
+        <h3>Records</h3>
+        <p>The study's filed record, in <code>case-study-providence-woodward-warren/</code>: <code>case-study.md</code> (the demonstration, with the departure sweep); <code>benchmark/PROTOCOL.md</code> and <code>benchmark/COMPARISON.md</code> (the matched-departure benchmark; external bests and the 25 itineraries at §3C); <code>phase-generalization.md</code> (the census and Stages B–C, with <code>generalization-results.json</code> and <code>generalization-stage-b.md</code>); <code>phase-rate.md</code> (the rate-phase design and selection, §§1–9) with <code>rate-phase-instances.json</code> and <code>select-rate-phase-instances.py</code>; the ten capture files <code>rate-phase-captures-*.md</code> (eight batches, two recaptures); and <code>rate-phase-analysis.md</code> (the §7 analysis: verdict matrix, band rates, class rates, cross-tab, control contrast, sensitivities); and the peer-review record — <code>peer-review-r1-statistics.md</code>, <code>peer-review-r2-measurement.md</code>, <code>peer-review-r3-reproducibility.md</code>, and <code>peer-review-packet.md</code> (the defect register and the corrected claims).</p>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

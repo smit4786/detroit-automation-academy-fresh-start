@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The QLINE Sign Error — Live Transit Detroit</title>
+<meta name="description" content="The QLINE track rendered as a floating diagonal bar, mirrored kilometres north of Woodward Avenue. Cause: a sign error in one coordinate of qline-3d.json.">
+<meta property="og:title" content="The QLINE Sign Error — Live Transit Detroit">
+<meta property="og:description" content="A sign error in the TIGER/Line extraction mirrored the QLINE track across the parallel through the map origin. Cause, evidence, and the 64-character resolution.">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/webp" href="../../assets/logo.webp">
+<link rel="stylesheet" href="../../styles.css?v=20261031-0615">
+<style>h1{font-size:var(--step-2);letter-spacing:-0.01em;margin:0.4em 0 0.6em}</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/article-assets/qline-corrected.jpg">
+<meta property="og:image:alt" content="The Live Transit 3D map with the QLINE route line lying on the Woodward Avenue corridor">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The QLINE Sign Error — Live Transit Detroit">
+<meta name="twitter:description" content="The QLINE track rendered as a floating diagonal bar, mirrored kilometres north of Woodward Avenue. Cause: a sign error in one coordinate of qline-3d.json.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/article-assets/qline-corrected.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The QLINE Sign Error",
+  "description": "The QLINE track rendered mirrored across the parallel through the map origin because the TIGER/Line extraction wrote scene z without the required sign negation. Data-only fix, verified numerically and on device.",
+  "url": "https://www.detroitautomationacademy.com/live-transit-detroit/qline-sign-error/",
+  "datePublished": "2026-10-13",
+  "author": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/"},
+  "publisher": {"@type": "Organization", "name": "Detroit Automation Academy", "url": "https://www.detroitautomationacademy.com/", "logo": "https://www.detroitautomationacademy.com/assets/logo.webp"}
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+<article class="section">
+    <div class="wrap">
+      <p class="kicker"><a href="../">Live Transit Detroit</a> · Installment 06 · October 2026</p>
+      <h1>The QLINE <span class="accent">Sign Error</span></h1>
+      <p class="fine">Published October 13, 2026 · By Justin Spencer Smith</p>
+      <div class="prose">
+        <p>On October 12, the QLINE track on the Live Transit map was redrawn from the TIGER/Line 2025 Woodward Avenue centerline, replacing hand-drawn geometry that sat off the road. On October 13, a screenshot from the production page showed the replacement was also wrong: with QLINE enabled, the track rendered as a thick teal bar floating diagonally across the street grid, while the three QLINE vehicle markers sat in their correct positions near Woodward Avenue, south of the bar. This document records the cause of the error, the evidence that isolated it, and the resolution. The fault was one missing minus sign, applied 64 times.</p>
+
+        <figure>
+          <img src="article-assets/qline-mirrored.jpg" alt="The Live Transit map before the fix: the QLINE route line renders as a diagonal bar across the grid while vehicle markers sit near Woodward Avenue" style="width:100%;border-radius:8px;">
+          <figcaption class="fine">Before: the QLINE line rendered as a diagonal bar offset from the street grid. The vehicle markers below it are in their correct positions. Production screenshot, October 13, 2026.</figcaption>
+        </figure>
+
+        <h3>The format convention</h3>
+        <p>Route geometry for the map is stored in per-agency data files (<code>ddot-routes-3d.json</code>, <code>smart-routes-3d.json</code>, <code>qline-3d.json</code>) that share one shape: a projection block, route groups, and routes whose paths are lists of coordinate pairs. The pairs are not latitude and longitude. They are scene coordinates produced by the renderer's projection, <code>project(lat, lon) = [(lon − lon0) · mLon, −(lat − lat0) · mLat]</code>, with <code>mLat = 111320</code> and the origin at <code>lat0 = 42.381161</code>. The renderer consumes the pairs verbatim as scene (x, z). The operative consequence is the second coordinate: <code>z = −(lat − lat0) · 111320</code>. Every point in Detroit is south of the origin parallel, so every valid z in these files is positive — downtown points in the DDOT and SMART files carry z of roughly +5,400 to +5,700. A file that stores z without the negation does not store an approximation of the track. It stores the track's mirror image.</p>
+
+        <h3>Cause of error</h3>
+        <p>The October 12 extraction converted the TIGER/Line centerline into the file format and wrote the second coordinate as <code>z = (lat − lat0) · 111320</code> — projected Y, positive northward — without negating it into scene Z. All 64 points in <code>qline-3d.json</code> (two paths of 32 points; the second path is the first in reverse) therefore carried negative z. The renderer, applying the pairs verbatim, drew the track mirrored across the parallel through the origin: up to approximately 11.5 km too far north, with its north–south slope inverted, which is what produced a diagonal bar crossing the grid instead of a line following the avenue. The x coordinates (longitude) were correct throughout, which is why the bar still crossed Woodward Avenue's longitude band and passed near the corridor at one end. The TIGER/Line centerline geometry itself was sound. Only the conversion into the file format was wrong.</p>
+
+        <h3>Why the earlier fix did not fix it</h3>
+        <p>The October 12 change replaced the geometry and reused the same conversion that had produced the hand-drawn file's coordinates. Replacing the input data cannot correct an error in the transformation applied to it. The change was also never verified in a browser on the production page; served-byte checks confirmed that the new file was live, and the file was live — it was the content that was wrong. Both failure modes are recorded in the production rules below.</p>
+
+        <h3>Evidence</h3>
+        <p>The diagnosis was reproduced numerically before any change was made, using the renderer's own projection math against the file actually served from production. Unprojecting the served path returned latitudes 42.393–42.433 — north of Grand Boulevard, where Woodward Avenue does not run. Three alternative explanations were tested and eliminated: the served file was byte-identical to the repository file, so the defect was not staleness or caching; the deploy workflow copies root <code>*.json</code>, so the file was being served; and QLINE merges into the same data structure and the same ribbon builder as DDOT and SMART, so the renderer was not treating it differently — the two sibling files render correctly on the same code path.</p>
+        <table class="postmeta">
+          <tr><th>Check</th><td><strong>As served</strong></td><td><strong>After the fix</strong></td></tr>
+          <tr><th>Campus Martius to path</th><td>7,183 m</td><td>37.2 m</td></tr>
+          <tr><th>Grand Circus Park to path</th><td>6,587 m</td><td>12.3 m</td></tr>
+          <tr><th>Fox Theatre to path</th><td>6,297 m</td><td>4.3 m</td></tr>
+          <tr><th>Grand Blvd &amp; Woodward to path</th><td>2,761 m</td><td>7.8 m</td></tr>
+          <tr><th>Live vehicle 287 to path</th><td>4,780 m</td><td>10.0 m</td></tr>
+          <tr><th>Live vehicle 292 to path</th><td>4,592 m</td><td>6.5 m</td></tr>
+          <tr><th>Path vs. DDOT route 4 (Woodward, GTFS-derived)</th><td>mean 3,339 m</td><td>mean 7.1 m, max 62.2 m</td></tr>
+        </table>
+        <p>Distances are point-to-segment, measured in Node with the production projection. The Congress Street reference measures 141.5 m after the fix; that reference is the centre of the Congress/Woodward intersection, and the track's southern terminus sits on Woodward between Congress and Larned, so a residual offset at that one reference is expected rather than anomalous.</p>
+
+        <h3>Resolution</h3>
+        <p>The fix was applied at the data layer only: the second coordinate of all 64 points in <code>qline-3d.json</code> was negated. The renderer was not changed — it and both sibling files agree on the convention, and changing the renderer to match one incorrect file would have broken every correct one. No geometry was rebuilt; the TIGER/Line points were already correct once the sign convention was honoured. The byte-level diff against the previous file is exactly the 64 removed minus signs (1,637 → 1,573 bytes); the projection block, groups, stops, and metadata are untouched, and no JavaScript changed, so no cache stamp moved. The change shipped as commit <code>59c99261cb</code> to the production repository on GitHub Pages; the deployment for that commit reported success, and the file served at the production URL is byte-identical to the fixed file.</p>
+
+        <figure>
+          <img src="article-assets/qline-corrected.jpg" alt="The Live Transit map after the fix: the QLINE route line and label lie on the Woodward Avenue corridor among the other route lines" style="width:100%;border-radius:8px;">
+          <figcaption class="fine">After: the QLINE line lies on the Woodward corridor, the label anchors over midtown, and the vehicle markers sit on the line. Production screenshot, October 13, 2026.</figcaption>
+        </figure>
+
+        <h3>Verification</h3>
+        <p>After the fix, the path unprojects to latitudes 42.329–42.369, monotonic from the Congress Street end to Grand Boulevard, with endpoints at (42.32937, −83.04530) and (42.36912, −83.07257) — Woodward Avenue at both termini. Two of the three live QLINE vehicles measured 10.0 m and 6.5 m from the corrected path. The third sat approximately 330 m beyond the northern endpoint, consistent with terminus turnback and layover trackage at Grand Boulevard, which the extracted revenue alignment does not include; it does not affect the drawn route. Visual confirmation was completed on device against the production page: the line lies on Woodward Avenue for its full length, the QLINE label anchors over the corridor, and the DDOT and SMART lines are unchanged.</p>
+
+        <h3>Rules recorded</h3>
+        <p>Two standing rules come out of this defect. First, before replacing any data file, read the existing file's byte structure and the consumer's parsing code — and where sibling files follow a convention, verify the new file against a sibling that renders correctly; a sign convention is exactly the class of detail that "same JSON shape" does not capture. Second, a geometry change is not done when it is pushed or when the served bytes match. It is done when the rendered result has been seen on the production page. The October 12 change satisfied the first two checks and was still wrong in the only way that mattered.</p>
+
+        <p><a href="../">← Live Transit Detroit series index</a></p>
+      </div>
+    </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>
