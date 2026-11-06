@@ -9940,6 +9940,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // cycle as the main envelope; resolves null on any failure so a SMART
   // outage can never fail or delay-mark the DDOT/QLINE poll.
   function fetchSmartDisplay(proxy) {
+    if (bootSmartDisplayP) { var p = bootSmartDisplayP; bootSmartDisplayP = null; return p; }
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, 8000);
     return fetch(proxy + '/smart-display.json', { cache: 'no-store', signal: ctrl.signal })
@@ -9956,14 +9957,25 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       .then(function (r) { clearTimeout(timer); return r.ok ? r.json() : null; },
             function () { clearTimeout(timer); return null; });
   }
+  // Startup sequence (2026-11-05): the boot section fires these first legs
+  // at module-boot time; each is consumed by the first post-build call of
+  // its poll function and never again.
+  var bootVehiclesP = null;
+  var bootAlertsP = null;
+  var bootSmartDisplayP = null;
   function poll() {
     var proxy = (window.FORGE_LIVE_DATA_URL || '').replace(/\/$/, '');
     if (!proxy) { setHeader(null, 'connecting…', false); return; }
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 20000);
-    fetch(proxy + '/vehicles.json', { cache: 'no-store', signal: ctrl.signal })
-      .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
-            function (e) { clearTimeout(timer); throw e; })
+    var firstLeg;
+    if (bootVehiclesP) { firstLeg = bootVehiclesP; bootVehiclesP = null; }
+    else {
+      var ctrl = new AbortController();
+      var timer = setTimeout(function () { ctrl.abort(); }, 20000);
+      firstLeg = fetch(proxy + '/vehicles.json', { cache: 'no-store', signal: ctrl.signal })
+        .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
+              function (e) { clearTimeout(timer); throw e; });
+    }
+    firstLeg
       .then(function (d) {
         if (!d || !Array.isArray(d.vehicles)) throw new Error('bad payload');
         // SMART (reactivated 2026-10-15) joins here: the display
@@ -10689,11 +10701,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   function pollAlerts() {
     var proxy = (window.FORGE_LIVE_DATA_URL || '').replace(/\/$/, '');
     if (!proxy) return;
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 15000);
-    fetch(proxy + '/alerts.json', { cache: 'no-store', signal: ctrl.signal })
-      .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
-            function (e) { clearTimeout(timer); throw e; })
+    var firstLeg;
+    if (bootAlertsP) { firstLeg = bootAlertsP; bootAlertsP = null; }
+    else {
+      var ctrl = new AbortController();
+      var timer = setTimeout(function () { ctrl.abort(); }, 15000);
+      firstLeg = fetch(proxy + '/alerts.json', { cache: 'no-store', signal: ctrl.signal })
+        .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
+              function (e) { clearTimeout(timer); throw e; });
+    }
+    firstLeg
       .then(function (d) {
         if (!d || !Array.isArray(d.alerts)) throw new Error('bad payload');
         // SMART service alerts are not published to this feed: the
@@ -12355,8 +12372,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   renderPlacesSr();
   // --- instant paint from logged history ---------------------------------------
   var historyRendered = false;
+  var bootFinalized = false; // startup sequence (2026-11-05): true once the phased boot completes
   function maybeRenderHistory() {
     if (historyRendered || !proj || !historyVehicles) return;
+    if (!bootFinalized) return; // history paint waits for the full build, as before
     if (liveEverOk) return; // live data already won the race
     historyRendered = true;
     lastVehicles = historyVehicles;
@@ -12392,431 +12411,45 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
   window.addEventListener('resize', resize);
 
-  Promise.all([
-    fetch('ddot-routes-3d.json?v=' + STAMP)
-      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }),
-    fetch('ddot-fleet.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }),
-    fetch('assets/detroit-streets.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }),
-    fetch('assets/detroit-street-names.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }),
-    fetch('peoplemover-3d.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }), // static layer is optional: map works without it
-    fetch('smart-routes-3d.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }), // SMART layer is optional: map works without it, see the merge below
-    fetch('qline-3d.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }) // QLINE layer is optional
-  ])
-    .then(function (all) {
-      var data = all[0];
-      fleetData = all[1];
-      streetData = all[2];
-      streetNameData = all[3];
-      var pmData = all[4];
-      var smartData = all[5];
-      var qlineData = all[6];
-      // SMART REACTIVATED 2026-10-15 (Justin's direction): the segment
-      // the removal tombstoned is live again. The routes file was never
-      // modified (it stayed in the repo as the rollback substrate), so
-      // the pre-removal merge returns verbatim and every registry index
-      // is again the pre-removal index (S1): DDOT 0-5123, SMART
-      // 5124-10560, QLINE 10561-10582. SMART routes are recolored
-      // uniformly to SMART red, as before the removal. If the fetch
-      // failed, the map runs DDOT+QLINE only (the pre-removal failure
-      // mode); smart-tombstones.json is no longer fetched or served.
-      if (smartData && Array.isArray(smartData.routes) && smartData.routes.length) {
-        data.groups = (data.groups || []).concat(smartData.groups || []);
-        smartData.routes.forEach(function (r) { r.color = '#313131'; });
-        data.routes = (data.routes || []).concat(smartData.routes);
-        data.stops = (data.stops || []).concat(smartData.stops || []);
-      }
-      // QLINE streetcar: merged in the same pattern. The proxy serves QLINE vehicle
-      // positions on the same /api/vehicles feed with agency='qline' and
-      // route_id='QLINE'. Absent file: the map runs without QLINE, no errors.
-      if (qlineData && Array.isArray(qlineData.routes) && qlineData.routes.length) {
-        data.groups = (data.groups || []).concat(qlineData.groups || []);
-        data.routes = (data.routes || []).concat(qlineData.routes);
-        data.stops = (data.stops || []).concat(qlineData.stops || []);
-      }
-      proj = {
-        lat0: data.projection.lat0,
-        lon0: data.projection.lon0,
-        mLat: 111320,
-        mLon: 111320 * Math.cos(data.projection.lat0 * DEG)
-      };
-
-      // Vector street map, drawn ourselves: dark ground + tiered Census
-      // TIGER/Line highway geometry. Crisp at every zoom; no raster tiles.
-      // The mosaic spans MOSAIC_BOUNDS; segments inside STREET_BOUNDS render
-      // always, segments outside live in streetExt, displayed only while
-      // the SMART group is displayed (see syncStreetExt).
-      var streetLocal = null;
-      (function buildStreets() {
-        // Ground covers the full mosaic bbox permanently. #0C0C0C against the
-        // #010103 scene background is near-identical, so the larger ground is
-        // visually a no-op while the extension is hidden.
-        var gnw = project(MOSAIC_BOUNDS.latN, MOSAIC_BOUNDS.lonW);
-        var gse = project(MOSAIC_BOUNDS.latS, MOSAIC_BOUNDS.lonE);
-        var gw = gse[0] - gnw[0], gh = gse[1] - gnw[1];
-        var ground = new THREE.Mesh(
-          new THREE.PlaneGeometry(gw, gh),
-          new THREE.MeshBasicMaterial({ color: 0x0c0c0c })
-        );
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.set(gnw[0] + gw / 2, 0, gnw[1] + gh / 2);
-        scene.add(ground);
-        // Core bounds in meters for the partition test (midpoint-in-core).
-        var cnw = project(STREET_BOUNDS.latN, STREET_BOUNDS.lonW);
-        var cse = project(STREET_BOUNDS.latS, STREET_BOUNDS.lonE);
-        var cx0 = cnw[0], cx1 = cse[0], cz0 = cnw[1], cz1 = cse[1];
-        // Safe-zone border: dashed amber perimeter at the coverage bounds so the
-        // edge of the mapped area stays visible while panning/scrolling. Floats
-        // at y=20 — above the street tiers (14-16), below the route decks (~66).
-        // Brand: Amber #B4B4B4, the academy's signal accent.
-        (function addBoundsBorder() {
-          var x0 = cx0, x1 = cx1, z0 = cz0, z1 = cz1, yB = 20;
-          var g = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(x0, yB, z0),
-            new THREE.Vector3(x1, yB, z0),
-            new THREE.Vector3(x1, yB, z1),
-            new THREE.Vector3(x0, yB, z1)
-          ]);
-          var border = new THREE.LineLoop(g, new THREE.LineDashedMaterial({
-            color: 0xB4B4B4, dashSize: 220, gapSize: 140,
-            transparent: true, opacity: 0.55, depthWrite: false
-          }));
-          border.computeLineDistances();
-          border.renderOrder = 5;
-          border.name = 'safe-zone-border';
-          scene.add(border);
-        })();
-        // Extension group: permanently hidden since the SMART removal.
-        streetExt = new THREE.Group();
-        streetExt.visible = false;
-        scene.add(streetExt);
-        // Expanded-bounds border: same amber language at the mosaic bounds,
-        // faded with the extension group so both states read correctly.
-        (function addExtBorder() {
-          var x0 = gnw[0], x1 = gse[0], z0 = gnw[1], z1 = gse[1], yB = 20;
-          var g = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(x0, yB, z0),
-            new THREE.Vector3(x1, yB, z0),
-            new THREE.Vector3(x1, yB, z1),
-            new THREE.Vector3(x0, yB, z1)
-          ]);
-          var mat = new THREE.LineDashedMaterial({
-            color: 0xB4B4B4, dashSize: 220, gapSize: 140,
-            transparent: true, opacity: 0, depthWrite: false
-          });
-          var border = new THREE.LineLoop(g, mat);
-          border.computeLineDistances();
-          border.renderOrder = 5;
-          border.name = 'safe-zone-border-ext';
-          streetExt.add(border);
-          streetExtMats.push({ mat: mat, baseOpacity: 0.55 });
-        })();
-        if (!streetData) return; // ground still renders; streets absent
-        function splitTier(arr) {
-          var core = [], ext = [];
-          for (var i = 0; i < arr.length; i += 4) {
-            var mx = (arr[i] + arr[i + 2]) / 2, mz = (arr[i + 1] + arr[i + 3]) / 2;
-            ((mx >= cx0 && mx <= cx1 && mz >= cz0 && mz <= cz1) ? core : ext)
-              .push(arr[i], arr[i + 1], arr[i + 2], arr[i + 3]);
-          }
-          return { core: core, ext: ext };
-        }
-        function addTier(arr, color, opacity, y, parent) {
-          if (!arr || !arr.length) return null;
-          var n = arr.length / 4;
-          var pos = new Float32Array(n * 6);
-          for (var i = 0; i < n; i++) {
-            pos[i * 6]     = arr[i * 4];
-            pos[i * 6 + 1] = y;
-            pos[i * 6 + 2] = arr[i * 4 + 1];
-            pos[i * 6 + 3] = arr[i * 4 + 2];
-            pos[i * 6 + 4] = y;
-            pos[i * 6 + 5] = arr[i * 4 + 3];
-          }
-          var g = new THREE.BufferGeometry();
-          g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-          var mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: opacity });
-          var lines = new THREE.LineSegments(g, mat);
-          lines.frustumCulled = false;
-          parent.add(lines);
-          if (parent === streetExt) streetExtMats.push({ mat: mat, baseOpacity: opacity });
-          return lines;
-        }
-        var fw = splitTier(streetData.freeway);
-        addTier(fw.core, 0x404040, 0.95, 16, scene);
-        addTier(fw.ext, 0x404040, 0.95, 16, streetExt);
-        var ar = splitTier(streetData.arterial);
-        addTier(ar.core, 0x2b2b2b, 0.9, 15, scene);
-        addTier(ar.ext, 0x2b2b2b, 0.9, 15, streetExt);
-        var lo = splitTier(streetData.local);
-        streetLocal = addTier(lo.core, 0x181818, 0.8, 14, scene);
-        streetExtLocal = addTier(lo.ext, 0x181818, 0.8, 14, streetExt);
-      })();
-
-      var casingMat = routeShader(new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.95, side: THREE.DoubleSide }), false);
-
-      // Per-group containers (stops clouds toggle with the group filter).
-      groupOrder = data.groups.map(function (g) { return g.id; });
-      data.groups.forEach(function (g) {
-        groupRoutes[g.id] = g.routes.slice();
-        var gr = new THREE.Group();
-        scene.add(gr);
-        groupObjs[g.id] = gr;
-      });
-
-      // Phase 1 merged guideway materials: one per class across all
-      // routes. Deck/skirt carry per-route alpha (dim x fade) and are
-      // transparent so per-route alpha can compose; depthWrite stays on,
-      // so crossings still resolve by the per-route deck heights.
-      var deckMatAll = routeShader(new THREE.MeshLambertMaterial({
-        color: 0xffffff, vertexColors: true, side: THREE.DoubleSide, transparent: true }), true);
-      var skirtMatAll = routeShader(new THREE.MeshLambertMaterial({
-        color: 0xffffff, vertexColors: true, side: THREE.DoubleSide, transparent: true }), true);
-      var glowMatAll = routeShader(new THREE.MeshBasicMaterial({
-        color: 0xffffff, vertexColors: true, transparent: true, opacity: 0.20,
-        depthWrite: false, side: THREE.DoubleSide }), false);
-      // Ribbon splintering repair, class 2(c): the glow used to blend
-      // additively, so corridor stacks summed past full white (six
-      // covering routes at Woodward & Warren summed to 1.20 -- the
-      // blown white/pink streaks). Normal blending caps any stack at
-      // the material opacity no matter how many routes cover a point:
-      // a lone route's halo is unchanged (Normal vs Additive differ
-      // only where fragments overlap), and stacked corridors now
-      // saturate at one halo's strength instead of blowing out.
-      streetGlowMats.push(glowMatAll);
-      var mergedGlow = [], mergedCase = [], mergedDeck = [], mergedSkirt = [];
-      data.routes.forEach(function (route, ri) {
-        var color = new THREE.Color(route.color);
-        routeColors[route.id] = color;
-        routeNames[route.id] = route.name;
-        routeById[route.id] = route;
-        routeOrder.push(route.id);
-        var grp = new THREE.Group();
-        // Stagger ribbon heights per route: coplanar overlapping guideways
-        // at crossings z-fight and flicker; a few meters of separation is
-        // invisible but kills the shimmer.
-        // Deliberate layer cake (meters): every route owns a unique level —
-        // 37 routes, no shared slots, so crossing/overlapping decks can never
-        // z-fight. Crossings read as clean overpasses, higher route over lower.
-        var yDeck = 66 + ri * 1.2;
-        var yGlow = 2 + ri * 0.25;
-        var yCase = 24 + ri * 0.15;
-        // Elevated guideway: the ribbon deck floats at y=66 with solid
-        // skirts to the ground, so routes read as 3D structures. Lambert
-        // materials let the directional light shade deck vs. sides.
-        // Phase 1: this route's geometry joins the merged per-class
-        // meshes after the loop, tagged with its route index and baked
-        // vertex color (deck/glow: the route color; skirt: color x 0.38,
-        // the pre-merge skirt material's shade). The group itself keeps
-        // only the label + tether; dimming is applyDim -> routeAlphaU.
-        var routeIdx = routeIndexById[route.id] = Object.keys(routeIndexById).length;
-        var skirtColor = color.clone().multiplyScalar(0.38);
-        var longest = null;
-        var glowGeos = [], caseGeos = [], deckGeos = [], skirtGeos = [];
-        route.paths.forEach(function (path, pi) {
-          if (path.length < 2) return;
-          // Ribbon splintering repair, class 2(a): sibling paths of a
-          // route shared the route's one deck level exactly, so
-          // direction pairs and branch variants drew coplanar over
-          // ~80% of path-km -- a depth-equal patchwork that no
-          // between-route height step could fix. Each path now takes
-          // a sub-meter slot inside its route's 1.2 m band (a
-          // golden-ratio spread of the path index: distinct slots at
-          // any path count, max 1.19 m), so no two guideway surfaces
-          // in the corpus share a height, while route order at
-          // crossings -- and the overpass read -- is unchanged. The
-          // glow takes the slot too (its stack is capped separately,
-          // at the material below) but not the fold lift: a 230 m
-          // additive haze has no fan to separate.
-          var slot = (pi * 0.6180339887 % 1) * 1.19;
-          glowGeos.push(ribbonGeometry(path, 230, yGlow, { repair: true, lift: false, slot: slot }));
-          caseGeos.push(ribbonGeometry(path, 95, yCase, { repair: true, slot: slot }));
-          deckGeos.push(ribbonGeometry(path, 72, yDeck, { repair: true, slot: slot }));
-          skirtGeos.push(skirtGeometry(path, 72, yDeck, { repair: true, slot: slot }));
-          if (!longest || path.length > longest.length) longest = path;
-        });
-        if (glowGeos.length) mergedGlow.push(tagRouteGeom(mergeGeoms(glowGeos), routeIdx, color));
-        if (caseGeos.length) mergedCase.push(tagRouteGeom(mergeGeoms(caseGeos), routeIdx, null));
-        if (deckGeos.length) mergedDeck.push(tagRouteGeom(mergeGeoms(deckGeos), routeIdx, color));
-        if (skirtGeos.length) mergedSkirt.push(tagRouteGeom(mergeGeoms(skirtGeos), routeIdx, skirtColor));
-        if (longest) {
-          var mid = longest[Math.floor(longest.length / 2)];
-          // Route display name: "name - number" unless they're identical (QLINE).
-          var displayName = routeLabel(route.id);
-          var label = makeLabel(displayName, route.color);
-          label.position.set(mid[0], 1050, mid[1]);
-          grp.add(label);
-          var tetherGeo = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(mid[0], yDeck, mid[1]),
-            new THREE.Vector3(mid[0], 980, mid[1])
-          ]);
-          var tether = new THREE.Line(tetherGeo, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.45 }));
-          grp.add(tether);
-          labelSprites.push({ sprite: label, routeId: route.id, tether: tether });
-        }
-        scene.add(grp);
-        routeGroups[route.id] = grp;
-      });
-      // Phase 1: the four merged guideway meshes (was: four meshes per
-      // route, ~332 draw calls; now four total). Deck normals are
-      // computed on the merged geometry — routes share no vertices, so
-      // the result equals the pre-merge per-route computation.
-      if (mergedGlow.length) {
-        var glowMesh = new THREE.Mesh(mergeGeoms(mergedGlow), glowMatAll);
-        glowMesh.frustumCulled = false;
-        scene.add(glowMesh);
-      }
-      if (mergedCase.length) {
-        var caseMesh = new THREE.Mesh(mergeGeoms(mergedCase), casingMat);
-        caseMesh.frustumCulled = false;
-        scene.add(caseMesh);
-      }
-      if (mergedDeck.length) {
-        var deckGeoAll = windingSplitNormals(mergeGeoms(mergedDeck));
-        // (Ribbon splintering repair, class 1 -- normal discipline.
-        // Plain computeVertexNormals on the merged deck averages face
-        // normals across every fold, splitting vertices into +Y/-Y
-        // populations; triangles whose winding and dominant normal
-        // population disagree shade at ~0.06 luminance against ~1.42
-        // lit -- the near-black starburst shards. windingSplitNormals
-        // duplicates vertices at winding boundaries so each leg keeps
-        // its own population. Uniform up normals were built, measured
-        // and rejected during this repair: under the deck's DoubleSide
-        // material they flip to down on the downward-winding runs and
-        // blacken the whole deck, straight paths included.)
-        var deckMesh = new THREE.Mesh(deckGeoAll, deckMatAll);
-        deckMesh.frustumCulled = false;
-        scene.add(deckMesh);
-      }
-      if (mergedSkirt.length) {
-        var skirtMesh = new THREE.Mesh(mergeGeoms(mergedSkirt), skirtMatAll);
-        skirtMesh.frustumCulled = false;
-        scene.add(skirtMesh);
-      }
-
-      // Stops are rebuilt from stopData by rebuildStops() (per-route colors,
-      // paper-white hubs) whenever filters change; see the stops section.
-      stopData = data.stops || [];
-      try { applyPlanDeepLink(); } catch (e) { errLog('planner', 'deep-link prefill failed: ' + ((e && e.message) || e)); }
-      if (typeof window.__setRideData === 'function') {
-        window.__setRideData(data.routes || [], stopData);
-      }
-
-      // People Mover static layer: built once, toggled independently of the
-      // DDOT route filters. Absent (fetch failed) the map simply has no PM layer.
-      if (pmData && pmData.loop && pmData.stations) buildPeopleMover(pmData);
-
-      // Belle Isle static layer: built once from the OSM island outline.
-      // Absent (fetch failed) the map simply has no island landmass.
-      fetch('assets/belle-isle.json?v=' + STAMP)
-        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-        .then(function (B) {
-          buildBelleIsle(B);
-          // HD topography rides the same optional-layer discipline.
-          fetch('assets/belle-isle-topo.json?v=' + STAMP)
-            .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-            .then(function (T) { buildBelleIsleTopo(T, B); })
-            .catch(function () { /* flat island stands without it */ });
-        })
-        .catch(function () { /* island is a bonus; map works without it */ });
-
-      // Water + far-shore static layer (project 16): built once from
-      // TIGER+OSM geometry. Absent (fetch failed) the map simply has
-      // no water layer.
-      fetch('assets/detroit-water.json?v=' + STAMP)
-        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-        .then(function (W) { buildWater(W); })
-        .catch(function () { /* water is a bonus; map works without it */ });
-
-      /* LANDMARK-MASSING-BEGIN v20261006-1700 — staging-only Phase A.
-         True-form OSM landmark massing (single merged mesh, 1 draw call).
-         Geometry: /tmp/build_landmarks.py. Revert: delete this block and
-         landmarks.json. */
-      (function () {
-        if (window.__landmarksA) return; window.__landmarksA = true;
-        fetch('landmarks.json?v=' + STAMP)
-          .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-          .then(function (L) {
-            var g = new THREE.BufferGeometry();
-            g.setAttribute('position', new THREE.Float32BufferAttribute(L.positions, 3));
-            g.setIndex(L.index);
-            g.computeVertexNormals();
-            var mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: 0x484848 }));
-            mesh.frustumCulled = false;
-            scene.add(mesh);
-          })
-          .catch(function (e) { console.warn('[landmarks] ' + e.message); });
-      })();
-      /* LANDMARK-MASSING-END */
-
-      // Alphabetize route lists by route name.
-      routeOrder.sort(function (a, b) {
-        return (routeNames[a] || '').localeCompare(routeNames[b] || '');
-      });
-      buildFilterPanel(data.groups);
-      applyFilters();
-      syncFilterUI();
-      rebuildStops();
-      // First-view launcher sheet (Concept 3): shown once the map's
-      // data has landed, in its persisted open/collapsed state. There
-      // is no boot location prompt in any form (deleted above).
-      fvInitFirstView();
-      $('filter-btn').addEventListener('click', function () { togglePanel(); setBrowse(false); });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') togglePanel(false);
-      });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setBrowse(false); });
-
-      resize();
-      setHeader(null, 'connecting…', false);
-      fetchHistory();
-      maybeRenderHistory();
-      poll();
-      startAlertsPoll();
-      // Hidden-tab backoff (credit saver): while the tab is hidden, skip the
-      // 60 s vehicle poll and re-check every 10 min instead. On return to
-      // visible, poll immediately and resume the normal cadence.
-      var HIDDEN_POLL_MS = 600000;
-      var pollTimer = null;
-      function schedulePoll() {
-        if (pollTimer) clearTimeout(pollTimer);
-        pollTimer = setTimeout(function () {
-          pollTimer = null;
-          if (!document.hidden) poll();
-          schedulePoll();
-        }, document.hidden ? HIDDEN_POLL_MS : POLL_MS);
-      }
-      schedulePoll();
-      document.addEventListener('visibilitychange', function () {
-        if (!document.hidden) { poll(); schedulePoll(); }
-      });
-      // Empirical motion prior: restore the local speed map, fetch the
-      // telemetry timing cells now and hourly; persist the map on hide.
-      loadSpeedmap();
-      fetchTimingCells();
-      setInterval(fetchTimingCells, 3600000);
-      window.addEventListener('pagehide', function () {
-        try { localStorage.setItem('fl-speedmap-v1', JSON.stringify(localSegs)); } catch (err) {}
-      });
-      var lastBusMode = null;
-      var lastFrameAt = performance.now();
-      var wdDeferStreak = 0;
-      var ehStuckSince = 0; // step 4a: when the stuck-interaction condition began
-      var frameErrStreak = 0;
-      var frameErrLogged = false;
+  // --- startup sequence (2026-11-05, owner directive) -------------------------
+  // Phased boot. The old boot was one Promise.all over all seven static
+  // files (3,722,289 B): the first frame waited for the slowest file
+  // (SMART routes, 1,327,160 B), for the full 83-route geometry build,
+  // and only then did the first live-vehicles fetch even start. Phases:
+  //   Phase 0 — the HTML shell + styles paint the map stage and header
+  //     (unchanged; the module graph — three 747,051 B + this file +
+  //     OrbitControls 40,755 B — loads as before).
+  //   Phase 1 — every fetch fires now: the seven static files, the water
+  //     layer (built on resolve; it needs only the scene), the logged-
+  //     history payload, and the first legs of the live polls (vehicles,
+  //     alerts, SMART display), held — never applied — until the build
+  //     completes, exactly where the poll functions have always
+  //     consumed them.
+  //   Phase 2 — FIRST FRAME: gate = DDOT routes (821,322 B; carries the
+  //     projection) + Detroit streets (1,198,675 B). Projection set,
+  //     streets built, render loop started in render-only mode (camera
+  //     live; the full frame body unlocks at bootFinalized) — the rider
+  //     sees the city while the route geometry is still arriving.
+  //   Phase 3 — gate = SMART + QLINE + People Mover + fleet + street
+  //     names resolved (all in flight since Phase 1): the full build
+  //     runs exactly as before (merges, ribbons, stops, panel), the
+  //     loop unlocks, and the first polls apply the payloads Phase 1
+  //     already fetched.
+  //   Phase 4 — enhancements, unchanged: Belle Isle (+ topo) and the
+  //     landmark massing fire at the end of the build, as before.
+  // Post-boot behavior is untouched: same merges, same build order,
+  // same poll cadence and payload handling; only the wait moved.
+  var lastBusMode = null;
+  var lastFrameAt = performance.now();
+  var wdDeferStreak = 0;
+  var ehStuckSince = 0; // step 4a: when the stuck-interaction condition began
+  var frameErrStreak = 0;
+  var frameErrLogged = false;
+  var streetLocal = null; // assigned by buildStreets (Phase 2); read by the frame loop
+  function startRenderLoop() {
       renderer.setAnimationLoop(function () {
         try {
+        if (!bootFinalized) { controls.update(); renderer.render(scene, camera); return; }
         controls.update();
         // Camera floor: the zoom-to-cursor dolly walks the lens down the
         // pointer ray, and a large wheel/pinch delta can tunnel it straight
@@ -12995,6 +12628,463 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           if (frameErrStreak >= 120) ladderReload('frames');
         }
       });
+  }
+  // Phase 1: first legs of the live polls, fired now and held for the
+  // poll functions' first post-build calls. An unconsumed rejection
+  // (the boot-failure path) is kept quiet by the extra catch branch;
+  // consumers of the stored promise still see the rejection.
+  (function () {
+    var proxy = (window.FORGE_LIVE_DATA_URL || '').replace(/\/$/, '');
+    if (!proxy) return;
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 20000);
+    bootVehiclesP = fetch(proxy + '/vehicles.json', { cache: 'no-store', signal: ctrl.signal })
+      .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
+            function (e) { clearTimeout(timer); throw e; });
+    bootVehiclesP.catch(function () {});
+    var ctrlA = new AbortController();
+    var timerA = setTimeout(function () { ctrlA.abort(); }, 15000);
+    bootAlertsP = fetch(proxy + '/alerts.json', { cache: 'no-store', signal: ctrlA.signal })
+      .then(function (r) { clearTimeout(timerA); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
+            function (e) { clearTimeout(timerA); throw e; });
+    bootAlertsP.catch(function () {});
+    var ctrlS = new AbortController();
+    var timerS = setTimeout(function () { ctrlS.abort(); }, 8000);
+    bootSmartDisplayP = fetch(proxy + '/smart-display.json', { cache: 'no-store', signal: ctrlS.signal })
+      .then(function (r) { clearTimeout(timerS); return r.ok ? r.json() : null; },
+            function () { clearTimeout(timerS); return null; });
+  })();
+  fetchHistory();
+  // Static fetch starters (Phase 1): identical URLs and failure
+  // semantics to the old Promise.all legs — DDOT routes is the only
+  // required file; every other file resolves null on failure.
+  var fDdot = fetch('ddot-routes-3d.json?v=' + STAMP)
+    .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  var fFleet = fetch('ddot-fleet.json?v=' + STAMP)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; });
+  var fStreets = fetch('assets/detroit-streets.json?v=' + STAMP)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; });
+  var fNames = fetch('assets/detroit-street-names.json?v=' + STAMP)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; });
+  var fPM = fetch('peoplemover-3d.json?v=' + STAMP)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; }); // static layer is optional: map works without it
+  var fSmart = fetch('smart-routes-3d.json?v=' + STAMP)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; }); // SMART layer is optional: map works without it, see the merge below
+  var fQline = fetch('qline-3d.json?v=' + STAMP)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; }); // QLINE layer is optional
+  // Water + far-shore static layer (project 16): built once from
+  // TIGER+OSM geometry. Its coordinates are pre-projected meters and
+  // the build needs only the scene, so the fetch fires in Phase 1 and
+  // the layer builds whenever it lands. Absent (fetch failed) the map
+  // simply has no water layer.
+  fetch('assets/detroit-water.json?v=' + STAMP)
+    .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function (W) { buildWater(W); })
+    .catch(function () { /* water is a bonus; map works without it */ });
+  var bootData = null;
+  // Phase 2 gate: projection + Detroit core geometry, then first frame.
+  Promise.all([fDdot, fStreets])
+    .then(function (core) {
+      bootData = core[0];
+      streetData = core[1];
+      proj = {
+        lat0: bootData.projection.lat0,
+        lon0: bootData.projection.lon0,
+        mLat: 111320,
+        mLon: 111320 * Math.cos(bootData.projection.lat0 * DEG)
+      };
+      // Vector street map, drawn ourselves: dark ground + tiered Census
+      // TIGER/Line highway geometry. Crisp at every zoom; no raster tiles.
+      // The mosaic spans MOSAIC_BOUNDS; segments inside STREET_BOUNDS render
+      // always, segments outside live in streetExt, displayed only while
+      // the SMART group is displayed (see syncStreetExt).
+      streetLocal = null;
+      (function buildStreets() {
+        // Ground covers the full mosaic bbox permanently. #0C0C0C against the
+        // #010103 scene background is near-identical, so the larger ground is
+        // visually a no-op while the extension is hidden.
+        var gnw = project(MOSAIC_BOUNDS.latN, MOSAIC_BOUNDS.lonW);
+        var gse = project(MOSAIC_BOUNDS.latS, MOSAIC_BOUNDS.lonE);
+        var gw = gse[0] - gnw[0], gh = gse[1] - gnw[1];
+        var ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(gw, gh),
+          new THREE.MeshBasicMaterial({ color: 0x0c0c0c })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.set(gnw[0] + gw / 2, 0, gnw[1] + gh / 2);
+        scene.add(ground);
+        // Core bounds in meters for the partition test (midpoint-in-core).
+        var cnw = project(STREET_BOUNDS.latN, STREET_BOUNDS.lonW);
+        var cse = project(STREET_BOUNDS.latS, STREET_BOUNDS.lonE);
+        var cx0 = cnw[0], cx1 = cse[0], cz0 = cnw[1], cz1 = cse[1];
+        // Safe-zone border: dashed amber perimeter at the coverage bounds so the
+        // edge of the mapped area stays visible while panning/scrolling. Floats
+        // at y=20 — above the street tiers (14-16), below the route decks (~66).
+        // Brand: Amber #B4B4B4, the academy's signal accent.
+        (function addBoundsBorder() {
+          var x0 = cx0, x1 = cx1, z0 = cz0, z1 = cz1, yB = 20;
+          var g = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(x0, yB, z0),
+            new THREE.Vector3(x1, yB, z0),
+            new THREE.Vector3(x1, yB, z1),
+            new THREE.Vector3(x0, yB, z1)
+          ]);
+          var border = new THREE.LineLoop(g, new THREE.LineDashedMaterial({
+            color: 0xB4B4B4, dashSize: 220, gapSize: 140,
+            transparent: true, opacity: 0.55, depthWrite: false
+          }));
+          border.computeLineDistances();
+          border.renderOrder = 5;
+          border.name = 'safe-zone-border';
+          scene.add(border);
+        })();
+        // Extension group: permanently hidden since the SMART removal.
+        streetExt = new THREE.Group();
+        streetExt.visible = false;
+        scene.add(streetExt);
+        // Expanded-bounds border: same amber language at the mosaic bounds,
+        // faded with the extension group so both states read correctly.
+        (function addExtBorder() {
+          var x0 = gnw[0], x1 = gse[0], z0 = gnw[1], z1 = gse[1], yB = 20;
+          var g = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(x0, yB, z0),
+            new THREE.Vector3(x1, yB, z0),
+            new THREE.Vector3(x1, yB, z1),
+            new THREE.Vector3(x0, yB, z1)
+          ]);
+          var mat = new THREE.LineDashedMaterial({
+            color: 0xB4B4B4, dashSize: 220, gapSize: 140,
+            transparent: true, opacity: 0, depthWrite: false
+          });
+          var border = new THREE.LineLoop(g, mat);
+          border.computeLineDistances();
+          border.renderOrder = 5;
+          border.name = 'safe-zone-border-ext';
+          streetExt.add(border);
+          streetExtMats.push({ mat: mat, baseOpacity: 0.55 });
+        })();
+        if (!streetData) return; // ground still renders; streets absent
+        function splitTier(arr) {
+          var core = [], ext = [];
+          for (var i = 0; i < arr.length; i += 4) {
+            var mx = (arr[i] + arr[i + 2]) / 2, mz = (arr[i + 1] + arr[i + 3]) / 2;
+            ((mx >= cx0 && mx <= cx1 && mz >= cz0 && mz <= cz1) ? core : ext)
+              .push(arr[i], arr[i + 1], arr[i + 2], arr[i + 3]);
+          }
+          return { core: core, ext: ext };
+        }
+        function addTier(arr, color, opacity, y, parent) {
+          if (!arr || !arr.length) return null;
+          var n = arr.length / 4;
+          var pos = new Float32Array(n * 6);
+          for (var i = 0; i < n; i++) {
+            pos[i * 6]     = arr[i * 4];
+            pos[i * 6 + 1] = y;
+            pos[i * 6 + 2] = arr[i * 4 + 1];
+            pos[i * 6 + 3] = arr[i * 4 + 2];
+            pos[i * 6 + 4] = y;
+            pos[i * 6 + 5] = arr[i * 4 + 3];
+          }
+          var g = new THREE.BufferGeometry();
+          g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+          var mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: opacity });
+          var lines = new THREE.LineSegments(g, mat);
+          lines.frustumCulled = false;
+          parent.add(lines);
+          if (parent === streetExt) streetExtMats.push({ mat: mat, baseOpacity: opacity });
+          return lines;
+        }
+        var fw = splitTier(streetData.freeway);
+        addTier(fw.core, 0x404040, 0.95, 16, scene);
+        addTier(fw.ext, 0x404040, 0.95, 16, streetExt);
+        var ar = splitTier(streetData.arterial);
+        addTier(ar.core, 0x2b2b2b, 0.9, 15, scene);
+        addTier(ar.ext, 0x2b2b2b, 0.9, 15, streetExt);
+        var lo = splitTier(streetData.local);
+        streetLocal = addTier(lo.core, 0x181818, 0.8, 14, scene);
+        streetExtLocal = addTier(lo.ext, 0x181818, 0.8, 14, streetExt);
+      })();
+      resize();
+      startRenderLoop();
+      // Phase 3 gate: the remaining static files (in flight since Phase 1).
+      return Promise.all([fSmart, fQline, fPM, fFleet, fNames]);
+    })
+    .then(function (rest) {
+      var all = [bootData, rest[3], streetData, rest[4], rest[2], rest[0], rest[1]];
+      var data = all[0];
+      fleetData = all[1];
+      streetData = all[2];
+      streetNameData = all[3];
+      var pmData = all[4];
+      var smartData = all[5];
+      var qlineData = all[6];
+      // SMART REACTIVATED 2026-10-15 (Justin's direction): the segment
+      // the removal tombstoned is live again. The routes file was never
+      // modified (it stayed in the repo as the rollback substrate), so
+      // the pre-removal merge returns verbatim and every registry index
+      // is again the pre-removal index (S1): DDOT 0-5123, SMART
+      // 5124-10560, QLINE 10561-10582. SMART routes are recolored
+      // uniformly to SMART red, as before the removal. If the fetch
+      // failed, the map runs DDOT+QLINE only (the pre-removal failure
+      // mode); smart-tombstones.json is no longer fetched or served.
+      if (smartData && Array.isArray(smartData.routes) && smartData.routes.length) {
+        data.groups = (data.groups || []).concat(smartData.groups || []);
+        smartData.routes.forEach(function (r) { r.color = '#313131'; });
+        data.routes = (data.routes || []).concat(smartData.routes);
+        data.stops = (data.stops || []).concat(smartData.stops || []);
+      }
+      // QLINE streetcar: merged in the same pattern. The proxy serves QLINE vehicle
+      // positions on the same /api/vehicles feed with agency='qline' and
+      // route_id='QLINE'. Absent file: the map runs without QLINE, no errors.
+      if (qlineData && Array.isArray(qlineData.routes) && qlineData.routes.length) {
+        data.groups = (data.groups || []).concat(qlineData.groups || []);
+        data.routes = (data.routes || []).concat(qlineData.routes);
+        data.stops = (data.stops || []).concat(qlineData.stops || []);
+      }
+      var casingMat = routeShader(new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.95, side: THREE.DoubleSide }), false);
+
+      // Per-group containers (stops clouds toggle with the group filter).
+      groupOrder = data.groups.map(function (g) { return g.id; });
+      data.groups.forEach(function (g) {
+        groupRoutes[g.id] = g.routes.slice();
+        var gr = new THREE.Group();
+        scene.add(gr);
+        groupObjs[g.id] = gr;
+      });
+
+      // Phase 1 merged guideway materials: one per class across all
+      // routes. Deck/skirt carry per-route alpha (dim x fade) and are
+      // transparent so per-route alpha can compose; depthWrite stays on,
+      // so crossings still resolve by the per-route deck heights.
+      var deckMatAll = routeShader(new THREE.MeshLambertMaterial({
+        color: 0xffffff, vertexColors: true, side: THREE.DoubleSide, transparent: true }), true);
+      var skirtMatAll = routeShader(new THREE.MeshLambertMaterial({
+        color: 0xffffff, vertexColors: true, side: THREE.DoubleSide, transparent: true }), true);
+      var glowMatAll = routeShader(new THREE.MeshBasicMaterial({
+        color: 0xffffff, vertexColors: true, transparent: true, opacity: 0.20,
+        depthWrite: false, side: THREE.DoubleSide }), false);
+      // Ribbon splintering repair, class 2(c): the glow used to blend
+      // additively, so corridor stacks summed past full white (six
+      // covering routes at Woodward & Warren summed to 1.20 -- the
+      // blown white/pink streaks). Normal blending caps any stack at
+      // the material opacity no matter how many routes cover a point:
+      // a lone route's halo is unchanged (Normal vs Additive differ
+      // only where fragments overlap), and stacked corridors now
+      // saturate at one halo's strength instead of blowing out.
+      streetGlowMats.push(glowMatAll);
+      var mergedGlow = [], mergedCase = [], mergedDeck = [], mergedSkirt = [];
+      data.routes.forEach(function (route, ri) {
+        var color = new THREE.Color(route.color);
+        routeColors[route.id] = color;
+        routeNames[route.id] = route.name;
+        routeById[route.id] = route;
+        routeOrder.push(route.id);
+        var grp = new THREE.Group();
+        // Stagger ribbon heights per route: coplanar overlapping guideways
+        // at crossings z-fight and flicker; a few meters of separation is
+        // invisible but kills the shimmer.
+        // Deliberate layer cake (meters): every route owns a unique level —
+        // 37 routes, no shared slots, so crossing/overlapping decks can never
+        // z-fight. Crossings read as clean overpasses, higher route over lower.
+        var yDeck = 66 + ri * 1.2;
+        var yGlow = 2 + ri * 0.25;
+        var yCase = 24 + ri * 0.15;
+        // Elevated guideway: the ribbon deck floats at y=66 with solid
+        // skirts to the ground, so routes read as 3D structures. Lambert
+        // materials let the directional light shade deck vs. sides.
+        // Phase 1: this route's geometry joins the merged per-class
+        // meshes after the loop, tagged with its route index and baked
+        // vertex color (deck/glow: the route color; skirt: color x 0.38,
+        // the pre-merge skirt material's shade). The group itself keeps
+        // only the label + tether; dimming is applyDim -> routeAlphaU.
+        var routeIdx = routeIndexById[route.id] = Object.keys(routeIndexById).length;
+        var skirtColor = color.clone().multiplyScalar(0.38);
+        var longest = null;
+        var glowGeos = [], caseGeos = [], deckGeos = [], skirtGeos = [];
+        route.paths.forEach(function (path, pi) {
+          if (path.length < 2) return;
+          // Ribbon splintering repair, class 2(a): sibling paths of a
+          // route shared the route's one deck level exactly, so
+          // direction pairs and branch variants drew coplanar over
+          // ~80% of path-km -- a depth-equal patchwork that no
+          // between-route height step could fix. Each path now takes
+          // a sub-meter slot inside its route's 1.2 m band (a
+          // golden-ratio spread of the path index: distinct slots at
+          // any path count, max 1.19 m), so no two guideway surfaces
+          // in the corpus share a height, while route order at
+          // crossings -- and the overpass read -- is unchanged. The
+          // glow takes the slot too (its stack is capped separately,
+          // at the material below) but not the fold lift: a 230 m
+          // additive haze has no fan to separate.
+          var slot = (pi * 0.6180339887 % 1) * 1.19;
+          glowGeos.push(ribbonGeometry(path, 230, yGlow, { repair: true, lift: false, slot: slot }));
+          caseGeos.push(ribbonGeometry(path, 95, yCase, { repair: true, slot: slot }));
+          deckGeos.push(ribbonGeometry(path, 72, yDeck, { repair: true, slot: slot }));
+          skirtGeos.push(skirtGeometry(path, 72, yDeck, { repair: true, slot: slot }));
+          if (!longest || path.length > longest.length) longest = path;
+        });
+        if (glowGeos.length) mergedGlow.push(tagRouteGeom(mergeGeoms(glowGeos), routeIdx, color));
+        if (caseGeos.length) mergedCase.push(tagRouteGeom(mergeGeoms(caseGeos), routeIdx, null));
+        if (deckGeos.length) mergedDeck.push(tagRouteGeom(mergeGeoms(deckGeos), routeIdx, color));
+        if (skirtGeos.length) mergedSkirt.push(tagRouteGeom(mergeGeoms(skirtGeos), routeIdx, skirtColor));
+        if (longest) {
+          var mid = longest[Math.floor(longest.length / 2)];
+          // Route display name: "name - number" unless they're identical (QLINE).
+          var displayName = routeLabel(route.id);
+          var label = makeLabel(displayName, route.color);
+          label.position.set(mid[0], 1050, mid[1]);
+          grp.add(label);
+          var tetherGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(mid[0], yDeck, mid[1]),
+            new THREE.Vector3(mid[0], 980, mid[1])
+          ]);
+          var tether = new THREE.Line(tetherGeo, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.45 }));
+          grp.add(tether);
+          labelSprites.push({ sprite: label, routeId: route.id, tether: tether });
+        }
+        scene.add(grp);
+        routeGroups[route.id] = grp;
+      });
+      // Phase 1: the four merged guideway meshes (was: four meshes per
+      // route, ~332 draw calls; now four total). Deck normals are
+      // computed on the merged geometry — routes share no vertices, so
+      // the result equals the pre-merge per-route computation.
+      if (mergedGlow.length) {
+        var glowMesh = new THREE.Mesh(mergeGeoms(mergedGlow), glowMatAll);
+        glowMesh.frustumCulled = false;
+        scene.add(glowMesh);
+      }
+      if (mergedCase.length) {
+        var caseMesh = new THREE.Mesh(mergeGeoms(mergedCase), casingMat);
+        caseMesh.frustumCulled = false;
+        scene.add(caseMesh);
+      }
+      if (mergedDeck.length) {
+        var deckGeoAll = windingSplitNormals(mergeGeoms(mergedDeck));
+        // (Ribbon splintering repair, class 1 -- normal discipline.
+        // Plain computeVertexNormals on the merged deck averages face
+        // normals across every fold, splitting vertices into +Y/-Y
+        // populations; triangles whose winding and dominant normal
+        // population disagree shade at ~0.06 luminance against ~1.42
+        // lit -- the near-black starburst shards. windingSplitNormals
+        // duplicates vertices at winding boundaries so each leg keeps
+        // its own population. Uniform up normals were built, measured
+        // and rejected during this repair: under the deck's DoubleSide
+        // material they flip to down on the downward-winding runs and
+        // blacken the whole deck, straight paths included.)
+        var deckMesh = new THREE.Mesh(deckGeoAll, deckMatAll);
+        deckMesh.frustumCulled = false;
+        scene.add(deckMesh);
+      }
+      if (mergedSkirt.length) {
+        var skirtMesh = new THREE.Mesh(mergeGeoms(mergedSkirt), skirtMatAll);
+        skirtMesh.frustumCulled = false;
+        scene.add(skirtMesh);
+      }
+
+      // Stops are rebuilt from stopData by rebuildStops() (per-route colors,
+      // paper-white hubs) whenever filters change; see the stops section.
+      stopData = data.stops || [];
+      try { applyPlanDeepLink(); } catch (e) { errLog('planner', 'deep-link prefill failed: ' + ((e && e.message) || e)); }
+      if (typeof window.__setRideData === 'function') {
+        window.__setRideData(data.routes || [], stopData);
+      }
+
+      // People Mover static layer: built once, toggled independently of the
+      // DDOT route filters. Absent (fetch failed) the map simply has no PM layer.
+      if (pmData && pmData.loop && pmData.stations) buildPeopleMover(pmData);
+
+      // Belle Isle static layer: built once from the OSM island outline.
+      // Absent (fetch failed) the map simply has no island landmass.
+      fetch('assets/belle-isle.json?v=' + STAMP)
+        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+        .then(function (B) {
+          buildBelleIsle(B);
+          // HD topography rides the same optional-layer discipline.
+          fetch('assets/belle-isle-topo.json?v=' + STAMP)
+            .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+            .then(function (T) { buildBelleIsleTopo(T, B); })
+            .catch(function () { /* flat island stands without it */ });
+        })
+        .catch(function () { /* island is a bonus; map works without it */ });
+
+
+      /* LANDMARK-MASSING-BEGIN v20261006-1700 — staging-only Phase A.
+         True-form OSM landmark massing (single merged mesh, 1 draw call).
+         Geometry: /tmp/build_landmarks.py. Revert: delete this block and
+         landmarks.json. */
+      (function () {
+        if (window.__landmarksA) return; window.__landmarksA = true;
+        fetch('landmarks.json?v=' + STAMP)
+          .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+          .then(function (L) {
+            var g = new THREE.BufferGeometry();
+            g.setAttribute('position', new THREE.Float32BufferAttribute(L.positions, 3));
+            g.setIndex(L.index);
+            g.computeVertexNormals();
+            var mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: 0x484848 }));
+            mesh.frustumCulled = false;
+            scene.add(mesh);
+          })
+          .catch(function (e) { console.warn('[landmarks] ' + e.message); });
+      })();
+      /* LANDMARK-MASSING-END */
+
+      // Alphabetize route lists by route name.
+      routeOrder.sort(function (a, b) {
+        return (routeNames[a] || '').localeCompare(routeNames[b] || '');
+      });
+      buildFilterPanel(data.groups);
+      applyFilters();
+      syncFilterUI();
+      rebuildStops();
+      // First-view launcher sheet (Concept 3): shown once the map's
+      // data has landed, in its persisted open/collapsed state. There
+      // is no boot location prompt in any form (deleted above).
+      fvInitFirstView();
+      $('filter-btn').addEventListener('click', function () { togglePanel(); setBrowse(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') togglePanel(false);
+      });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setBrowse(false); });
+
+      resize();
+      setHeader(null, 'connecting…', false);
+      bootFinalized = true;
+      maybeRenderHistory();
+      poll();
+      startAlertsPoll();
+      // Hidden-tab backoff (credit saver): while the tab is hidden, skip the
+      // 60 s vehicle poll and re-check every 10 min instead. On return to
+      // visible, poll immediately and resume the normal cadence.
+      var HIDDEN_POLL_MS = 600000;
+      var pollTimer = null;
+      function schedulePoll() {
+        if (pollTimer) clearTimeout(pollTimer);
+        pollTimer = setTimeout(function () {
+          pollTimer = null;
+          if (!document.hidden) poll();
+          schedulePoll();
+        }, document.hidden ? HIDDEN_POLL_MS : POLL_MS);
+      }
+      schedulePoll();
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) { poll(); schedulePoll(); }
+      });
+      // Empirical motion prior: restore the local speed map, fetch the
+      // telemetry timing cells now and hourly; persist the map on hide.
+      loadSpeedmap();
+      fetchTimingCells();
+      setInterval(fetchTimingCells, 3600000);
+      window.addEventListener('pagehide', function () {
+        try { localStorage.setItem('fl-speedmap-v1', JSON.stringify(localSegs)); } catch (err) {}
+      });
       // Restore the camera + route selection a recovery reload saved
       // (2026-11-05): one-shot, 10-minute freshness window.
       try {
@@ -13066,6 +13156,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       });
     })
     .catch(function () {
+      try { renderer.setAnimationLoop(null); } catch (e) {}
       fail('Could not load route data. Please check your connection and reload.');
     });
 
