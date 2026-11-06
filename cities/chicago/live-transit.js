@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261105-chi3';
+  var STAMP = '20261105-chi4';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -449,14 +449,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       fail('The map display stopped and could not be restored automatically. Close this tab and reopen the page to continue.');
       return;
     }
-    // D4 (round 2): do not rebuild/re-show the interruption toast when
-    // it is already on screen (the DOM rebuild is what made the dismiss
-    // button's reference go stale in the browser check), and do not
-    // re-show it at all inside the mute window after a rider dismiss.
-    if (!flInterruptToastUp && Date.now() >= flInterruptMutedUntil) {
-      flInterruptToastUp = true;
-      showToast('Display interrupted — reloading the map…', true);
-    }
+    // D4 (round 3): the interruption toast is NOT shown on entry. A
+    // stand-down/defer cycle is not an interruption the rider needs to
+    // see; the notice appears only in the reload branch below, at the
+    // moment a reload is actually committed. (Rounds 1–2 showed it on
+    // entry, so a slow-but-alive render loop flickered it ~1/s.)
     setTimeout(function () {
       var gl = null;
       try { gl = renderer.getContext(); } catch (e) {}
@@ -478,6 +475,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // the one automatic recovery and a genuine failure within 30 s
       // went straight to the terminal fallback.
       FLDIAG.reloads++; // FL-DIAG (temporary)
+      // D4 (round 3): reload is committed — now the rider sees why.
+      flInterruptToastUp = true;
+      showToast('Display interrupted — reloading the map…', true);
       try { sessionStorage.setItem('fl-recover-at', '' + Date.now()); } catch (e) {}
       // State preservation (2026-11-05, owner directive): a recovery
       // reload must not destroy the rider's place — snapshot camera and
@@ -955,7 +955,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // routeGroups[rid].visible keeps its exact semantics for the label,
   // tether, alert overlays, and updateBuses' group check; applyFilters
   // mirrors the same routeShown() result into uRouteVis.
-  var ROUTE_MAX = 128;
+  var ROUTE_MAX = 192; // D1b (round 3): Chicago carries 132 routes; the inherited 128 overflowed the uRouteVis/uRouteAlpha shader arrays (routes with index >= 128 were discard-tested against out-of-range uniforms)
   var routeVisU = { value: new Float32Array(ROUTE_MAX).fill(1) };
   var routeAlphaU = { value: new Float32Array(ROUTE_MAX).fill(1) };
   var routeIndexById = {};  // route id -> index into the uniform arrays
@@ -12846,6 +12846,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         fetch('cta-empty.json?v=' + STAMP)
           .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
           .then(function (L) {
+            // D1 (round 3): a payload without real positions/index arrays
+            // (Chicago's cta-empty.json stub is {}) must not build a mesh:
+            // setIndex(undefined) leaves geometry.index === undefined, and
+            // renderBufferDirect's `index !== null` branch then throws on
+            // index.count — aborting every frame mid-render (the opaque
+            // pass drew, the transparent pass never ran: streets, water,
+            // ribbons and labels all vanished while ground+stops drew).
+            if (!L || !Array.isArray(L.positions) || !L.positions.length ||
+                !Array.isArray(L.index) || !L.index.length) return;
             var g = new THREE.BufferGeometry();
             g.setAttribute('position', new THREE.Float32BufferAttribute(L.positions, 3));
             g.setIndex(L.index);
@@ -12909,6 +12918,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       });
       var lastBusMode = null;
       var lastFrameAt = performance.now();
+      var flFrameEmaMs = 0; // D4 (round 3): measured frame cadence — EMA of successful frame intervals; the watchdog scales its gap threshold to it
       FLDIAG.loopStarted = true; // FL-DIAG (temporary)
       var wdDeferStreak = 0;
       var ehStuckSince = 0; // step 4a: when the stuck-interaction condition began
@@ -13079,7 +13089,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         smoothBadges();
         applyLogoFade();
         renderer.render(scene, camera);
-        lastFrameAt = performance.now();
+        // D4 (round 3): cadence sample from successful frames only.
+        var flNowMs = performance.now();
+        if (lastFrameAt) {
+          var flDtMs = flNowMs - lastFrameAt;
+          if (flDtMs > 0 && flDtMs < 30000) flFrameEmaMs = flFrameEmaMs ? (flFrameEmaMs * 0.8 + flDtMs * 0.2) : flDtMs;
+        }
+        lastFrameAt = flNowMs;
         flFrameAt = lastFrameAt; // step 1/4: snapshot mirror + supervisors
         ehFrameTick(lastFrameAt);
         frameErrStreak = 0;
@@ -13121,8 +13137,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         var gl = null;
         try { gl = renderer.getContext(); } catch (e) {}
         if (gl && gl.isContextLost()) { ladderReload('watchdog'); return; }
-        if (lastFrameAt && performance.now() - lastFrameAt <= 5000) wdDeferStreak = 0;
-        if (lastFrameAt && performance.now() - lastFrameAt > 5000) {
+        // D4 (round 3): the gap threshold scales to the measured frame
+        // cadence — roughly ten missed frames at the loop's own rate,
+        // floored at the inherited 5 s, capped at 45 s. A sustained
+        // slow-but-alive loop (software rendering at ~1 fps) is not an
+        // interruption; a genuine stall still trips it, just later.
+        var flGapMs = flFrameEmaMs ? Math.max(5000, Math.min(45000, Math.round(flFrameEmaMs * 10))) : 5000;
+        if (lastFrameAt && performance.now() - lastFrameAt <= flGapMs) wdDeferStreak = 0;
+        if (lastFrameAt && performance.now() - lastFrameAt > flGapMs) {
           // Interaction guard (2026-11-05, owner directive): a frame gap
           // during or just after active input is jank under the rider's
           // hand, not a dead loop — defer the reload and hand the loop a
@@ -13184,7 +13206,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var ri = renderer.info.render;
       var camD = Math.round(camera.position.distanceTo(controls.target));
       var L = [];
-      L.push('FL-DIAG chi3 · t+' + ((Date.now() - FLDIAG.t0) / 1000).toFixed(0) + 's · camDist ' + camD + ' m · camPos [' + camera.position.toArray().map(Math.round).join(',') + '] · camTgt [' + controls.target.toArray().map(Math.round).join(',') + ']');
+      L.push('FL-DIAG chi4 · t+' + ((Date.now() - FLDIAG.t0) / 1000).toFixed(0) + 's · camDist ' + camD + ' m · camPos [' + camera.position.toArray().map(Math.round).join(',') + '] · camTgt [' + controls.target.toArray().map(Math.round).join(',') + ']');
       L.push('loop started: ' + FLDIAG.loopStarted + ' · render calls ' + ri.calls + ' · lines ' + ri.lines + ' · triangles ' + ri.triangles + ' · scene children ' + scene.children.length);
       L.push('streets fetch: ' + FLDIAG.streetsFetch);
       L.push('street names fetch: ' + FLDIAG.streetNamesFetch);
