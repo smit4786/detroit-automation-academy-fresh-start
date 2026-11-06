@@ -13,13 +13,24 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261106-0906';
+  var STAMP = '20261106-1619';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
   try {
     var _bs = document.getElementById('build-stamp');
     if (_bs) _bs.textContent = 'Build ' + STAMP + '.';
+  } catch (e) {}
+
+  // Offline shell (2026-11-06): the service worker caches the app shell
+  // and the last live-data payloads, so the page still opens — honestly
+  // labeled with its last-update time — when the connection drops.
+  // Guarded end to end: no serviceWorker support, or any failure
+  // registering, changes nothing about the page.
+  try {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    }
   } catch (e) {}
 
   // === Error handling, steps 1–5 (2026-10-16) ==============================
@@ -10097,6 +10108,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // at module-boot time; each is consumed by the first post-build call of
   // its poll function and never again.
   var bootVehiclesP = null;
+  // Set by both vehicles fetch legs when the service worker serves the
+  // payload from cache (X-LTD-From-Cache): the header then shows the
+  // payload's own generated_at as a last-update time, never "updated".
+  var vehiclesFromCache = false;
   var bootAlertsP = null;
   var bootSmartDisplayP = null;
   function poll() {
@@ -10108,7 +10123,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var ctrl = new AbortController();
       var timer = setTimeout(function () { ctrl.abort(); }, 20000);
       firstLeg = fetch(proxy + '/vehicles.json', { cache: 'no-store', signal: ctrl.signal })
-        .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
+        .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); vehiclesFromCache = !!(r.headers && r.headers.get && r.headers.get('X-LTD-From-Cache')); return r.json(); },
               function (e) { clearTimeout(timer); throw e; });
     }
     firstLeg
@@ -10150,7 +10165,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         refreshFilterCounts();
         if (selectedRoute) renderRouteCard(selectedRoute);
         lastTotal = n;
-        setHeader(n, 'updated ' + fmtTime(d.generated_at ? new Date(d.generated_at) : null), false);
+        if (vehiclesFromCache) {
+          setHeader(n, 'last update ' + fmtTime(d.generated_at ? new Date(d.generated_at) : null) + ' \u00b7 offline \u2014 showing saved data', true);
+        } else {
+          setHeader(n, 'updated ' + fmtTime(d.generated_at ? new Date(d.generated_at) : null), false);
+        }
         svcFeedOk(d); // service degradation notice: evaluate source states + freshness
         // SMART freshness surfaces track every successful poll (S6).
         applySmartAgeUI();
@@ -12776,7 +12795,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, 20000);
     bootVehiclesP = fetch(proxy + '/vehicles.json', { cache: 'no-store', signal: ctrl.signal })
-      .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); return r.json(); },
+      .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('http ' + r.status); vehiclesFromCache = !!(r.headers && r.headers.get && r.headers.get('X-LTD-From-Cache')); return r.json(); },
             function (e) { clearTimeout(timer); throw e; });
     bootVehiclesP.catch(function () {});
     var ctrlA = new AbortController();
