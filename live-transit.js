@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261106-1619';
+  var STAMP = '20261106-1638';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -8919,7 +8919,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   var lastPollT = 0;      // performance.now() of the previous poll (for observations)
   var pollSeq = 0;        // increments per poll; trackers record their birth poll
   var MPH_TO_MPS = 0.44704;
-  var PREDICT_HORIZON_S = 150; // never dead-reckon on a fix older than this
+  var PREDICT_HORIZON_S = 300; // never dead-reckon on a fix older than this
   var SNAP_DIST_M = 200;       // along-track divergence above this = teleport
   var OFFSHAPE_M = 150;        // cross-track beyond this = detour, render raw
   // Kalman filter noise model. R = GPS measurement variance (15m sigma).
