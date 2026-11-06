@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261105-chi4';
+  var STAMP = '20261105-chi5';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -10131,6 +10131,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   var SVC_SHORT = {
     'stale': 'live positions delayed',
     'cta-not-configured': 'CTA live positions not connected',
+    'cta-buses-not-configured': 'CTA bus positions not connected',
     'cta-down': 'CTA live positions unavailable'
   };
   var SVC_TAIL = 'What still works: the map, all stop and route information, and the trip planner are unaffected. The planner computes journeys from the published CTA timetable (CTA GTFS schedule data), not from live positions. While live positions are unavailable, scheduled times are the reliable basis for planning a trip. This notice concerns the live data feed only. CTA bus and train service is not cancelled, and this page does not announce service cancellations.';
@@ -10158,6 +10159,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       return [{ key: 'cta-not-configured' }];
     }
     if (cta && cta.ok === false) out.push({ key: 'cta-down' });
+    var buses = cta && cta.buses;
+    if (buses && buses.configured === false) {
+      // The train leg is connected (this envelope reports
+      // configured), but the bus leg is not: the CTA Bus Tracker
+      // feed needs its own API key, which is not connected yet.
+      // The notice keeps naming that blocker so the page never
+      // reads as fully live while buses are dark.
+      out.push({ key: 'cta-buses-not-configured' });
+    }
     return out;
   }
 
@@ -10173,6 +10183,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         return 'CTA live positions are not connected to this map yet.';
       case 'cta-down':
         return 'CTA live positions unavailable. The CTA feed is not reporting.';
+      case 'cta-buses-not-configured':
+        return 'CTA train positions are live. Bus positions are not connected yet.';
     }
     return '';
   }
@@ -10193,6 +10205,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           fmtTime(new Date(c.genAt)) + ' (' + c.ageMin + ' minutes old), and it is not being refreshed. The positions on the map are exactly the positions in that file. They are not advanced or estimated between updates.';
       case 'cta-not-configured':
         return 'Live CTA positions come from the CTA Bus Tracker and Train Tracker feeds, which require a CTA API key. No key is configured for this map yet, so no live vehicles are shown and the count above is not a live count. Everything else works: every CTA route and stop is on the map, and departures and trip planning use the published CTA timetable.';
+      case 'cta-buses-not-configured':
+        return 'Live train positions come from the CTA Train Tracker feed and are updating on this map. Live bus positions come from the CTA Bus Tracker feed, which requires its own CTA API key — that key is not connected yet, so no live buses are shown. Bus routes, stops, and departures continue on the published CTA timetable, and the trip planner is unaffected.';
       case 'cta-down':
         return 'The CTA position source returned no data for the most recent update. CTA vehicles are removed from the map while the source is not reporting, and they return when the source resumes. A source outage is not a service suspension. CTA buses and trains continue to run on their published schedules.';
     }
@@ -13206,7 +13220,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var ri = renderer.info.render;
       var camD = Math.round(camera.position.distanceTo(controls.target));
       var L = [];
-      L.push('FL-DIAG chi4 · t+' + ((Date.now() - FLDIAG.t0) / 1000).toFixed(0) + 's · camDist ' + camD + ' m · camPos [' + camera.position.toArray().map(Math.round).join(',') + '] · camTgt [' + controls.target.toArray().map(Math.round).join(',') + ']');
+      L.push('FL-DIAG chi5 · t+' + ((Date.now() - FLDIAG.t0) / 1000).toFixed(0) + 's · camDist ' + camD + ' m · camPos [' + camera.position.toArray().map(Math.round).join(',') + '] · camTgt [' + controls.target.toArray().map(Math.round).join(',') + ']');
       L.push('loop started: ' + FLDIAG.loopStarted + ' · render calls ' + ri.calls + ' · lines ' + ri.lines + ' · triangles ' + ri.triangles + ' · scene children ' + scene.children.length);
       L.push('streets fetch: ' + FLDIAG.streetsFetch);
       L.push('street names fetch: ' + FLDIAG.streetNamesFetch);

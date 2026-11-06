@@ -1,0 +1,48 @@
+name: CTA Train Tracker live positions (Chicago staging)
+
+# Chicago staging live rail layer. Follows the Detroit keyless-chain
+# pattern at staging scale: the Train Tracker key lives only in this
+# repo's Actions secrets (CTA_TRAIN_KEY); the collector fetches train
+# positions and commits a static vehicles.json the page polls. The key
+# never appears in page code or committed files.
+#
+# Cadence: GitHub's shortest schedule interval is 5 minutes, so each
+# run loops 5 collection cycles ~60 s apart, giving ~60 s polling
+# while a run is alive (CTA Train Tracker terms permit reasonable
+# polling; one request per cycle covers all 8 'L' routes).
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cta-train-live
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect CTA train positions
+        env:
+          CTA_TRAIN_KEY: ${{ secrets.CTA_TRAIN_KEY }}
+        run: |
+          set -e
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for i in 1 2 3 4 5; do
+            python3 .github/scripts/cta_train_collect.py
+            if ! git diff --quiet -- cities/chicago/live-data/vehicles.json; then
+              git add cities/chicago/live-data/vehicles.json
+              git commit -m 'Chicago live-data: train positions update'
+              git pull --rebase origin main || true
+              git push origin main
+            fi
+            if [ "$i" -lt 5 ]; then sleep 50; fi
+          done
