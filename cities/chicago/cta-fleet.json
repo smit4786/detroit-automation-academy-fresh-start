@@ -1,0 +1,52 @@
+{
+ "default": {
+  "assumed": true,
+  "height_m": 3.3,
+  "length_m": 12.19,
+  "model": "40-ft transit bus",
+  "seats": null,
+  "width_m": 2.59
+ },
+ "ranges": [
+  {
+   "from": 1000,
+   "height_m": 3.3,
+   "length_m": 12.19,
+   "model": "New Flyer D40LF",
+   "seats": 39,
+   "to": 1629,
+   "width_m": 2.59
+  },
+  {
+   "from": 1630,
+   "height_m": 3.3,
+   "length_m": 12.19,
+   "model": "Nova Bus LFS",
+   "seats": 39,
+   "to": 2029,
+   "width_m": 2.59
+  },
+  {
+   "from": 4000,
+   "height_m": 3.3,
+   "length_m": 18.29,
+   "model": "New Flyer DE60LF",
+   "note": "60-ft articulated",
+   "seats": 55,
+   "to": 4207,
+   "width_m": 2.59
+  },
+  {
+   "from": 4300,
+   "height_m": 3.3,
+   "length_m": 12.19,
+   "model": "Proterra BE40",
+   "note": "battery-electric",
+   "seats": 39,
+   "to": 4332,
+   "width_m": 2.59
+  }
+ ],
+ "source": "CTA bus fleet composition — public fleet facts (fleet-number ranges by model, as supplied for this build, 2026-11-05). Dimensions are nominal manufacturer figures for the model; seating is the listed figure for the range.",
+ "units": "meters"
+}

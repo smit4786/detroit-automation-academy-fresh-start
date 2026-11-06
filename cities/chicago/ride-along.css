@@ -1,0 +1,207 @@
+/* Ride Along widget styles — matches the Live Transit Detroit chrome. */
+
+.ra-wrap {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: rgba(16, 16, 16, 0.92);
+  border: 1px solid rgba(242, 242, 242, 0.14);
+  border-radius: 12px;
+  padding: 16px;
+  color: #F2F2F2;
+  max-width: 360px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.ra-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ra-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #9F9F9F;
+}
+
+.ra-select {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  background: #101010;
+  color: #F2F2F2;
+  border: 1px solid rgba(242, 242, 242, 0.2);
+  border-radius: 8px;
+}
+
+.ra-empty {
+  font-size: 13px;
+  color: #9F9F9F;
+  margin: 12px 0 0;
+}
+
+.ra-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.ra-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.ra-route {
+  font-size: 15px;
+}
+
+.ra-dest {
+  font-size: 13px;
+  color: #9F9F9F;
+}
+
+.ra-bus {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #9F9F9F;
+}
+
+.ra-here {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #F2F2F2;
+}
+
+.ra-next-time {
+  margin: 6px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #767676;
+}
+
+.ra-time {
+  color: #9F9F9F;
+  font-size: 13px;
+}
+
+.ra-note {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9F9F9F;
+}
+
+.ra-xfer {
+  display: block;
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #9F9F9F;
+}
+
+.ra-next {
+  background: rgba(118, 118, 118, 0.12);
+  border: 1px solid rgba(118, 118, 118, 0.45);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.ra-next-kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #767676;
+}
+
+.ra-next-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.ra-next-x {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #9F9F9F;
+}
+
+.ra-sub {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9F9F9F;
+}
+
+.ra-stops {
+  margin: 0 0 14px;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.ra-stop {
+  color: #F2F2F2;
+}
+
+.ra-xlist {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #9F9F9F;
+  list-style: disc;
+}
+
+.ra-leave {
+  /* Sticky at the tile's bottom edge (2026-10-16): the rider's exit
+     control must be reachable without scrolling — it is the last
+     element of the ride body, and position:sticky;bottom:0 pins it
+     to whichever scrollport holds the tile (the card on mobile, the
+     wrap on desktop) while the stops list scrolls beneath it. The
+     opaque background keeps rows from showing through. */
+  position: sticky;
+  bottom: 0;
+  margin-top: 10px;
+  background: #111111;
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  background: transparent;
+  color: #F2F2F2;
+  border: 1px solid rgba(242, 242, 242, 0.25);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ra-leave:hover {
+  border-color: #767676;
+  color: #767676;
+}
+
+/* Return (project 11): restores the tile's previous state — a
+   distinct control from Get off, which ends the ride. It sits
+   directly above Get off in the ride body; Get off keeps the
+   sticky bottom slot. */
+.ra-return {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  background: transparent;
+  color: #F2F2F2;
+  border: 1px solid rgba(118, 118, 118, 0.55);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ra-return:hover {
+  border-color: #767676;
+  color: #767676;
+}
