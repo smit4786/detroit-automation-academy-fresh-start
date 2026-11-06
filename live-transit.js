@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261025-2057';
+  var STAMP = '20261106-0906';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -1043,6 +1043,123 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   haloIM.frustumCulled = false;
   haloIM.renderOrder = 4;
   pillarMeshes.push(haloIM);
+
+  // --- route endpoint (terminus) markers -------------------------------------
+  // UAT fix 2026-11-06 (owner iPad: "No dynamic elements for bus
+  // endpoints"). Every route's path termini get a ground marker in the
+  // bus-pillar family language (flat ring + short post, route color):
+  // the ring breathes on the shared bus pulse, and a terminus HEATS —
+  // swells and brightens — while a live bus of its route is dwelling at
+  // that end of the line (tracker arc position within 100 m of the arc
+  // end, recomputed each poll in refreshEndpointActivity). Static
+  // geography otherwise: markers belong to their route group (hidden
+  // with it, dimmed with it via routeDimmed) and, like the pillars,
+  // stand down in true-scale bus mode. Two InstancedMeshes, two draw
+  // calls, per-frame matrix writes only for visible termini.
+  var ENDPOINT_MAX = 384;
+  var _endpointFallback = new THREE.Color(0xf2f2f2);
+  var endpointRecs = [];        // {routeId, x, z, r, heat, heatTarget}
+  var endpointKeyMap = {};      // routeId|pathIdx|end -> [endpointRecs index]
+  var endpointRingIM = null, endpointPostIM = null;
+  function buildEndpoints(routes) {
+    endpointRecs = []; endpointKeyMap = {};
+    var placed = []; // every terminus placed so far, any route (stack rings)
+    routes.forEach(function (route) {
+      var mine = []; // this route's deduped termini
+      (route.paths || []).forEach(function (path, pi) {
+        if (!path || path.length < 2) return;
+        var ends = [[path[0], pi, 0], [path[path.length - 1], pi, 1]];
+        ends.forEach(function (e) {
+          var pt = e[0], key = route.id + '|' + e[1] + '|' + e[2];
+          var found = -1;
+          for (var i = 0; i < mine.length; i++) {
+            var dx = mine[i].x - pt[0], dz = mine[i].z - pt[1];
+            if (dx * dx + dz * dz < 150 * 150) { found = mine[i].idx; break; }
+          }
+          if (found < 0) {
+            var stack = 0;
+            for (var j = 0; j < placed.length; j++) {
+              var sx = placed[j].x - pt[0], sz = placed[j].z - pt[1];
+              if (sx * sx + sz * sz < 25 * 25) stack++;
+            }
+            var rec = { routeId: route.id, x: pt[0], z: pt[1], r: 30 + stack * 7, heat: 0, heatTarget: 0 };
+            found = endpointRecs.length;
+            endpointRecs.push(rec);
+            mine.push({ x: pt[0], z: pt[1], idx: found });
+            placed.push(rec);
+          }
+          (endpointKeyMap[key] = endpointKeyMap[key] || []).push(found);
+        });
+      });
+    });
+    if (endpointRecs.length > ENDPOINT_MAX) {
+      console.warn('buildEndpoints: ' + endpointRecs.length + ' termini exceed cap ' + ENDPOINT_MAX + '; truncating');
+      endpointRecs.length = ENDPOINT_MAX;
+    }
+    var ringGeo = new THREE.RingGeometry(0.66, 1.0, 40);
+    var postGeo = new THREE.CylinderGeometry(0.16, 0.24, 1, 12);
+    endpointRingIM = new THREE.InstancedMesh(ringGeo,
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide }), ENDPOINT_MAX);
+    endpointPostIM = new THREE.InstancedMesh(postGeo,
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, depthWrite: false }), ENDPOINT_MAX);
+    [endpointRingIM, endpointPostIM].forEach(function (im) {
+      im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      im.count = 0;
+      im.frustumCulled = false;
+      im.renderOrder = 3;
+      scene.add(im);
+    });
+    console.info('buildEndpoints: ' + endpointRecs.length + ' route termini marked');
+  }
+  function refreshEndpointActivity() {
+    if (!endpointRecs.length) return;
+    for (var i = 0; i < endpointRecs.length; i++) endpointRecs[i].heatTarget = 0;
+    for (var id in busTrackers) {
+      var tr = busTrackers[id];
+      if (!tr.arc || tr.pathIdx < 0 || !tr.arc.len) continue;
+      var key = null;
+      if (tr.s <= 100) key = tr.routeId + '|' + tr.pathIdx + '|0';
+      else if (tr.s >= tr.arc.len - 100) key = tr.routeId + '|' + tr.pathIdx + '|1';
+      if (!key) continue;
+      var recs = endpointKeyMap[key];
+      if (recs) for (var j = 0; j < recs.length; j++) endpointRecs[recs[j]].heatTarget = 1;
+    }
+  }
+  function renderEndpoints() {
+    if (!endpointRingIM) return;
+    var show = !busMode;
+    endpointRingIM.visible = show; endpointPostIM.visible = show;
+    if (!show) return;
+    var rm = (typeof reducedMotion !== 'undefined') && reducedMotion;
+    var pulse = rm ? 1 : busPulse();
+    var k = 0;
+    for (var i = 0; i < endpointRecs.length; i++) {
+      var rec = endpointRecs[i];
+      var grp = routeGroups[rec.routeId];
+      if (!grp || !grp.visible) continue;
+      rec.heat += (rec.heatTarget - rec.heat) * 0.05;
+      if (Math.abs(rec.heatTarget - rec.heat) < 0.002) rec.heat = rec.heatTarget;
+      var dim = routeDimmed[rec.routeId] ? 0.22 : 1;
+      var bright = dim * (0.5 + 0.85 * rec.heat);
+      var col = (routeColors[rec.routeId] || _endpointFallback).clone().multiplyScalar(bright);
+      var rs = rec.r * pulse * (1 + 0.55 * rec.heat);
+      _p3.set(rec.x, 7, rec.z); _s3.set(rs, rs, 1);
+      _m4.compose(_p3, _ringQ, _s3);
+      endpointRingIM.setMatrixAt(k, _m4);
+      endpointRingIM.setColorAt(k, col);
+      var ph = 30 * (1 + 0.8 * rec.heat), pr = 5 * (1 + 0.4 * rec.heat);
+      _p3.set(rec.x, ph / 2, rec.z); _q3.identity(); _s3.set(pr, ph, pr);
+      _m4.compose(_p3, _q3, _s3);
+      endpointPostIM.setMatrixAt(k, _m4);
+      endpointPostIM.setColorAt(k, col);
+      k++;
+    }
+    endpointRingIM.count = k; endpointPostIM.count = k;
+    endpointRingIM.instanceMatrix.needsUpdate = true;
+    endpointPostIM.instanceMatrix.needsUpdate = true;
+    if (endpointRingIM.instanceColor) endpointRingIM.instanceColor.needsUpdate = true;
+    if (endpointPostIM.instanceColor) endpointPostIM.instanceColor.needsUpdate = true;
+  }
 
   // Per-bus route badges: number-only chips. Destinations live in the bus
   // card (title + Destination row) — the floating badge stays compact.
@@ -8268,7 +8385,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
 
   // Belle Isle topography (HD upgrade, 2026-11-05): USGS NED 1/3
-  // arc-second elevations on a 60 m grid (assets/belle-isle-topo.json),
+  // arc-second elevations on a 60 m grid (assets/belle-isle-topo.json;
+  // mesh resampled to a 30 m grid 2026-11-06, UAT fix — see the file's
+  // source field),
   // drawn as a monochrome relief mesh over the flat island fill —
   // vertex grays from height + slope, heights exaggerated 4x (the
   // island's true relief is ~5.6 m over 4.3 km; at true scale it would
@@ -8343,7 +8462,17 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // Geometry: assets/detroit-water.json — TIGER/Line 2025 areawater and
   // OSM natural=water unioned, clipped to MOSAIC_BOUNDS, simplified at
   // 3 m, pre-projected to scene meters by dvu-build/build_water.py
-  // (authoritative sources only; never hand-drawn). Draw calls: main
+  // (authoritative sources only; never hand-drawn).
+  // UAT fix 2026-11-06 (owner iPad: water flickering, triangle edges):
+  // the shipped file's "unioned" claim was not true of its contents —
+  // 22 polygon pairs still overlapped (17 small polygons lying entirely
+  // inside the main river/lake body, 5 partial crossings), all rendered
+  // coplanar at y=2 in one mesh: equal depth on both triangulations is
+  // a textbook z-fight, and the fight pattern traces the two earcut
+  // triangulations — the flicker and the triangle edges were one
+  // defect. The data file now carries a true planar union (zero
+  // overlapping pairs, total water area preserved); see its source
+  // field. The render code below is unchanged by the fix. Draw calls: main
   // fill at y=2 (above the ground plane, below the Belle Isle landmass
   // fill at y=3 and the street tiers), Belle Isle interior fill at
   // y=4.5 (above the island fill, so its canals and lakes read),
@@ -8394,7 +8523,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     // Project 22, Treatment 1 (Neon Vector): the water fills draw hard
     // indigo bands from a baked shore-distance field — deep 0x101010
     // (>= 300 m from shore), mid 0x1f1f1f (60-300 m), shore accent
-    // 0x222222 (< 60 m, shimmering +/-4% via uTime). The mid band
+    // 0x222222 (< 60 m, shimmering +/-4% via uTime).
+    // UAT fix 2026-11-06 (owner iPad: water read coarse/faceted): the
+    // three governing values and their luminance order are unchanged,
+    // but the band edges now graduate (smoothstep 240-360 m and
+    // 40-90 m) instead of stepping at the thresholds, and the field
+    // bakes at 10 m cells (was 20 m) — the hard steps on a 20 m grid
+    // were the visible faceting on the water surface. The mid band
     // carries Project 16 Option A's governing water value 0x1f1f1f
     // (A owns water luminance; the band structure, thresholds, and
     // the deep and shore-accent values are Neon Vector's): A's value
@@ -8433,8 +8568,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
              '\tvec2 shoreUv = (vWPos - uShoreBounds.xy) / uShoreBounds.zw;',
              '\tfloat shoreD = texture2D(uShoreTex, shoreUv).r * 650.0;',
              '\tvec3 waterCol = vec3(0.12157, 0.12157, 0.12157);',
-             '\tif (shoreD < 300.0) waterCol = vec3(0.14510, 0.14510, 0.14510);',
-             '\tif (shoreD < 60.0) waterCol = vec3(0.17647, 0.17647, 0.17647) * (1.0 + 0.04 * sin(uTime * 0.35));',
+             '\twaterCol = mix(waterCol, vec3(0.14510, 0.14510, 0.14510), 1.0 - smoothstep(240.0, 360.0, shoreD));',
+             '\twaterCol = mix(waterCol, vec3(0.17647, 0.17647, 0.17647) * (1.0 + 0.04 * sin(uTime * 0.35)), 1.0 - smoothstep(40.0, 90.0, shoreD));',
              '\tdiffuseColor.rgb = waterCol;'].join('\n'));
       };
       m.customProgramCacheKey = function () { return 'waterBand'; };
@@ -8454,7 +8589,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           });
         });
       });
-      var CELL = 20;
+      var CELL = 10;
       var gw = Math.max(1, Math.ceil((maxX - minX) / CELL));
       var gh = Math.max(1, Math.ceil((maxY - minY) / CELL));
       var mask = new Uint8Array(gw * gh);
@@ -9911,6 +10046,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     for (var id in busTrackers) if (!seen[id]) delete busTrackers[id];
     lastPollT = now;
     pollSeq++;
+    refreshEndpointActivity(); // terminus heat from this poll's reconciled trackers
     runPlannerPollPath(); // Phase 2b-i delays + planner path (contained, step 2)
     renderBusInstances();
     if (typeof refreshBrowseBuses === 'function') {
@@ -12473,6 +12609,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         // Per-vehicle motion prediction: buses glide along their shapes
         // between polls instead of jumping every 60 s.
         updateBusMotion(performance.now());
+        renderEndpoints(); // terminus markers: pulse + live terminus heat
         followTick(); // selected bus stays on screen as it moves
         ridePickTick(); // endpoint labels track their buses (project 11)
         if (youMarker.group.visible) {
@@ -12987,6 +13124,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         skirtMesh.frustumCulled = false;
         scene.add(skirtMesh);
       }
+
+      // Route endpoint (terminus) markers: built once from the merged
+      // route set (DDOT + SMART + QLINE), dynamic per the live feed —
+      // see the endpoint block at the pillar family.
+      buildEndpoints(data.routes);
 
       // Stops are rebuilt from stopData by rebuildStops() (per-route colors,
       // paper-white hubs) whenever filters change; see the stops section.
