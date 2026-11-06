@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Departure Board — Live Transit Detroit</title>
+<meta name="description" content="Next departures at your nearest Detroit bus stop — DDOT scheduled times and SMART live times, one glance, no map.">
+<link rel="canonical" href="https://www.detroitautomationacademy.com/board/">
+<meta property="og:title" content="Departure Board — Live Transit Detroit">
+<meta property="og:description" content="Next departures at your nearest Detroit bus stop — DDOT scheduled times and SMART live times, one glance, no map.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/board/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Departure Board — Live Transit Detroit">
+<meta name="twitter:description" content="Next departures at your nearest Detroit bus stop — DDOT scheduled times and SMART live times, one glance, no map.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Departure Board — Live Transit Detroit",
+  "url": "https://www.detroitautomationacademy.com/board/",
+  "description": "Next departures at your nearest Detroit bus stop — DDOT scheduled times and SMART live times, one glance, no map.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/"
+  }
+}
+</script>
+<link rel="icon" type="image/webp" href="/assets/logo.webp">
+<style>
+  :root{
+    --midnight:#101010; --card:#191919; --forge:#767676; --amber:#b4b4b4;
+    --concrete:#9f9f9f; --paper:#f2f2f2; --line:rgba(242, 242, 242, .09);
+    --live:#a4a4a4; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--midnight);color:var(--paper);
+    font-family:'Inter',system-ui,sans-serif;line-height:1.45;
+    -webkit-font-smoothing:antialiased}
+  h1,h2,.grotesk{font-family:'Space Grotesk','Inter',sans-serif}
+  a{color:var(--amber)}
+  .wrap{max-width:44rem;margin:0 auto;padding:1rem 1.1rem 3rem}
+  header.bar{display:flex;align-items:center;gap:.8rem;padding:.4rem 0 1rem;
+    border-bottom:1px solid var(--line)}
+  header.bar .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:1.05rem;letter-spacing:.02em;color:var(--paper);text-decoration:none}
+  header.bar .brand span{color:var(--forge)}
+  header.bar nav{margin-left:auto;display:flex;gap:1rem;font-size:.9rem}
+  header.bar nav a{text-decoration:none}
+  header.bar nav a:hover{text-decoration:underline}
+  .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:.72rem;
+    color:var(--concrete);margin:1.4rem 0 .2rem}
+  .eyebrow a{color:var(--concrete)}
+  #stop-name{font-size:2rem;line-height:1.12;margin:.1rem 0 .3rem;font-weight:700}
+  #stop-meta{color:var(--concrete);font-size:.95rem;margin:0 0 .8rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.45rem;margin:0 0 1.1rem}
+  .chip{display:inline-flex;align-items:center;gap:.45rem;background:var(--card);
+    border:1px solid var(--line);border-radius:999px;padding:.28rem .7rem .28rem .5rem;
+    font-size:.85rem;font-weight:600}
+  .chip i{width:.7rem;height:.7rem;border-radius:3px;display:inline-block;flex:none}
+  #alert-line{background:#222222;border:1px solid #555555;color:#dadada;
+    border-radius:var(--radius);padding:.6rem .8rem;font-size:.9rem;margin:0 0 1rem}
+  ol#deps{list-style:none;margin:0;padding:0}
+  ol#deps li{display:flex;align-items:baseline;gap:.8rem;padding:.85rem 0;
+    border-top:1px solid var(--line)}
+  ol#deps li .mins{font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
+  ol#deps li.first .mins{font-size:4.2rem;color:var(--paper)}
+  ol#deps li.big .mins{font-size:2.3rem}
+  ol#deps li.small .mins{font-size:1.25rem}
+  ol#deps li.first.clocktime .mins{font-size:2.4rem}
+  ol#deps li.big.clocktime .mins{font-size:1.7rem}
+  ol#deps li .what{min-width:0;flex:1}
+  ol#deps li .rname{font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  ol#deps li.first .rname{font-size:1.25rem}
+  ol#deps li .clock{color:var(--concrete);font-size:.9rem;font-variant-numeric:tabular-nums}
+  ol#deps li i.dot{width:.7rem;height:.7rem;border-radius:3px;display:inline-block;flex:none}
+  .tag{flex:none;font-size:.62rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;padding:.12rem .4rem;border:1px solid #434343;
+    border-radius:999px;color:var(--concrete)}
+  .tag.live{background:var(--live);border-color:transparent;color:#101010}
+  #deps-note{color:var(--concrete);font-size:.9rem;line-height:1.5;margin:1rem 0 0}
+  .actions{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.4rem 0 0}
+  .btn{display:inline-block;background:var(--card);border:1px solid var(--line);
+    color:var(--paper);border-radius:999px;padding:.6rem 1.1rem;font-size:.95rem;
+    text-decoration:none;cursor:pointer;font-family:inherit}
+  .btn.primary{background:var(--forge);border-color:var(--forge);color:#fff;font-weight:600}
+  .btn:hover{filter:brightness(1.15)}
+  #feed-status{color:var(--concrete);font-size:.82rem;margin:2rem 0 0;
+    border-top:1px solid var(--line);padding-top:.8rem;font-variant-numeric:tabular-nums}
+  footer.fine{color:var(--concrete);font-size:.78rem;line-height:1.55;margin:.6rem 0 0}
+  /* Picker */
+  #picker h1{font-size:1.7rem;margin:.4rem 0 .4rem}
+  #picker p{color:var(--concrete)}
+  #stop-search{width:100%;font-size:1.1rem;padding:.8rem 1rem;border-radius:var(--radius);
+    border:1px solid var(--line);background:var(--card);color:var(--paper);margin:.6rem 0}
+  #stop-search:focus{outline:2px solid var(--amber);outline-offset:1px}
+  ul#results{list-style:none;margin:0;padding:0}
+  ul#results li{border-top:1px solid var(--line)}
+  ul#results button{display:flex;width:100%;text-align:left;background:none;border:0;
+    color:var(--paper);padding:.8rem .2rem;font-size:1.02rem;cursor:pointer;
+    font-family:inherit;align-items:baseline;gap:.6rem}
+  ul#results button:hover{background:var(--card)}
+  ul#results .sid{color:var(--concrete);font-size:.82rem;margin-left:auto;flex:none}
+  .state{color:var(--concrete);font-size:1.05rem;padding:1.2rem 0}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="/board/">Live Transit <span>·</span> Departure Board</a>
+    <nav>
+      <a href="/live-transit.html">Live map</a>
+      <a href="/voter-guide.html">Voter guide</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="picker" hidden>
+      <p class="eyebrow">Departure Board</p>
+      <h1>Find your stop</h1>
+      <p id="picker-note">Choose the stop you are waiting at — or let the board find the one nearest you.</p>
+      <button class="btn primary" id="locate-btn" type="button">Use my location</button>
+      <input id="stop-search" type="search" autocomplete="off" placeholder="Search stops — try “Woodward”, “Rosa Parks”, a stop number…" aria-label="Search stops">
+      <ul id="results"></ul>
+    </section>
+
+    <section id="board" hidden>
+      <p class="eyebrow"><span id="board-eyebrow">Your stop</span> · <a href="#" id="change-stop">Change stop</a> · <a href="#" id="recenter">Nearest stop</a></p>
+      <h2 id="stop-name">Stop</h2>
+      <p id="stop-meta"></p>
+      <div class="chips" id="route-chips"></div>
+      <div id="alert-line" hidden></div>
+      <ol id="deps"></ol>
+      <p id="deps-note"></p>
+      <div class="actions">
+        <a class="btn primary" id="plan-link" href="/live-transit.html">Plan a trip to this stop</a>
+        <a class="btn" href="/live-transit.html">Open the live map</a>
+      </div>
+    </section>
+
+    <section id="state" class="state">Loading the board…</section>
+  </main>
+
+  <p id="feed-status"></p>
+  <footer class="fine">
+    Times: DDOT from the published timetable (feed <span id="feed-ver">S1000182</span>);
+    SMART live times from Swiftly trip updates, display only. Positions: DDOT via
+    Clever Devices BusTime, SMART via Swiftly, QLINE via its public GTFS-RT feed.
+    Route shapes &amp; stops: DDOT, SMART, and QLINE GTFS. A page of
+    <a href="/">Detroit Automation Academy</a>. Platform status:
+    <a href="/dashboard.html">dashboard</a>. Positions poll continuously and publish about every five minutes; the map dead-reckons between updates.
+  </footer>
+</div>
+
+<script type="module">
+import * as R from '/raptor.js';
+import * as core from './board-core.js';
+
+var $ = function (id) { return document.getElementById(id); };
+var POLL_MS = 60000, HIDDEN_POLL_MS = 600000; // the app's cadence
+
+var S = {
+  R: R, tt: null, feedVersion: 'S1000182', reg: null, proj: null,
+  vehicles: null, vehiclesAt: 0, smartDisplay: null,
+  alerts: null, tuIndex: null, tuByRoute: new Map(),
+  stop: null, userLatLon: null, pollCount: 0, booted: false
+};
+
+function fetchJson(url) {
+  return fetch(url, { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url);
+    return r.json();
+  });
+}
+function fetchJsonOrNull(url) { return fetchJson(url).catch(function () { return null; }); }
+
+function showState(msg) {
+  $('state').hidden = false; $('state').textContent = msg;
+  $('picker').hidden = true; $('board').hidden = true;
+}
+function showPicker(note) {
+  $('state').hidden = true; $('board').hidden = true; $('picker').hidden = false;
+  if (note) $('picker-note').textContent = note;
+  var inp = $('stop-search'); if (inp) inp.focus();
+}
+function showBoard() {
+  $('state').hidden = true; $('picker').hidden = true; $('board').hidden = false;
+}
+
+/* ---------------- data loads ---------------- */
+function loadStatics() {
+  var manifestP = fetchJsonOrNull('/live-data/watch/ltwb-manifest.json').then(function (m) {
+    if (m && m.feed_version) { S.feedVersion = m.feed_version; $('feed-ver').textContent = m.feed_version; }
+    return R.loadTimetable('/ddot-timetable-' + S.feedVersion + '.json');
+  });
+  var regP = Promise.all([
+    fetchJson('/ddot-routes-3d.json'),
+    fetchJsonOrNull('/smart-routes-3d.json'),
+    fetchJsonOrNull('/qline-3d.json')
+  ]).then(function (all) {
+    S.proj = core.makeProj(all[0].projection);
+    S.reg = core.buildRegistry(all[0], all[1], all[2]);
+  });
+  return Promise.all([manifestP, regP]).then(function (res) { S.tt = res[0]; });
+}
+
+function loadLive() {
+  S.pollCount++;
+  var jobs = [
+    fetchJsonOrNull('/live-data/vehicles.json').then(function (v) {
+      if (v) { S.vehicles = v; S.vehiclesAt = Date.now(); }
+    }),
+    fetchJsonOrNull('/live-data/smart-display.json').then(function (s) {
+      if (s) S.smartDisplay = s;
+    }),
+    fetchJsonOrNull('/live-data/smart-tu/index.json').then(function (ix) {
+      S.tuIndex = ix;
+    })
+  ];
+  if (S.pollCount % 2 === 1) { // the app's 120 s alert cadence
+    jobs.push(fetchJsonOrNull('/live-data/alerts.json').then(function (a) {
+      if (a) S.alerts = a;
+    }));
+  }
+  return Promise.all(jobs).then(function () {
+    // SMART derivative files for the current stop's routes, when relevant.
+    if (S.stop && S.stop.seg !== 'ddot') {
+      var routes = S.stop.r.filter(function (rid) { return S.reg.smartRouteIds[String(rid)]; });
+      return Promise.all(routes.map(function (rid) {
+        return fetchJsonOrNull('/live-data/smart-tu/' + encodeURIComponent(rid) + '.json').then(function (f) {
+          if (f) S.tuByRoute.set(String(rid), f);
+        });
+      }));
+    }
+  }).then(renderFeedStatus);
+}
+
+/* ---------------- rendering ---------------- */
+function agencyName(seg) { return seg === 'smart' ? 'SMART' : seg === 'qline' ? 'QLINE' : 'DDOT'; }
+function distText(m) {
+  if (m == null) return '';
+  if (m < 1000) return Math.round(m) + ' m away';
+  return (m / 1609.34).toFixed(1) + ' mi away';
+}
+
+function renderFeedStatus() {
+  var el = $('feed-status');
+  if (!S.vehicles) { el.textContent = 'Live positions are unavailable right now; scheduled times still show.'; return; }
+  var counts = { ddot: 0, smart: 0, qline: 0 };
+  (S.vehicles.vehicles || []).forEach(function (v) { if (counts[v.agency] != null) counts[v.agency]++; });
+  var smartN = S.smartDisplay && Array.isArray(S.smartDisplay.vehicles) ? S.smartDisplay.vehicles.length : 0;
+  var when = S.vehicles.generated_at ? core.formatClock12Detroit(new Date(S.vehicles.generated_at).getTime()) : '';
+  el.textContent = 'Live positions as of ' + when + ' · ' + counts.ddot + ' DDOT · ' +
+    smartN + ' SMART · ' + counts.qline + ' QLINE out now';
+}
+
+function renderAlertLine(st) {
+  var host = $('alert-line');
+  var hits = [];
+  if (S.alerts && Array.isArray(S.alerts.alerts)) {
+    S.alerts.alerts.forEach(function (a) {
+      if (!a || a.agency !== st.seg) return;
+      if (Array.isArray(a.routes) && a.routes.length &&
+          !a.routes.some(function (r) { return st.r.indexOf(String(r)) >= 0; })) return;
+      hits.push(a);
+    });
+  }
+  if (!hits.length) { host.hidden = true; host.textContent = ''; return; }
+  host.hidden = false;
+  host.textContent = 'Service alert — ' + (hits[0].description || hits[0].header || '');
+}
+
+function chipHtml(rid) {
+  var rec = S.reg.routesById[String(rid)];
+  var color = rec ? rec.color : '#f2f2f2';
+  return '<span class="chip"><i style="background:' + color + '"></i>' +
+    core.routeLabel(S.reg.routeNames, String(rid)) + '</span>';
+}
+
+function renderStop(st, distM, eyebrow) {
+  S.stop = st;
+  showBoard();
+  $('board-eyebrow').textContent = eyebrow || 'Your stop';
+  $('stop-name').textContent = st.n || 'Stop';
+  var bits = ['Stop ' + st.id, agencyName(st.seg)];
+  if (distM != null) bits.push(distText(distM));
+  $('stop-meta').textContent = bits.join(' · ');
+  $('route-chips').innerHTML = st.r.map(chipHtml).join('');
+  var ll = core.unproject(S.proj, st.x, st.z);
+  $('plan-link').href = '/live-transit.html?plan&to=' +
+    ll.lat.toFixed(6) + ',' + ll.lon.toFixed(6) + '&label=' + encodeURIComponent(st.n || 'Stop');
+  try {
+    var url = new URL(window.location.href);
+    url.searchParams.set('stop', String(st.id));
+    window.history.replaceState(null, '', url.toString());
+  } catch (e) {}
+  renderAlertLine(st);
+  renderDepartures();
+  if (st.seg !== 'ddot') {
+    // The boot poll ran before any stop was chosen, so this stop's
+    // SMART derivative files may not be in hand yet — fetch, re-render.
+    loadLive().then(function () { if (S.stop === st) renderDepartures(); });
+  }
+}
+
+function depRowHtml(r, cls, timeStr, clockStr, tagLive, extra) {
+  var rec = S.reg.routesById[String(r.rid)];
+  var color = rec ? rec.color : '#f2f2f2';
+  if (/AM|PM/.test(timeStr)) cls += ' clocktime';
+  return '<li class="' + cls + '">' +
+    '<span class="mins">' + timeStr + '</span>' +
+    '<span class="what"><span class="rname"><i class="dot" style="background:' + color + '"></i>' +
+    core.routeLabel(S.reg.routeNames, String(r.rid)) +
+    (r.head ? ' · ' + r.head : '') +
+    ' <span class="tag' + (tagLive ? ' live' : '') + '">' + (tagLive ? 'Live' : 'Scheduled') + '</span></span>' +
+    '<span class="clock">' + clockStr + (extra || '') + '</span></span></li>';
+}
+
+function renderDepartures() {
+  var st = S.stop;
+  if (!st) return;
+  var list = $('deps'), note = $('deps-note');
+  var nowMs = Date.now();
+  list.innerHTML = ''; note.textContent = '';
+  renderAlertLine(st);
+
+  if (st.seg === 'ddot') {
+    var res = core.computeDdotDepartures(R, S.tt, S.reg.stops, st.idx, nowMs, null);
+    if (res.state === 'loading') { note.textContent = 'Arrival times are loading…'; return; }
+    if (res.state === 'nosvc') { note.textContent = 'No DDOT service is scheduled today.'; return; }
+    if (res.state === 'na' || !res.rows.length) {
+      if (res.state !== 'na' && !res.rows.length) note.textContent = 'No more buses are scheduled at this stop today.';
+      else note.textContent = 'Arrival times are published for DDOT stops in the current timetable; this stop is not in it.';
+      return;
+    }
+    var dp = core.detroitParts(nowMs);
+    res.rows.forEach(function (r, i) {
+      var dSec = r.eta - dp.sec;
+      var clock = R.fmtClockSec(((r.eta % 86400) + 86400) % 86400);
+      list.innerHTML += depRowHtml(r, i === 0 ? 'first' : (i < 3 ? 'big' : 'small'),
+        core.timeText(dSec, clock), clock, false, '');
+    });
+    note.textContent = 'Scheduled times from the published DDOT timetable. ' +
+      'Live estimates for this stop — from the bus on each trip — are on the live map.';
+    return;
+  }
+
+  if (st.seg === 'smart') {
+    var gen = S.tuIndex && S.tuIndex.gen != null ? S.tuIndex.gen : null;
+    var rows = core.smartDepartures(S.tuByRoute, S.reg.smartRouteIds, st, gen, nowMs);
+    if (rows === null) {
+      note.textContent = 'Arrival times are published for DDOT stops. SMART and QLINE publish live positions only — see the live map.';
+      return;
+    }
+    if (!rows.length) {
+      note.textContent = 'SMART live times are published when a bus is on its way; no SMART trip is reporting times for this stop right now — see the live map.';
+      return;
+    }
+    rows.forEach(function (r, i) {
+      var dSec = r.time - nowMs / 1000;
+      var clock = core.formatClock12Detroit(r.time * 1000);
+      var extra = '';
+      if (r.delay != null && Math.abs(r.delay) >= 45) {
+        extra = ' — running ' + Math.round(Math.abs(r.delay) / 60) + ' min ' + (r.delay > 0 ? 'late' : 'early');
+      }
+      list.innerHTML += depRowHtml(r, i === 0 ? 'first' : (i < 3 ? 'big' : 'small'),
+        core.timeText(dSec, clock), clock, true, extra);
+    });
+    note.textContent = 'Live times from SMART trip updates (Swiftly); the feed rebuilds every few minutes.';
+    return;
+  }
+
+  // QLINE: no published arrival times (the app's boundary) — live streetcars.
+  var cars = S.vehicles ? core.qlineStreetcars(S.vehicles.vehicles, S.proj, st, nowMs) : [];
+  if (!S.vehicles) { note.textContent = 'Live positions are unavailable right now.'; return; }
+  if (!cars.length) {
+    note.textContent = 'Arrival times are published for DDOT stops. QLINE publishes live positions only — and no streetcar is reporting right now.';
+    return;
+  }
+  cars.slice(0, 3).forEach(function (c, i) {
+    var fake = { rid: 'QLINE', head: c.destination || 'Streetcar ' + c.vehicleId };
+    list.innerHTML += '<li class="' + (i === 0 ? 'big' : 'small') + '">' +
+      '<span class="mins">' + distText(c.distM).replace(' away', '') + '</span>' +
+      '<span class="what"><span class="rname"><i class="dot" style="background:#888888"></i>QLINE' +
+      (c.destination ? ' · ' + c.destination : '') +
+      ' <span class="tag live">Live</span></span>' +
+      '<span class="clock">streetcar position' + (c.ageS != null ? ', ' + (c.ageS < 60 ? c.ageS + 's old' : Math.floor(c.ageS / 60) + 'm old') : '') + '</span></span></li>';
+  });
+  note.textContent = 'QLINE publishes live positions, not arrival times — the nearest reporting streetcars to this stop.';
+}
+
+/* ---------------- picking a stop ---------------- */
+function pickStop(st, distM, eyebrow) { renderStop(st, distM, eyebrow); }
+
+function locate() {
+  if (!navigator.geolocation) { showPicker('This browser cannot share a location — search for your stop instead.'); return; }
+  showState('Finding your nearest stop…');
+  var done = false;
+  var timer = setTimeout(function () {
+    if (!done) { done = true; showPicker('Location took too long — search for your stop instead.'); }
+  }, 9000);
+  navigator.geolocation.getCurrentPosition(function (pos) {
+    if (done) return; done = true; clearTimeout(timer);
+    S.userLatLon = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    var near = core.nearestStop(S.reg.stops, S.proj, pos.coords.latitude, pos.coords.longitude);
+    if (near) pickStop(near.stop, near.distM, 'Nearest stop');
+    else showPicker('No stop could be found near that location — search for your stop instead.');
+  }, function () {
+    if (done) return; done = true; clearTimeout(timer);
+    showPicker('Location is off or was denied — search for your stop instead. That is all the board needs.');
+  }, { timeout: 8000, maximumAge: 60000 });
+}
+
+function wirePicker() {
+  $('locate-btn').addEventListener('click', locate);
+  var inp = $('stop-search'), ul = $('results');
+  inp.addEventListener('input', function () {
+    var hits = core.searchStops(S.reg.stops, inp.value, 12);
+    ul.innerHTML = '';
+    hits.forEach(function (st) {
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = '<span>' + (st.n || 'Stop') + '</span><span class="sid">' +
+        agencyName(st.seg) + ' · Stop ' + st.id + '</span>';
+      b.addEventListener('click', function () {
+        var d = null;
+        if (S.userLatLon) {
+          var p = core.projectLatLon(S.proj, S.userLatLon.lat, S.userLatLon.lon);
+          d = Math.hypot(st.x - p[0], st.z - p[1]);
+        }
+        pickStop(st, d, 'Your stop');
+      });
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+  });
+  $('change-stop').addEventListener('click', function (e) { e.preventDefault(); showPicker(); });
+  $('recenter').addEventListener('click', function (e) { e.preventDefault(); locate(); });
+}
+
+/* ---------------- boot + loops ---------------- */
+function startLoops() {
+  setInterval(function () { if (S.stop && !$('board').hidden) renderDepartures(); }, 30000);
+  (function poll() {
+    loadLive().then(function () {
+      if (S.stop && !$('board').hidden) renderDepartures();
+      renderFeedStatus();
+    });
+    setTimeout(poll, document.hidden ? HIDDEN_POLL_MS : POLL_MS);
+  })();
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) loadLive().then(function () {
+      if (S.stop && !$('board').hidden) renderDepartures();
+    });
+  });
+}
+
+function boot() {
+  wirePicker();
+  showState('Loading the board…');
+  loadStatics().then(function () {
+    return loadLive();
+  }).then(function () {
+    S.booted = true;
+    startLoops();
+    var want = new URL(window.location.href).searchParams.get('stop');
+    if (want) {
+      var st = core.findStopById(S.reg.stops, want);
+      if (st) { pickStop(st, null, 'Your stop'); return; }
+      showPicker('That stop link did not match a stop on file — search for your stop instead.');
+      return;
+    }
+    locate();
+  }).catch(function (e) {
+    showState('The board could not load its schedule data. Check your connection and reload.');
+  });
+}
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+/*
+Purpose: Detroit Automation Academy — Forge brand palette and theme variables.
+Governing standard: BRAND_GUIDELINES.md in this repo; implemented in styles.css.
+Last Modified: October 22, 2026
+*/
+
+:root {
+  /* Forge palette (BRAND_GUIDELINES.md / styles.css) */
+  --daa-bg: #101010;        /* Midnight */
+  --daa-fg: #f2f2f2;        /* Paper */
+  --daa-primary: #767676;   /* Forge */
+  --daa-accent: #b4b4b4;    /* Amber */
+  --daa-muted: #9f9f9f;     /* Concrete */
+}

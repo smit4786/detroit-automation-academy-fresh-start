@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apple Learning Coach — Justin Spencer Smith</title>
+<meta name="description" content="Justin Spencer Smith's Apple Learning Coach certification work: Apple's professional learning program for coaching educators on Apple technology. A personal domain, separate from Detroit Automation Academy business.">
+<link rel="icon" type="image/webp" href="../assets/logo.webp">
+<style>
+  /* Apple-inspired personal-domain treatment. Scoped under .apl — does not leak into site chrome. */
+  .apl { background: #fff; color: #1d1d1d; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  .apl *, .apl *::before, .apl *::after { box-sizing: border-box; }
+  .apl-wrap { max-width: 1020px; margin: 0 auto; padding: 0 1.5rem; }
+  .apl section { padding: 4.5rem 0; }
+  .apl h1, .apl h2, .apl h3, .apl p { margin: 0; }
+  .apl a { color: #616161; text-decoration: none; }
+  .apl a:hover { text-decoration: underline; }
+
+  /* Navigation — Apple style: slim, translucent, sticky */
+  .apl-nav { position: sticky; top: 0; z-index: 60; background: rgba(255,255,255,.72); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,.1); }
+  .apl-nav-inner { display: flex; align-items: center; height: 52px; gap: 1.25rem; }
+  .apl-nav-brand { font-size: .95rem; font-weight: 600; color: #1d1d1d !important; letter-spacing: -.01em; white-space: nowrap; }
+  .apl-nav-brand:hover { text-decoration: none; }
+  .apl-nav-links { display: flex; gap: 1.4rem; margin-left: auto; }
+  .apl-nav-links a { font-size: .82rem; color: #1d1d1d !important; opacity: .75; white-space: nowrap; }
+  .apl-nav-links a:hover { opacity: 1; text-decoration: none; }
+  .apl-nav-cta { background: #616161; color: #fff !important; border-radius: 999px; padding: .42rem 1rem; font-size: .82rem; font-weight: 500; white-space: nowrap; }
+  .apl-nav-cta:hover { background: #666666; text-decoration: none; }
+
+  /* Hero */
+  .apl-hero { text-align: center; padding: 5.5rem 0 4.5rem !important; background: #fff; }
+  .apl-eyebrow { font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #6e6e6e; margin-bottom: 1rem; }
+  .apl-hero h1 { font-size: clamp(3rem, 8vw, 5.25rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; color: #1d1d1d; }
+  .apl-hero .sub { font-size: clamp(1.15rem, 2.4vw, 1.5rem); color: #6e6e6e; max-width: 42rem; margin: 1.25rem auto 0; line-height: 1.45; letter-spacing: -.01em; }
+  .apl-pills { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1.75rem; }
+  .apl-pill { display: inline-flex; align-items: center; gap: .4rem; background: #f5f5f5; color: #1d1d1d; border-radius: 999px; padding: .5rem 1rem; font-size: .85rem; font-weight: 500; }
+  .apl-pill.done { background: #f1f1f1; color: #616161; }
+  .apl-pill a { color: inherit; font-weight: 600; }
+  .apl-pill a:hover { text-decoration: underline; }
+
+  /* Section titles */
+  .apl-h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 600; letter-spacing: -.02em; color: #1d1d1d; text-align: center; margin-bottom: .75rem; }
+  .apl-lede { text-align: center; color: #6e6e6e; font-size: 1.05rem; max-width: 44rem; margin: 0 auto 2.75rem; line-height: 1.6; }
+
+  /* Status stepper */
+  .apl-status { background: #f5f5f5; }
+  .apl-steps { display: flex; align-items: flex-start; justify-content: space-between; max-width: 880px; margin: 0 auto; }
+  .apl-step { flex: 1; text-align: center; position: relative; padding: 0 .5rem; }
+  .apl-step::before { content: ""; position: absolute; top: 15px; left: -50%; width: 100%; height: 2px; background: #d2d2d2; z-index: 0; }
+  .apl-step:first-child::before { display: none; }
+  .apl-step.done::before { background: #616161; }
+  .apl-dot { width: 32px; height: 32px; border-radius: 50%; margin: 0 auto .75rem; display: flex; align-items: center; justify-content: center; font-size: .9rem; font-weight: 600; position: relative; z-index: 1; background: #fff; border: 2px solid #d2d2d2; color: #6e6e6e; }
+  .apl-step.done .apl-dot { background: #616161; border-color: #616161; color: #fff; }
+  .apl-step.current .apl-dot { border-color: #616161; color: #616161; }
+  .apl-beyond { text-align: center; font-size: .9rem; color: #6e6e6e; margin: 2.2rem auto 0; max-width: 640px; }
+  .apl-step h3 { font-size: .95rem; font-weight: 600; color: #1d1d1d; margin-bottom: .25rem; }
+  .apl-step p { font-size: .82rem; color: #6e6e6e; line-height: 1.45; }
+  .apl-step p a { font-weight: 500; }
+
+  /* Portfolio cards */
+  .apl-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  .apl-card { background: #f5f5f5; border-radius: 18px; padding: 1.75rem; display: flex; flex-direction: column; min-height: 190px; }
+  .apl-card h3 { font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; color: #1d1d1d; margin-bottom: .5rem; }
+  .apl-card p { font-size: .92rem; color: #6e6e6e; line-height: 1.55; flex: 1; }
+  .apl-tag { margin-top: 1.25rem; font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #868686; }
+
+  /* Black contrast block */
+  .apl-black { background: #000 !important; text-align: center; }
+  .apl-black .creds { font-size: clamp(1.4rem, 3.4vw, 2.4rem); font-weight: 600; letter-spacing: -.02em; line-height: 1.35; color: #f5f5f5; max-width: 56rem; margin: 0 auto; }
+  .apl-black .creds span { color: #868686; }
+
+  /* Journals + about */
+  .apl-alt { background: #f5f5f5; }
+  .apl-prose { max-width: 44rem; margin: 0 auto; color: #1d1d1d; font-size: 1.02rem; line-height: 1.7; }
+  .apl-prose p + p { margin-top: 1rem; }
+  .apl-prose .dim { color: #6e6e6e; }
+  .apl-topics { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.5rem; }
+  .apl-topic { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 999px; padding: .45rem .95rem; font-size: .83rem; color: #1d1d1d; }
+
+  /* Contact */
+  .apl-contact { text-align: center; }
+  .apl-contact .mail { font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 600; letter-spacing: -.02em; }
+
+  /* Footnote */
+  .apl-fine { padding: 2rem 0 2.5rem !important; text-align: center; }
+  .apl-fine p { font-size: .75rem; color: #868686; line-height: 1.7; max-width: 46rem; margin: 0 auto; }
+  .apl-fine a { color: #6e6e6e; }
+
+  @media (max-width: 760px) {
+    .apl-nav-inner { gap: .9rem; overflow-x: auto; scrollbar-width: none; }
+    .apl-nav-inner::-webkit-scrollbar { display: none; }
+    .apl-nav-links { gap: 1rem; margin-left: 0; }
+    .apl-cards { grid-template-columns: 1fr; }
+    .apl-steps { flex-direction: column; gap: 1.75rem; align-items: stretch; }
+    .apl-step { text-align: left; display: flex; gap: 1rem; align-items: flex-start; padding: 0; }
+    .apl-step::before { display: none; }
+    .apl-dot { margin: 0; flex-shrink: 0; }
+    .apl section { padding: 3.25rem 0; }
+  }
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/apple-learning-coach/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:title" content="Apple Learning Coach — Justin Spencer Smith">
+<meta property="og:description" content="Justin Spencer Smith's Apple Learning Coach certification work. A personal domain, separate from Detroit Automation Academy business.">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/apple-learning-coach/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Apple Learning Coach — Justin Spencer Smith">
+<meta name="twitter:description" content="Justin Spencer Smith's Apple Learning Coach certification work. A personal domain, separate from Detroit Automation Academy business.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Apple Learning Coach — Justin Spencer Smith",
+  "url": "https://www.detroitautomationacademy.com/apple-learning-coach/",
+  "description": "Justin Spencer Smith's Apple Learning Coach certification work: a personal domain, separate from Detroit Automation Academy business."
+}
+</script>
+</head>
+<body>
+
+<div class="apl">
+
+  <nav class="apl-nav" aria-label="Page">
+    <div class="apl-wrap apl-nav-inner">
+      <a class="apl-nav-brand" href="#">Justin Spencer Smith</a>
+      <div class="apl-nav-links">
+        <a href="#timeline">Timeline</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#journals">Journals</a>
+      </div>
+      <a class="apl-nav-cta" href="mailto:justin@detroitautomationacademy.com">Say hello</a>
+    </div>
+  </nav>
+
+  <section class="apl-hero">
+    <div class="apl-wrap">
+      <p class="apl-eyebrow">Apple Certified Coach</p>
+      <h1>Justin Spencer Smith.</h1>
+      <p class="sub">Coaching educators on getting more out of Apple technology.</p>
+      <div class="apl-pills">
+        <span class="apl-pill done">✓ <a href="https://education.apple.com/profile/DetroitAutomationAcademy">Apple Teacher</a></span>
+        <span class="apl-pill">Certification in progress: Apple Certified Coach</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="apl-status" id="timeline">
+    <div class="apl-wrap">
+      <h2 class="apl-h2">Where things stand.</h2>
+      <p class="apl-lede">On the path to Apple Certified Coach through Apple's free Apple Learning Coach professional learning program — about 43.5 hours across six units: self-paced lessons plus two virtual workshop days, a coaching journal per unit, and a final Coaching Portfolio. It carries the ISTE Seal of Alignment for Coaches.</p>
+      <div class="apl-steps">
+        <div class="apl-step done">
+          <div class="apl-dot">✓</div>
+          <div><h3>Apple Teacher</h3><p>Recognition confirmed — <a href="https://education.apple.com/profile/DetroitAutomationAcademy">view profile</a>. Required before acceptance into the program.</p></div>
+        </div>
+        <div class="apl-step done">
+          <div class="apl-dot">✓</div>
+          <div><h3>Accepted</h3><p>Into the Apple Learning Coach program.</p></div>
+        </div>
+        <div class="apl-step current">
+          <div class="apl-dot">3</div>
+          <div><h3>Kickoff</h3><p>Tuesday, October 13, 2026,<br>11:00 AM–12:00 PM ET, online.</p></div>
+        </div>
+        <div class="apl-step">
+          <div class="apl-dot">4</div>
+          <div><h3>Units &amp; journals</h3><p>Self-paced lessons and quizzes across six units, with a coaching journal submitted per unit. Unit 1 underway.</p></div>
+        </div>
+        <div class="apl-step">
+          <div class="apl-dot">5</div>
+          <div><h3>Workshops</h3><p>Two virtual workshop days — November 4–5, 2026.</p></div>
+        </div>
+        <div class="apl-step">
+          <div class="apl-dot">6</div>
+          <div><h3>Coaching Portfolio</h3><p>Final submission at the end of Unit 6.</p></div>
+        </div>
+        <div class="apl-step">
+          <div class="apl-dot">7</div>
+          <div><h3>Apple Certified Coach</h3><p>The credential.</p></div>
+        </div>
+      </div>
+      <p class="apl-beyond">After certification: <strong>Apple Distinguished Educator</strong> — Apple's application-based recognition program for education leaders.</p>
+    </div>
+  </section>
+
+  <section id="portfolio">
+    <div class="apl-wrap">
+      <h2 class="apl-h2">The portfolio.</h2>
+      <p class="apl-lede">Six sections, built as the certification progresses. Each opens when its work is real — nothing placeholder-published.</p>
+      <div class="apl-cards">
+        <div class="apl-card"><h3>Philosophy</h3><p>How I coach — the beliefs behind the practice.</p><span class="apl-tag">Forthcoming</span></div>
+        <div class="apl-card"><h3>Goals</h3><p>What the coaching is for, and how I'll know it's working.</p><span class="apl-tag">Forthcoming</span></div>
+        <div class="apl-card"><h3>Activities</h3><p>The work itself: units, workshops, and coaching reps.</p><span class="apl-tag">Forthcoming</span></div>
+        <div class="apl-card"><h3>Evidence of Success</h3><p>What changed for the educators coached — and the proof.</p><span class="apl-tag">Forthcoming</span></div>
+        <div class="apl-card"><h3>Timeline</h3><p>The certification path, mapped against the program's units.</p><span class="apl-tag">Forthcoming</span></div>
+        <div class="apl-card"><h3>Skills Demonstration</h3><p>Coaching in action — artifacts from real sessions.</p><span class="apl-tag">Forthcoming</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="apl-black">
+    <div class="apl-wrap">
+      <p class="creds">Apple Certified Support Professional. <span>Jamf Certified Expert (Jamf 400).</span> Youth STEM and robotics lead. <span>Advisor to the University of Michigan Center for Innovation.</span></p>
+    </div>
+  </section>
+
+  <section class="apl-alt" id="journals">
+    <div class="apl-wrap">
+      <h2 class="apl-h2">Journals.</h2>
+      <p class="apl-lede">Coaching journal notes from each unit, published as the certification progresses.</p>
+      <div class="apl-prose">
+        <p><strong>Unit 1 — in progress.</strong> <span class="dim">Coaching motivations and goals, values and vision, creative-technology self-evaluation, audio reflection, professional-learning collage.</span></p>
+        <div class="apl-topics">
+          <span class="apl-topic">Motivations &amp; goals</span>
+          <span class="apl-topic">Values &amp; vision</span>
+          <span class="apl-topic">Creative-technology self-evaluation</span>
+          <span class="apl-topic">Audio reflection</span>
+          <span class="apl-topic">Professional-learning collage</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="apl-contact" id="contact">
+    <div class="apl-wrap">
+      <h2 class="apl-h2">Say hello.</h2>
+      <p class="apl-lede">For coaching conversations, program questions, or educator collaboration.</p>
+      <p class="mail"><a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    </div>
+  </section>
+
+  <div class="apl-fine">
+    <div class="apl-wrap">
+      <p>A personal domain of Justin Spencer Smith — his Apple Learning Coach certification work, separate from Detroit Automation Academy programs and business.<br>Apple Teacher profile: <a href="https://education.apple.com/profile/DetroitAutomationAcademy">education.apple.com/profile/DetroitAutomationAcademy</a><br><a href="https://www.detroitautomationacademy.com/">← Detroit Automation Academy</a></p>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
