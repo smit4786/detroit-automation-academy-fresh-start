@@ -10132,6 +10132,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     'stale': 'live positions delayed',
     'cta-not-configured': 'CTA live positions not connected',
     'cta-buses-not-configured': 'CTA bus positions not connected',
+    'cta-trains-down': 'CTA train positions unavailable',
+    'cta-buses-down': 'CTA bus positions unavailable',
     'cta-down': 'CTA live positions unavailable'
   };
   var SVC_TAIL = 'What still works: the map, all stop and route information, and the trip planner are unaffected. The planner computes journeys from the published CTA timetable (CTA GTFS schedule data), not from live positions. While live positions are unavailable, scheduled times are the reliable basis for planning a trip. This notice concerns the live data feed only. CTA bus and train service is not cancelled, and this page does not announce service cancellations.';
@@ -10159,7 +10161,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       return [{ key: 'cta-not-configured' }];
     }
     if (cta && cta.ok === false) out.push({ key: 'cta-down' });
+    var trains = cta && cta.trains;
     var buses = cta && cta.buses;
+    if (trains && trains.configured !== false && trains.ok === false && !(cta && cta.ok === false)) {
+      // Exactly one leg is dark while the envelope still reports
+      // via the other: name the dark leg. Both legs dark is the
+      // whole-feed cta-down condition above.
+      out.push({ key: 'cta-trains-down' });
+    }
     if (buses && buses.configured === false) {
       // The train leg is connected (this envelope reports
       // configured), but the bus leg is not: the CTA Bus Tracker
@@ -10167,6 +10176,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // The notice keeps naming that blocker so the page never
       // reads as fully live while buses are dark.
       out.push({ key: 'cta-buses-not-configured' });
+    } else if (buses && buses.ok === false && !(cta && cta.ok === false)) {
+      out.push({ key: 'cta-buses-down' });
     }
     return out;
   }
@@ -10185,6 +10196,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         return 'CTA live positions unavailable. The CTA feed is not reporting.';
       case 'cta-buses-not-configured':
         return 'CTA train positions are live. Bus positions are not connected yet.';
+      case 'cta-trains-down':
+        return 'CTA train positions unavailable. The Train Tracker feed is not reporting.';
+      case 'cta-buses-down':
+        return 'CTA bus positions unavailable. The Bus Tracker feed is not reporting.';
     }
     return '';
   }
@@ -10207,6 +10222,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         return 'Live CTA positions come from the CTA Bus Tracker and Train Tracker feeds, which require a CTA API key. No key is configured for this map yet, so no live vehicles are shown and the count above is not a live count. Everything else works: every CTA route and stop is on the map, and departures and trip planning use the published CTA timetable.';
       case 'cta-buses-not-configured':
         return 'Live train positions come from the CTA Train Tracker feed and are updating on this map. Live bus positions come from the CTA Bus Tracker feed, which requires its own CTA API key — that key is not connected yet, so no live buses are shown. Bus routes, stops, and departures continue on the published CTA timetable, and the trip planner is unaffected.';
+      case 'cta-trains-down':
+        return 'The CTA Train Tracker source returned no data for the most recent update. Trains are removed from the map while the source is not reporting, and they return when the source resumes. Bus positions, every route and stop, and the trip planner are unaffected. A source outage is not a service suspension.';
+      case 'cta-buses-down':
+        return 'The CTA Bus Tracker source returned no data for the most recent update. Buses are removed from the map while the source is not reporting, and they return when the source resumes. Train positions, every route and stop, and the trip planner are unaffected. A source outage is not a service suspension.';
       case 'cta-down':
         return 'The CTA position source returned no data for the most recent update. CTA vehicles are removed from the map while the source is not reporting, and they return when the source resumes. A source outage is not a service suspension. CTA buses and trains continue to run on their published schedules.';
     }

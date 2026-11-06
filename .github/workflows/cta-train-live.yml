@@ -1,10 +1,10 @@
-name: CTA Train Tracker live positions (Chicago staging)
+name: CTA live positions (Chicago staging)
 
-# Chicago staging live rail layer. Follows the Detroit keyless-chain
-# pattern at staging scale: the Train Tracker key lives only in this
-# repo's Actions secrets (CTA_TRAIN_KEY); the collector fetches train
-# positions and commits a static vehicles.json the page polls. The key
-# never appears in page code or committed files.
+# Chicago staging live layer. Follows the Detroit keyless-chain
+# pattern at staging scale: the CTA keys live only in this repo's
+# Actions secrets (CTA_TRAIN_KEY, CTA_BUS_KEY); the collector fetches
+# train and bus positions and commits a static vehicles.json the page
+# polls. The keys never appear in page code or committed files.
 #
 # Cadence: GitHub's shortest schedule interval is 5 minutes, so each
 # run loops 5 collection cycles ~60 s apart, giving ~60 s polling
@@ -29,9 +29,10 @@ jobs:
     timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
-      - name: Collect CTA train positions
+      - name: Collect CTA train and bus positions
         env:
           CTA_TRAIN_KEY: ${{ secrets.CTA_TRAIN_KEY }}
+          CTA_BUS_KEY: ${{ secrets.CTA_BUS_KEY }}
         run: |
           set -e
           git config user.name 'github-actions[bot]'
