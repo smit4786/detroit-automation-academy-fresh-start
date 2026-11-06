@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform status — Detroit Automation Academy</title>
+<meta name="description" content="Live status of Detroit Automation Academy platform systems: website, live transit map, bus data feed, and timing data.">
+<meta property="og:title" content="Platform status — Detroit Automation Academy">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/webp" href="/assets/logo.webp">
+<link rel="stylesheet" href="/styles.css?v=20261031-0615">
+<style>
+.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 1.5rem; }
+.status-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; }
+.status-card h3 { margin: 0 0 .35rem; font-size: 1.05rem; }
+.status-card > p { color: #9f9f9f; font-size: .88rem; margin: 0 0 .9rem; }
+.pill { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border-radius: 999px; padding: .35rem .8rem; border: 1px solid; }
+.pill.ok { color: #c9c9c9; border-color: rgba(201, 201, 201, .5); background: rgba(201, 201, 201, .08); }
+.pill.bad { color: #a7a7a7; border-color: rgba(167, 167, 167, .5); background: rgba(167, 167, 167, .08); }
+.pill.wait { color: #9f9f9f; border-color: rgba(159, 159, 159, .4); }
+.status-meta { color: #9f9f9f; font-size: .8rem; margin-top: .7rem; font-variant-numeric: tabular-nums; }
+.status-foot { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.5rem; }
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/dashboard.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:description" content="Live status of Detroit Automation Academy platform systems.">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/dashboard.html">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:image:alt" content="Detroit Automation Academy — Forge D logo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Platform status — Detroit Automation Academy">
+<meta name="twitter:description" content="Live status of Detroit Automation Academy platform systems: website, live transit map, bus data feed, and timing data.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Platform status",
+  "url": "https://www.detroitautomationacademy.com/dashboard.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main id="top">
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">Platform status</p>
+      <h1>Systems, <span class="accent">live.</span></h1>
+      <div class="prose">
+        <p>Real-time status of the Academy's public platform systems, checked from your browser right now. Refreshes automatically every minute.</p>
+      </div>
+      <div class="status-grid" id="status-grid" aria-live="polite"></div>
+      <div class="status-foot">
+        <button class="btn btn-ghost" id="status-recheck">Recheck now</button>
+        <span class="status-meta" id="status-meta"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="releases">
+
+<section class="section">
+  <div class="wrap">
+    <div class="rel-hero">
+      <p class="kicker">Live Transit Detroit · Releases</p>
+      <h2>Release <span class="accent">Record</span></h2>
+      <p class="lede">Live Transit builds carry a build stamp — the build identifier. Releases carry a public dot name over the stamp, so a rider, a partner, or a reporter can cite a release by a name, not a timestamp. A dot is assigned when its payload has passed the release gate: verified payloads, browser-checked on the production site, with a one-step rollback per dot. Dots ship per-feature — when the payload verifies, not on a fixed calendar.</p>
+    </div>
+
+    <div class="rel-card">
+      <h2>Live Transit v2.0 — a new planning engine</h2>
+      <p class="meta">Released October 21, 2026 · Build 20261021-0917</p>
+      <p>The trip planner now runs on Live Transit's second-generation engine. The answers are the ones riders already get — verified identical on our regression grid — and they arrive faster: the median plan time on the Woodward acceptance trip is down from 340 ms to 267 ms in benchmark measurement.</p>
+      <p>The new engine also computes fewest-transfer and least-walking alternatives, departure windows, and arrive-by plans; those reach the planner's interface in a following release (v2.1). DDOT and SMART trips are planned from the agencies' published schedules; live bus positions stay on the map, as before. Planning still runs entirely on the rider's device — an origin and a destination never leave the phone.</p>
+      <p class="src">Payload: the assembled second-generation planner engine (one file, byte-verified against its benchmark record before release). Rollback unit: build 20261020-1647.</p>
+    </div>
+
+    <div class="rel-card">
+      <h2>The v1 line</h2>
+      <p>Builds before the dot era belong to the v1 line and carry build stamps only — no retroactive dot numbers are assigned. The last v1 build was 20261020-1647.</p>
+    </div>
+
+    <p><a href="/press/media-kit.html">Media kit</a> · <a href="/live-transit.html">Open Live Transit</a></p>
+  </div>
+</section>
+
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var toggle = document.getElementById('navToggle');
+  var nav = document.getElementById('navLinks');
+  toggle.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+
+  var CHECKS = [
+    { id: 'site',    name: 'Website',          desc: 'Academy homepage and content pages', url: '/' },
+    { id: 'transit', name: 'Live Transit map', desc: '3D transit map application',         url: '/live-transit.html' },
+    { id: 'proxy',   name: 'Bus data feed',    desc: 'Live DDOT vehicle positions',        url: 'https://forge-line-live-proxy.netlify.app/api/vehicles', method: 'HEAD' },
+    { id: 'timing',  name: 'Timing data',      desc: 'Empirical segment timing dataset',   url: 'https://raw.githubusercontent.com/smit4786/forge-line-transit-data/main/data/timing/segments.json' }
+  ];
+  function check(c) {
+    var t0 = performance.now();
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 10000);
+    return fetch(c.url, { cache: 'no-store', signal: ctrl.signal, method: c.method || 'GET' })
+      .then(function (r) { return { ok: r.ok, ms: Math.round(performance.now() - t0) }; })
+      .catch(function () { return { ok: false, ms: Math.round(performance.now() - t0) }; })
+      .finally(function () { clearTimeout(timer); });
+  }
+  function render() {
+    var grid = document.getElementById('status-grid');
+    grid.innerHTML = '';
+    CHECKS.forEach(function (c) {
+      var d = document.createElement('div');
+      d.className = 'status-card';
+      d.id = 'st-' + c.id;
+      var h = document.createElement('h3'); h.textContent = c.name;
+      var p = document.createElement('p'); p.textContent = c.desc;
+      var pill = document.createElement('span'); pill.className = 'pill wait'; pill.textContent = 'checking…';
+      var meta = document.createElement('p'); meta.className = 'status-meta';
+      d.appendChild(h); d.appendChild(p); d.appendChild(pill); d.appendChild(meta);
+      grid.appendChild(d);
+    });
+    document.getElementById('status-meta').textContent = 'Checking…';
+    var done = 0, up = 0;
+    CHECKS.forEach(function (c) {
+      check(c).then(function (r) {
+        var d = document.getElementById('st-' + c.id);
+        var pill = d.querySelector('.pill');
+        pill.className = 'pill ' + (r.ok ? 'ok' : 'bad');
+        pill.textContent = r.ok ? 'operational' : 'unreachable';
+        d.querySelector('.status-meta').textContent = r.ms + ' ms';
+        done++; if (r.ok) up++;
+        if (done === CHECKS.length) {
+          document.getElementById('status-meta').textContent =
+            up + ' of ' + done + ' systems operational · checked ' + new Date().toLocaleTimeString();
+        }
+      });
+    });
+  }
+  document.getElementById('status-recheck').addEventListener('click', render);
+  render();
+  setInterval(render, 60000);
+})();
+</script>
+
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

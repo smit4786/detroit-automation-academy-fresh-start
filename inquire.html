@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact &amp; Inquiries — Detroit Automation Academy</title>
+<meta name="description" content="Start a conversation with Detroit Automation Academy — sponsorships, partnerships, programs, and press. Every inquiry is read and answered by a person.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/webp" href="assets/logo.webp">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css?v=20261031-0615">
+<style>
+  .inquire-hero { padding: 96px 24px 40px; text-align: center; }
+  .inquire-wrap { max-width: 640px; margin: 0 auto; padding: 0 24px 96px; }
+  .inq-form { display: grid; gap: 18px; margin-top: 36px; }
+  .inq-form label { display: grid; gap: 8px; font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem; letter-spacing: 0.04em; color: var(--concrete); text-align: left; }
+  .inq-form input, .inq-form select, .inq-form textarea {
+    font: inherit; font-size: 1rem; color: inherit; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 12px 14px; width: 100%; }
+  .inq-form textarea { min-height: 140px; resize: vertical; }
+  .inq-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .inq-status { margin-top: 18px; font-size: 0.95rem; color: var(--concrete); }
+  .inq-status a { color: var(--amber); }
+  @media (max-width: 760px) { .inquire-hero { padding: 64px 20px 32px; } }
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/inquire.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:title" content="Contact &amp; Inquiries — Detroit Automation Academy">
+<meta property="og:description" content="Start a conversation with Detroit Automation Academy — sponsorships, partnerships, programs, and press.">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/inquire.html">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:image:alt" content="Detroit Automation Academy — Forge D logo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Contact &amp; Inquiries — Detroit Automation Academy">
+<meta name="twitter:description" content="Start a conversation with Detroit Automation Academy — sponsorships, partnerships, programs, and press.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Contact & Inquiries",
+  "url": "https://www.detroitautomationacademy.com/inquire.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+
+<div id="daa-nav"></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main>
+
+  <section class="inquire-hero">
+    <div class="wrap">
+      <p class="kicker">Contact</p>
+      <h1>Start the <span class="accent">conversation.</span></h1>
+      <p class="lede" style="margin-bottom:0;">Sponsorships, partnerships, programs, press — one form, read by a person. Tell us what you're working on and we'll answer from a human inbox.</p>
+    </div>
+  </section>
+
+  <div class="inquire-wrap">
+    <form class="inq-form" id="inquiryForm" novalidate>
+      <label>Your name *
+        <input type="text" name="name" autocomplete="name" required maxlength="120">
+      </label>
+      <label>Organization
+        <input type="text" name="organization" autocomplete="organization" maxlength="160">
+      </label>
+      <label>Email *
+        <input type="email" name="email" autocomplete="email" required maxlength="160">
+      </label>
+      <label>I'm writing about
+        <select name="interest">
+          <option>Sponsorship</option>
+          <option>Partnership</option>
+          <option>Programs</option>
+          <option>Press</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Message *
+        <textarea name="message" required maxlength="4000" placeholder="What are you proposing, asking, or offering?"></textarea>
+      </label>
+      <label class="inq-hp" aria-hidden="true">Company site
+        <input type="text" name="company_url" tabindex="-1" autocomplete="off">
+      </label>
+      <button type="submit" class="btn btn-primary">Send inquiry</button>
+      <p class="inq-status" id="inquiryStatus">Prefer email? Write to <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a> — every inquiry is read.</p>
+    </form>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* Set to the daa-ingest endpoint ('https://<host>/inquire') when it deploys.
+     Until then the form composes the inquiry into the visitor's own email
+     client — nothing is stored by this page, and no inquiry is lost. */
+  var INQUIRY_ENDPOINT = null;
+  var form = document.getElementById('inquiryForm');
+  var status = document.getElementById('inquiryStatus');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var data = {
+      name: form.name.value.trim(),
+      organization: form.organization.value.trim(),
+      email: form.email.value.trim(),
+      interest: form.interest.value,
+      message: form.message.value.trim(),
+      company_url: form.company_url.value,
+      page: location.pathname
+    };
+    if (!data.name || !data.email || !data.message) {
+      status.textContent = 'Name, email, and a message are required.';
+      return;
+    }
+    function viaEmail() {
+      var subject = encodeURIComponent('Inquiry — ' + data.interest);
+      var body = encodeURIComponent(
+        'Name: ' + data.name + '\nOrganization: ' + (data.organization || '(none)') +
+        '\nEmail: ' + data.email + '\n\n' + data.message);
+      status.innerHTML = 'Opening your email with the inquiry pre-written — ' +
+        'or copy it to <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a>.';
+      window.location.href = 'mailto:justin@detroitautomationacademy.com?subject=' + subject + '&body=' + body;
+    }
+    if (!INQUIRY_ENDPOINT) { viaEmail(); return; }
+    status.textContent = 'Sending…';
+    fetch(INQUIRY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('send failed');
+      status.textContent = 'Received — thank you. We reply from a human inbox; if two business days pass without an answer, write to smit4786@gmail.com and say so.';
+      form.reset();
+    }).catch(viaEmail);
+  });
+})();
+</script>
+<script src="/nav.js?v=20261031-0615"></script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>

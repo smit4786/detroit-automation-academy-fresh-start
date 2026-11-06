@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transit API — Detroit Automation Academy</title>
+<meta name="description" content="Documentation for the Detroit Automation Academy's live transit data: DDOT and QLINE vehicle positions and DDOT service alerts as static JSON.">
+<link rel="icon" type="image/webp" href="assets/logo.webp">
+<link rel="stylesheet" href="styles.css?v=20261031-0615">
+<style>
+  .api-hero { padding: 4.5rem 0 2rem; }
+  .api-hero h1 { font-family: "Space Grotesk", sans-serif; font-size: 2.4rem; margin: .4rem 0 1rem; color: #f2f2f2; letter-spacing: .01em; }
+  .endpoint { background: var(--midnight-2); border: 1px solid rgba(242, 242, 242, .14); border-radius: 14px; padding: 1.25rem 1.4rem; margin: 1.5rem 0; }
+  .endpoint-head { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .8rem; }
+  .method { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: .8rem; letter-spacing: .06em; background: #a4a4a4; color: #101010; border-radius: 6px; padding: .3rem .6rem; }
+  .endpoint-path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.05rem; color: #f2f2f2; word-break: break-all; }
+  .kv { display: grid; grid-template-columns: 11rem 1fr; gap: .4rem 1rem; font-size: .92rem; margin: .6rem 0 0; }
+  .kv dt { color: #9f9f9f; }
+  .kv dd { margin: 0; color: #f2f2f2; }
+  pre.code { background: #0b0b0b; border: 1px solid rgba(242, 242, 242, .14); border-radius: 12px; padding: 1.1rem 1.25rem; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; line-height: 1.55; color: #dbdbdb; margin: 1rem 0 1.5rem; }
+  pre.code .k { color: #b4b4b4; }
+  table.fields { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 1rem 0 1.75rem; }
+  table.fields th { text-align: left; font-family: "Space Grotesk", sans-serif; font-size: .78rem; letter-spacing: .05em; text-transform: uppercase; color: #9f9f9f; padding: .55rem .7rem; border-bottom: 1px solid rgba(242, 242, 242, .2); }
+  table.fields td { padding: .55rem .7rem; border-bottom: 1px solid rgba(242, 242, 242, .08); vertical-align: top; }
+  table.fields td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #b4b4b4; white-space: nowrap; }
+  table.fields td:nth-child(2) { color: #9f9f9f; white-space: nowrap; }
+  .callout { border-left: 3px solid #767676; background: rgba(118, 118, 118, .07); border-radius: 0 10px 10px 0; padding: .9rem 1.1rem; margin: 1.25rem 0; font-size: .92rem; }
+  .callout p { margin: 0; }
+  .api-section { padding: 2.5rem 0; border-top: 1px solid rgba(242, 242, 242, .1); }
+  .api-section h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.5rem; color: #f2f2f2; margin: 0 0 .8rem; }
+  .api-section h3 { font-family: "Space Grotesk", sans-serif; font-size: 1.05rem; color: #f2f2f2; margin: 1.6rem 0 .4rem; }
+  a code, p code, li code, td code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em; background: rgba(242, 242, 242, .08); border-radius: 5px; padding: .1em .4em; color: #f2f2f2; }
+  @media (max-width: 640px) {
+    .kv { grid-template-columns: 1fr; }
+    .api-hero h1 { font-size: 1.9rem; }
+  }
+</style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/api.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:title" content="Transit API — Detroit Automation Academy">
+<meta property="og:description" content="Documentation for the Detroit Automation Academy's live transit data: DDOT and QLINE vehicle positions and alerts as static JSON.">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/api.html">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta property="og:image:alt" content="Detroit Automation Academy — Forge D logo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Transit API — Detroit Automation Academy">
+<meta name="twitter:description" content="Documentation for the Detroit Automation Academy's live transit data: DDOT and QLINE vehicle positions and DDOT service alerts as static JSON.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  "name": "Detroit Automation Academy Transit API",
+  "url": "https://www.detroitautomationacademy.com/api.html",
+  "description": "Live DDOT and QLINE vehicle data from the Detroit Automation Academy, published as static JSON.",
+  "provider": {
+    "@type": "Organization",
+    "name": "Detroit Automation Academy",
+    "url": "https://www.detroitautomationacademy.com/"
+  }
+}
+</script>
+  <link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="/feed.xml">
+</head>
+<body>
+
+<div id="daa-nav"><header class="nav"><a class="brand" href="/" aria-label="Detroit Automation Academy — home"><img src="/assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="/live-transit.html">Live Map</a><a class="lane" data-audience="user" href="/live-transit/">Cities</a><a class="lane" data-audience="visitor" href="/programs.html">Programs</a><a class="lane" data-audience="visitor" href="/voter-guide.html">Voter Guide</a><a class="lane" data-audience="reader" href="/signal/">The Signal</a><a class="lane" data-audience="visitor" href="/inquire.html">Contact</a><a class="lane" data-audience="visitor" href="/find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="/nav.js?v=20261031-0615"></script>
+
+<main>
+  <section class="api-hero">
+    <div class="wrap">
+      <p class="kicker">Developer documentation</p>
+      <h1>The transit <span class="accent">API.</span></h1>
+      <div class="prose">
+        <p>This is the live data feed behind the academy&rsquo;s <a href="live-transit.html">Live Transit map</a> and the bus count on the <a href="live-transit.html">Live Transit page</a>: Detroit Department of Transportation (DDOT) bus positions, QLINE streetcar positions, and DDOT service alerts, published as static JSON files on this site. A GitHub Actions workflow collects the agency feeds — the keys never leave Actions — and the academy&rsquo;s publisher turns the collected feeds into the finished files on this site. Positions poll continuously and publish about every five minutes; the map dead-reckons between updates. No key required.</p>
+        <p>Base URL: <code>https://detroitautomationacademy.com</code></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <h2>Endpoints</h2>
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/live-data/vehicles.json</span>
+        </div>
+        <dl class="kv">
+          <dt>Parameters</dt><dd>None.</dd>
+          <dt>Refresh</dt><dd>The publisher runs about every 5 minutes and republishes the file when the underlying data has changed (and at least every 30 minutes as a liveness heartbeat). GitHub Pages may serve a cached copy for up to 10 minutes. Judge freshness by <code>generated_at</code>, never by fetch time.</dd>
+          <dt>CORS</dt><dd>Served by GitHub Pages with <code>Access-Control-Allow-Origin: *</code> — call it directly from browser JavaScript.</dd>
+          <dt>Auth</dt><dd>None to read. The upstream DDOT key is a secret of the collection workflow and never appears in the published files.</dd>
+        </dl>
+      </div>
+
+      <h3>Example response <span style="color:#9f9f9f;font-weight:400;font-size:.85rem;">(real response, 2026-10-15; trimmed to 1 of 4 vehicles)</span></h3>
+<pre class="code">{
+  "generated_at": "2026-10-16T00:00:29.484Z",
+  "count": 4,
+  "vehicles": [
+    {
+      "agency": "qline",
+      "route_id": "QLINE",
+      "vehicle_id": "287",
+      "lat": 42.33913040161133,
+      "lon": -83.05245971679688,
+      "bearing": 154,
+      "speed_mph": null,
+      "updated_at": "2026-10-15T23:59:59.000Z"
+    }
+  ],
+  "sources": {
+    "ddot":  { "ok": true, "at": "2026-10-16T00:00:29.484Z", "vehicles": 0, "batches_ok": 4, "batches_failed": 0 },
+    "smart": { "ok": true, "at": "2026-10-16T00:00:29.484Z", "vehicles": 141 },
+    "qline": { "ok": true, "at": "2026-10-16T00:00:29.484Z", "vehicles": 4 }
+  }
+}</pre>
+
+      <h3>Top-level fields</h3>
+      <table class="fields">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>generated_at</td><td>string</td><td>ISO 8601 UTC timestamp of when the publisher generated this file. The file is only republished when the data changes (30-minute heartbeat aside), so this is the freshness clock for everything in it.</td></tr>
+          <tr><td>count</td><td>integer</td><td>Number of vehicle objects in <code>vehicles</code>.</td></tr>
+          <tr><td>vehicles</td><td>array</td><td>Live vehicle snapshots (fields below).</td></tr>
+          <tr><td>sources</td><td>object</td><td>Per-agency feed status, keyed <code>ddot</code>, <code>smart</code>, <code>qline</code>: <code>ok</code>, <code>at</code>, and either <code>vehicles</code> (a count) or a <code>reason</code>. Two states are named explicitly: <code>sources.ddot</code> carries <code>"configured": false</code> with a reason when the collection workflow lacks the upstream DDOT key — DDOT vehicles are then absent while other agencies still publish; <code>sources.smart</code> reports the status of the SMART display leg built from the Swiftly GTFS-Realtime feed: SMART vehicle positions are displayed in the Live Transit Detroit application only and are never part of this file's <code>vehicles</code> array or of the public JSON contract — the <code>vehicles</code> count under <code>sources.smart</code> counts positions published to the application's display payload, not records in this file.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Vehicle fields</h3>
+      <table class="fields">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>agency</td><td>string</td><td><code>ddot</code> or <code>qline</code>.</td></tr>
+          <tr><td>route_id</td><td>string</td><td>GTFS route id: the route number for DDOT vehicles (the feed covers all 37 DDOT routes), or <code>QLINE</code> for the streetcar.</td></tr>
+          <tr><td>vehicle_id</td><td>string</td><td>Agency vehicle number.</td></tr>
+          <tr><td>lat / lon</td><td>number</td><td>WGS84 position in decimal degrees.</td></tr>
+          <tr><td>bearing</td><td>number</td><td>Compass heading in degrees, or <code>null</code> when the feed does not report it.</td></tr>
+          <tr><td>speed_mph</td><td>number</td><td>Reported speed in miles per hour, or <code>null</code> when the feed does not report it.</td></tr>
+          <tr><td>destination</td><td>string</td><td>DDOT records only: the destination text reported by the BusTime feed, or <code>null</code>. QLINE records do not carry this field.</td></tr>
+          <tr><td>updated_at</td><td>string</td><td>Vehicle timestamp as reported by the agency feed (ISO 8601; DDOT timestamps are agency-local time without an offset). <code>null</code> when the feed reports none.</td></tr>
+        </tbody>
+      </table>
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/live-data/alerts.json</span>
+        </div>
+        <dl class="kv">
+          <dt>Parameters</dt><dd>None.</dd>
+          <dt>Refresh</dt><dd>Rebuilt on the same schedule as <code>vehicles.json</code>: about every 5 minutes when the alert set or a source state changes, with the same 30-minute heartbeat.</dd>
+          <dt>CORS</dt><dd>Served by GitHub Pages with <code>Access-Control-Allow-Origin: *</code>.</dd>
+          <dt>Auth</dt><dd>None to read.</dd>
+        </dl>
+      </div>
+
+      <h3>Example response <span style="color:#9f9f9f;font-weight:400;font-size:.85rem;">(real response, 2026-10-15)</span></h3>
+<pre class="code">{
+  "generated_at": "2026-10-15T19:51:06.386Z",
+  "count": 0,
+  "alerts": [],
+  "sources": [
+    {
+      "agency": "ddot",
+      "kind": "realtime",
+      "via": "bustime",
+      "fetched_at": "2026-10-15T19:51:06.386Z",
+      "ok": false,
+      "status": "error",
+      "alerts": 0,
+      "reason": "DDOT_BUSTIME_KEY secret not configured",
+      "configured": false
+    }
+  ]
+}</pre>
+
+      <h3>Alerts top-level fields</h3>
+      <table class="fields">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>generated_at</td><td>string</td><td>ISO 8601 UTC timestamp of when the publisher generated this file.</td></tr>
+          <tr><td>count</td><td>integer</td><td>Number of alert objects in <code>alerts</code>.</td></tr>
+          <tr><td>alerts</td><td>array</td><td>Active DDOT service bulletins (fields below).</td></tr>
+          <tr><td>sources</td><td>array</td><td>Per-agency feed status as an array (in <code>vehicles.json</code> it is an object). Each entry carries <code>agency</code>, <code>kind</code>, <code>via</code>, <code>fetched_at</code>, <code>ok</code>, <code>status</code> (<code>ok</code> or <code>error</code>), and <code>alerts</code> (a count); a failed or unconfigured source adds a <code>reason</code>, and the not-configured state adds <code>"configured": false</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Bulletin fields</h3>
+      <table class="fields">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>string</td><td>Bulletin id from the BusTime feed.</td></tr>
+          <tr><td>agency</td><td>string</td><td><code>ddot</code>.</td></tr>
+          <tr><td>header</td><td>string</td><td>Bulletin headline.</td></tr>
+          <tr><td>description</td><td>string</td><td>Bulletin detail text.</td></tr>
+          <tr><td>effect / cause</td><td>string</td><td>Currently always <code>null</code> — the BusTime bulletin feed does not carry GTFS-RT effect/cause values.</td></tr>
+          <tr><td>active_period</td><td>object</td><td><code>{start, end}</code>: <code>start</code> is the bulletin timestamp reported by the BusTime feed (agency-local ISO 8601, or <code>null</code>); <code>end</code> is currently always <code>null</code>.</td></tr>
+          <tr><td>routes / stops</td><td>array</td><td>Route ids and stop ids the bulletin applies to.</td></tr>
+          <tr><td>url</td><td>string</td><td>Currently always <code>null</code>.</td></tr>
+          <tr><td>source</td><td>string</td><td><code>bustime</code>.</td></tr>
+          <tr><td>fetched_at</td><td>string</td><td>When the publisher fetched this bulletin (the file&rsquo;s <code>generated_at</code>).</td></tr>
+          <tr><td>kind</td><td>string</td><td><code>realtime</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/feed.xml</span>
+        </div>
+        <dl class="kv">
+          <dt>Format</dt><dd>RSS 2.0 feed of the academy&rsquo;s publishing, newest first: The Signal editions and specials, Live Transit Detroit installments, Detroit 2126, and Notes. Each item carries the article&rsquo;s title, link, publication date, category, and description, plus a <code>content:encoded</code> body with links back to the article and its section hub.</dd>
+          <dt>Parameters</dt><dd>None.</dd>
+          <dt>Refresh</dt><dd>Regenerated from <code>sitemap.xml</code> and each page&rsquo;s own metadata when a new article publishes. Point a feed reader at the URL and new pieces arrive as they publish; there is no polling schedule.</dd>
+          <dt>CORS</dt><dd>Served by GitHub Pages with <code>Access-Control-Allow-Origin: *</code>.</dd>
+          <dt>Auth</dt><dd>None. No key required.</dd>
+          <dt>Display</dt><dd>Feed readers receive the raw RSS XML. Opened in a browser, the feed renders as a formatted page via <code>/feed.xsl</code>, the XSLT stylesheet the feed declares &mdash; the stylesheet affects browser display only.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <h2>Retired endpoints</h2>
+      <div class="prose">
+        <p>The live data used to be served by a proxy at <code>forge-line-live-proxy.netlify.app</code>. <strong>Those endpoints were retired on 2026-10-15</strong> — the proxy&rsquo;s hosting quota was exhausted (it returned HTTP 503 <code>usage_exceeded</code> on every path) and the feed moved to the static files above. Do not build against them:</p>
+        <ul>
+          <li><code>GET https://forge-line-live-proxy.netlify.app/api/vehicles</code> — retired 2026-10-15; use <code>/live-data/vehicles.json</code> instead.</li>
+          <li><code>GET https://forge-line-live-proxy.netlify.app/api/alerts</code> — retired 2026-10-15; use <code>/live-data/alerts.json</code> instead.</li>
+          <li><code>GET https://forge-line-live-proxy.netlify.app/healthz</code> — retired 2026-10-15; the static files need no health endpoint — check <code>generated_at</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <h2>Rate-limit etiquette</h2>
+      <div class="prose">
+        <ul>
+          <li>Poll at most <strong>once per minute</strong>. Positions poll continuously and publish about every five minutes; the map dead-reckons between updates — matching that cadence is plenty.</li>
+          <li>The files are rebuilt about every 5 minutes, so faster polling returns the same file; use <code>generated_at</code> to detect genuinely new data instead of re-polling.</li>
+          <li>Cache responses client-side. Don&rsquo;t fan out one page view into many parallel requests.</li>
+          <li>The published files are the whole interface — there is no key to ask for and nothing upstream to bypass; the agency key exists only inside the collection workflow.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <p>Building a student project or a community tool? The 5-minute cadence is the intended use. If you need something the feed doesn&rsquo;t offer, the logged history below may already have it.</p>
+      </div>
+      <div class="prose">
+        <p>Use of these files — and of the logged history dataset below — is governed by &sect;6 of the <a href="/terms.html">Terms of Service</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <h2>Commercial use</h2>
+      <div class="prose">
+        <p>Personal, student, and community use is free with attribution: <em>Live transit data: Detroit Automation Academy (detroitautomationacademy.com)</em>. Building something commercial on this data — a product, a service, a paid integration? Talk to us first: <a href="mailto:justin@detroitautomationacademy.com?subject=API%20commercial%20use%20inquiry">justin@detroitautomationacademy.com</a>. Commercial use is licensed by AUTOMATEDTECHNOLOGIES; one conversation sets the terms.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <h2>Logged history dataset</h2>
+      <div class="prose">
+        <p>A public log of this feed&rsquo;s snapshots, appended every 5 minutes, runs from 2026-10-03 — the raw material for headway analysis, reliability scores, and arrival predictions. Vehicle objects in the log use exactly the same field names as the live endpoint above, so code written against the live feed reads the history without translation.</p>
+        <ul>
+          <li>Repository: <a href="https://github.com/smit4786/forge-line-transit-data">github.com/smit4786/forge-line-transit-data</a></li>
+          <li>Format: <code>forge-line.telemetry/v1</code>, documented in the repo&rsquo;s <a href="https://github.com/smit4786/forge-line-transit-data/blob/main/SCHEMA.md">SCHEMA.md</a></li>
+          <li>Day index: <code>https://raw.githubusercontent.com/smit4786/forge-line-transit-data/main/data/index.json</code></li>
+          <li>One day of polls: <code>https://raw.githubusercontent.com/smit4786/forge-line-transit-data/main/data/2026-10-03.jsonl</code> <span style="color:#9f9f9f;">(replace the date)</span></li>
+        </ul>
+        <p>Failed polls are never logged as empty records — a gap in a day&rsquo;s file means that poll failed, not that zero buses were running.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <h2>Error behavior</h2>
+      <div class="prose">
+        <ul>
+          <li><strong>Old <code>generated_at</code></strong> — the files are static, so a failed or delayed build leaves the previous file in place rather than returning an error. If <code>generated_at</code> is well past the ~5-minute publish cadence, treat the contents as of that timestamp and keep retrying on your normal cadence.</li>
+          <li><strong>A source reports <code>"ok": false</code></strong> — that agency&rsquo;s leg failed or is not configured (its <code>reason</code> says which); the other agencies&rsquo; data still publishes. Check <code>sources</code> before concluding the whole feed is down.</li>
+          <li><strong>Non-200 or network failure</strong> — back off and retry after 60 seconds. Don&rsquo;t hammer the files; they only change every few minutes anyway.</li>
+          <li><strong>Empty <code>vehicles</code> array</strong> — valid response, no vehicles currently reporting on the covered routes (common late at night).</li>
+        </ul>
+        <p>File-level timestamps (<code>generated_at</code>, <code>fetched_at</code>) are UTC; vehicle and bulletin timestamps are reported as the agency feeds give them. Route coverage may expand as feeds are added; check <code>sources</code> to see which agencies are live.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-section">
+    <div class="wrap">
+      <p class="kicker">Attribution</p>
+      <h2>Built by <span class="accent">Detroit Automation Academy.</span></h2>
+      <div class="prose">
+        <p>Live vehicle data: DDOT via Clever Devices BusTime; QLINE via its public GTFS-RT feed. Route shapes and stops: DDOT and QLINE GTFS.</p>
+        <p class="fine">This feed is a community resource, published from the academy&rsquo;s own repository — please follow the rate-limit etiquette above so it stays fast for everyone.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="/live-transit.html">Live Map</a> · <a href="/board/">Departure Board</a> · <a href="/live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="/live-transit.html">Detroit</a> · <a href="/live-transit/philadelphia/">Philadelphia</a> · <a href="/live-transit/cincinnati/">Cincinnati</a> · <a href="/live-transit/denver/">Denver</a> · <a href="/live-transit/austin/">Austin</a> · <a href="/live-transit/sacramento/">Sacramento</a> · <a href="/live-transit/san-diego/">San Diego</a> · <a href="/live-transit/columbus/">Columbus</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="/signal/">The Signal</a> · <a href="/live-transit-detroit/">Live Transit Detroit stories</a> · <a href="/notes/">Notes</a> · <a href="/press/">The Press</a> · <a href="/feed/">Latest</a> · <a href="/watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="/programs.html">Programs</a> · <a href="/curriculum/online-safety/">Online Safety</a> · <a href="/voter-guide.html">Voter Guide</a> · <a href="/partners.html">Partners</a> · <a href="/api.html">API</a> · <a href="/inquire.html">Contact</a> · <a href="/apple-learning-coach/">Coach Profile</a> · <a href="/press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="/dashboard.html">Status</a> · <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="/find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
+
+<script>
+  // Minimal nav toggle (mirrors index behavior for this standalone page)
+  (function () {
+    var t = document.getElementById('navToggle'), l = document.getElementById('navLinks');
+    if (!t || !l) return;
+    t.addEventListener('click', function () {
+      var open = l.classList.toggle('open');
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  })();
+</script>
+<script src="/assets/measure.js?v=20261023-o2" defer></script>
+</body>
+</html>
