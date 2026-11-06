@@ -1,326 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
-<meta name="theme-color" content="#ffffff">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The Index — Detroit Automation Academy</title>
-<meta name="description" content="The Index: projects, decision gates, and implementations for the Detroit Automation Academy domain — the state of the work, on the record.">
+<meta name="description" content="The Index: every page on the Detroit Automation Academy site — the map, the stories, the programs, and the fine print — in one place.">
+<meta name="author" content="Justin Spencer Smith">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="icon" type="image/webp" href="../assets/logo.webp">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../styles.css?v=20261102-1818">
 <style>
-  :root{
-    --ink:#111; --body:#222; --muted:#5a5a5a; --faint:#8a8a8a;
-    --line:#d8d8d8; --line-strong:#a8a8a8; --band:#f2f2f2; --band-2:#e8e8e8;
-    --page-margin:16px; --panel-pad:12px; --gap:12px;
-  }
-  *{box-sizing:border-box}
-  html{background:#fff}
-  body{margin:0;color:var(--body);background:#fff;
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-    font-size:16px;line-height:1.45}
-  a{color:var(--ink);text-underline-offset:2px}
-
-  /* Shared domain nav (chrome only — this page's masthead is its own) */
-  .nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-    padding:10px var(--page-margin);border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);
-    font-weight:700;letter-spacing:.01em}
-  .brand em{font-style:normal;font-weight:400}
-  .nav-links{display:flex;gap:4px 14px;flex-wrap:wrap;margin-left:auto}
-  .nav-links a{text-decoration:none;color:var(--body);padding:6px 2px}
-  .nav-links a[aria-current="page"]{font-weight:700;text-decoration:underline}
-
-  main{max-width:960px;margin:0 auto;padding:0 var(--page-margin) 48px}
-
-  /* Own masthead (REQ-ID-1: every view carries its own name) */
-  .masthead{padding:28px 0 16px;border-bottom:3px solid var(--ink)}
-  .wordmark{font-size:clamp(2rem,6vw,3.25rem);font-weight:800;letter-spacing:.04em;
-    color:var(--ink);line-height:1;margin:0}
-  .wordmark small{display:block;font-size:.95rem;font-weight:600;letter-spacing:.14em;
-    color:var(--muted);margin-top:8px;text-transform:uppercase}
-  .tagline{margin:12px 0 0;font-size:1.05rem;color:var(--body);max-width:62ch}
-
-  .stamp{margin-top:var(--gap);background:var(--band);border-left:4px solid var(--ink);
-    padding:var(--panel-pad)}
-  .stamp strong{color:var(--ink)}
-  .stamp .when{font-size:1.05rem;font-weight:700;color:var(--ink)}
-  .counts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;color:var(--body)}
-  .counts b{color:var(--ink)}
-
-  section{margin-top:28px}
-  h2{font-size:1.3rem;color:var(--ink);margin:0 0 4px;padding-bottom:6px;
-    border-bottom:2px solid var(--ink)}
-  h3{font-size:1.05rem;color:var(--ink);margin:18px 0 6px}
-  .lede{color:var(--muted);margin:0 0 10px;max-width:70ch}
-  .panel{border:1px solid var(--line);padding:var(--panel-pad);margin-top:var(--gap)}
-  .panel h3{margin-top:0}
-
-  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.95rem}
-  th,td{text-align:left;vertical-align:top;padding:9px 8px;border-bottom:1px solid var(--line)}
-  th{color:var(--ink);font-weight:700;border-bottom:2px solid var(--line-strong);white-space:nowrap}
-  tr{min-height:44px}
-  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .state{font-weight:700;color:var(--ink);white-space:nowrap}
-  .open{font-weight:700;color:var(--ink)}
-  .src{color:var(--muted);font-size:.88rem}
-  .route{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9rem;white-space:nowrap}
-  ul.tight{margin:6px 0 0;padding-left:20px}
-  ul.tight li{margin:4px 0}
-  .fail{border:2px solid var(--ink);padding:var(--panel-pad);margin-top:var(--gap)}
-  footer{border-top:1px solid var(--line);margin-top:36px;padding-top:12px;
-    color:var(--muted);font-size:.92rem}
-  footer nav{margin:0 0 8px}
-  .scroll{overflow-x:auto}
-  @media (max-width:640px){ .nav-links{margin-left:0} th,td{padding:8px 6px} }
+.index-list{list-style:none;margin:1.25rem 0 0;padding:0;border-top:1px solid var(--line);}
+.index-list li{padding:.8rem 0;border-bottom:1px solid var(--line);}
+.index-list a{font-weight:600;text-decoration:none;}
+.index-list a:hover{text-decoration:underline;}
+.index-desc{color:var(--muted, #5a5a5a);margin:.15rem 0 0;}
+.index-sub{list-style:none;margin:.4rem 0 0;padding:0 0 0 1.25rem;}
+.index-sub li{padding:.35rem 0;border-bottom:none;}
+.index-path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;color:var(--muted, #5a5a5a);margin-left:.5rem;white-space:nowrap;}
 </style>
+<link rel="canonical" href="https://www.detroitautomationacademy.com/the-index/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Detroit Automation Academy">
+<meta property="og:title" content="The Index — Detroit Automation Academy">
+<meta property="og:description" content="Every page on the Detroit Automation Academy site — the map, the stories, the programs, and the fine print — in one place.">
+<meta property="og:url" content="https://www.detroitautomationacademy.com/the-index/">
+<meta property="og:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Index — Detroit Automation Academy">
+<meta name="twitter:description" content="Every page on the Detroit Automation Academy site, in one place.">
+<meta name="twitter:image" content="https://www.detroitautomationacademy.com/assets/logo.webp">
+<link rel="alternate" type="application/rss+xml" title="Detroit Automation Academy — RSS feed" href="../feed.xml">
 </head>
 <body>
+<a class="skip-link" href="#top">Skip to main content</a>
 
-<header class="nav">
-  <a class="brand" href="../" aria-label="Detroit Automation Academy — home"><span>Detroit Automation <em>Academy</em></span></a>
-  <nav class="nav-links" id="daaNavLinks" aria-label="Primary">
-    <a class="lane" data-audience="user" href="../live-transit.html">Live Map</a>
-    <a class="lane" data-audience="user" href="../live-transit/">Cities</a>
-    <a class="lane" data-audience="visitor" href="../programs.html">Programs</a>
-    <a class="lane" data-audience="reader" href="../signal/">The Signal</a>
-    <a class="lane" data-audience="reader" href="./" aria-current="page">The Index</a>
-    <a class="lane" data-audience="visitor" href="../inquire.html">Contact</a>
-    <a class="lane" data-audience="visitor" href="../find.html">Find</a>
-  </nav>
-</header>
+<div id="daa-nav"><header class="nav"><a class="brand" href="../" aria-label="Detroit Automation Academy — home"><img src="../assets/logo.webp" alt="" class="brand-mark"><span class="brand-word">Detroit Automation <em>Academy</em></span></a><nav class="nav-links" id="daaNavLinks" aria-label="Primary"><a class="lane" data-audience="user" href="../live-transit.html">Live Map</a><a class="lane" data-audience="user" href="../live-transit/">Cities</a><a class="lane" data-audience="visitor" href="../programs.html">Programs</a><a class="lane" data-audience="reader" href="../signal/">The Signal</a><a class="lane" data-audience="reader" href="../the-index/" aria-current="page">The Index</a><a class="lane" data-audience="visitor" href="../inquire.html">Contact</a><a class="lane" data-audience="visitor" href="../find.html">Find</a></nav><button class="nav-toggle" id="daaNavToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button></header></div>
+<script src="../nav.js?v=20261102-1618"></script>
 
 <main id="top">
-  <div class="masthead">
-    <h1 class="wordmark">THE INDEX<small>Detroit Automation Academy</small></h1>
-    <p class="tagline" id="tagline">Projects, decision gates, and implementations for this domain — the state of the work, on the record.</p>
-  </div>
 
-  <div class="stamp" id="stamp" role="status">
-    <span class="when">Loading the registry…</span>
-  </div>
-
-  <noscript><div class="fail"><strong>The Index is a dynamic page.</strong> It reads its registry (registry.json, beside this page) and renders it. With scripts off, read the registry file directly — it is plain JSON.</div></noscript>
-
-  <section id="views"><h2>The views</h2>
-    <p class="lede">Every view in the V2 set, at sitemap level, with its state in production and in UAT. Names are the names the views carry in production and UAT.</p>
-    <div class="scroll"><table id="views-table"></table></div>
+  <section class="hero" aria-labelledby="index-heading">
+    <div class="hero-inner">
+      <p class="eyebrow">The Index</p>
+      <h1 id="index-heading">Everything on this site, <span class="accent">in one place.</span></h1>
+      <p class="lede">Every section and page of the Detroit Automation Academy site, organized the way the footer organizes it — Ride, Read, Learn &amp; work, Trust. If it is listed here, it exists. Start at the <a href="../">home page</a> (the Now Board), or jump straight to what you need.</p>
+    </div>
   </section>
 
-  <section id="sitemaps"><h2>Sitemaps</h2>
-    <p class="lede">The two repositories as they stand, counted from their file trees at generation time. Production's tree advances continuously because the live data plane publishes into it.</p>
-    <div id="sitemap-blocks"></div>
+  <section class="section" aria-labelledby="ride-heading">
+    <div class="wrap">
+      <p class="kicker">Ride</p>
+      <h2 id="ride-heading">The map and the <span class="accent">buses.</span></h2>
+      <ul class="index-list">
+        <li><a href="../live-transit.html">Live Map — Live Transit Detroit</a><span class="index-path">/live-transit.html</span>
+          <p class="index-desc">Every DDOT bus live in 3D; SMART buses shown live under license.</p></li>
+        <li><a href="../board/">Departure Board</a><span class="index-path">/board/</span>
+          <p class="index-desc">The Live Transit Detroit departure board.</p></li>
+        <li><a href="../live-transit/">Cities</a><span class="index-path">/live-transit/</span>
+          <p class="index-desc">Live Transit city pages, starting with Detroit.</p></li>
+      </ul>
+    </div>
   </section>
 
-  <section id="projects"><h2>Projects</h2>
-    <p class="lede">Every project board on file, with the state of its items at generation time.</p>
-    <div class="scroll"><table id="projects-table"></table></div>
-    <p class="src" id="projects-excluded"></p>
+  <section class="section section-alt" aria-labelledby="read-heading">
+    <div class="wrap">
+      <p class="kicker">Read</p>
+      <h2 id="read-heading">Newsletters, stories, <span class="accent">and notes.</span></h2>
+      <ul class="index-list">
+        <li><a href="../signal/">The Signal</a><span class="index-path">/signal/</span>
+          <p class="index-desc">The academy&rsquo;s weekly transit newsletter — the buses, the rails, the maps, and the people moving around this city.</p>
+          <ul class="index-sub">
+            <li><a href="../signal/edition-01/">Edition 01 — BIOBUZZ Is Here: What the New FTC Season Demands</a></li>
+            <li><a href="../signal/edition-02/">Edition 02 — BIOBUZZ, Week Two: The Three Bets That Win This Season</a></li>
+            <li><a href="../signal/edition-03/">Edition 03 — Your Ballot, Decoded: The Detroit Voter Guide Is Live</a></li>
+            <li><a href="../signal/edition-04/">Edition 04 — The Rulebook Changed Again — and the Robots Keep Moving to Detroit</a></li>
+            <li><a href="../signal/edition-05/">Edition 05 — Every Stop, Counted</a></li>
+            <li><a href="../signal/edition-06/">Edition 06 — The Week We Audited Ourselves</a></li>
+            <li><a href="../signal/edition-07/">Edition 07 — Detroit Votes This Week</a></li>
+            <li><a href="../signal/detroit-2126-01/">Detroit 2126, 01 — The Ride Is Free</a></li>
+            <li><a href="../signal/detroit-2126-02/">Detroit 2126, 02 — Who Is It For?</a></li>
+            <li><a href="../signal/special-accessibility/">Special — What the Pictures Say Now</a></li>
+            <li><a href="../signal/special-food-coop/">Special — Thirty Days to Keep the Doors Open</a></li>
+            <li><a href="../signal/special-live-transit/">Special — Every DDOT Bus, Live, in 3D</a></li>
+            <li><a href="../signal/special-shut-down-by-the-meter/">Special — Shut Down by the Meter</a></li>
+            <li><a href="../signal/special-the-trip-your-app-doesnt-show-you/">Special — The Trip Your App Doesn&rsquo;t Show You</a></li>
+            <li><a href="../signal/special-triumphant-return/">Special — The Triumphant Return</a></li>
+            <li><a href="../signal/special-uplift-defined/">Special — Uplift, Defined</a></li>
+          </ul></li>
+        <li><a href="../live-transit-detroit/">Live Transit Detroit — stories</a><span class="index-path">/live-transit-detroit/</span>
+          <p class="index-desc">The story archive behind the live map.</p>
+          <ul class="index-sub">
+            <li><a href="../live-transit-detroit/belle-isle/">Belle Isle, Rendered — True-Form Island Geometry for Live Transit</a></li>
+            <li><a href="../live-transit-detroit/beyond-8-mile/">Beyond 8 Mile</a></li>
+            <li><a href="../live-transit-detroit/the-invisible-middle-leg/">The Invisible Middle Leg</a></li>
+            <li><a href="../live-transit-detroit/qline-announcement/">QLINE Streetcars Now Live on Live Transit Detroit</a></li>
+            <li><a href="../live-transit-detroit/qline-sign-error/">The QLINE Sign Error</a></li>
+            <li><a href="../live-transit-detroit/people-mover-under-construction/">The People Mover Is Under Construction</a></li>
+            <li><a href="../live-transit-detroit/2b-ii-postmortem/">Postmortem: Activating Empirical Timetable Substitution</a></li>
+            <li><a href="../live-transit-detroit/ship-day-20261006/">Build Notes: October 6 Promotion — Nine Changes to Production</a></li>
+          </ul></li>
+        <li><a href="../notes/">Notes</a><span class="index-path">/notes/</span>
+          <p class="index-desc">Technical notes from the work.</p>
+          <ul class="index-sub">
+            <li><a href="../notes/app-group-stability/">Stability through Shared Storage: The App Group Milestone</a></li>
+            <li><a href="../notes/at-diary-sprint-2/">Sprint 2: Building a Privacy-First Diary on Apple Native Frameworks</a></li>
+            <li><a href="../notes/at-diary-sprint-3/">Sprint 3: Privacy-First Spatial Intelligence</a></li>
+            <li><a href="../notes/cicd-pipeline-postmortem/">Fixing Our CI/CD Pipeline: Submodules, Empty Commits, and the QA Gate</a></li>
+            <li><a href="../notes/daa-crm-cloud-run-deployment/">Registration Live: From Zero to Cloud Run in One Session</a></li>
+            <li><a href="../notes/pause-and-pivot-protocol/">Digital Stoicism: The Pause-and-Pivot Protocol</a></li>
+          </ul></li>
+        <li><a href="../press/">The Press</a><span class="index-path">/press/</span>
+          <p class="index-desc">Just the Facts — wire-style briefs, stripped of spin.</p></li>
+        <li><a href="../the-index/" aria-current="page">The Index</a><span class="index-path">/the-index/</span>
+          <p class="index-desc">This page — every page on the site, in one place.</p></li>
+        <li><a href="../feed/">Latest</a><span class="index-path">/feed/</span>
+          <p class="index-desc">The site&rsquo;s RSS feed page. The feed itself: <a href="../feed.xml">feed.xml</a>.</p></li>
+        <li><a href="../watch/">Watch</a><span class="index-path">/watch/</span>
+          <p class="index-desc">Video from the academy.</p></li>
+      </ul>
+    </div>
   </section>
 
-  <section id="gates"><h2>Decision gates</h2>
-    <p class="lede">Decisions that are open, and the record of decisions made. Each entry names what the gate controls and the record it comes from.</p>
-    <h3>Open</h3>
-    <div class="scroll"><table id="gates-open"></table></div>
-    <h3>Decided</h3>
-    <div class="scroll"><table id="gates-decided"></table></div>
-    <p class="src" id="gates-excluded"></p>
+  <section class="section" aria-labelledby="learn-heading">
+    <div class="wrap">
+      <p class="kicker">Learn &amp; work</p>
+      <h2 id="learn-heading">Programs, partners, <span class="accent">and services.</span></h2>
+      <ul class="index-list">
+        <li><a href="../programs.html">Programs</a><span class="index-path">/programs.html</span>
+          <p class="index-desc">Robotics, drones, and automation training — from first circuit to first career.</p></li>
+        <li><a href="../curriculum/online-safety/">Online Safety — curriculum</a><span class="index-path">/curriculum/online-safety/</span>
+          <p class="index-desc">Online Safety &amp; Sentient Ethics curriculum.</p>
+          <ul class="index-sub">
+            <li><a href="../curriculum/online-safety/youth.html">The Sentient Shield: Youth Online Safety</a></li>
+          </ul></li>
+        <li><a href="../voter-guide.html">The Detroit Voter Guide</a><span class="index-path">/voter-guide.html</span>
+          <p class="index-desc">The academy&rsquo;s Detroit voter guide.</p>
+          <ul class="index-sub">
+            <li><a href="../voter-guide/geography/">Detroit Voter Geography — Precincts, Districts, Neighborhoods</a></li>
+          </ul></li>
+        <li><a href="../partners.html">Partners</a><span class="index-path">/partners.html</span>
+          <p class="index-desc">The organizations the academy works with.</p></li>
+        <li><a href="../services.html">Services — AutomatedTechnologies</a><span class="index-path">/services.html</span>
+          <p class="index-desc">Communications audit &amp; safeguard design ($2,500 fixed) and the pre-send verification retainer ($750/month).</p></li>
+        <li><a href="../api.html">API</a><span class="index-path">/api.html</span>
+          <p class="index-desc">The transit API.</p></li>
+        <li><a href="../apple-learning-coach/">Coach Profile</a><span class="index-path">/apple-learning-coach/</span>
+          <p class="index-desc">Apple Learning Coach — Justin Spencer Smith.</p></li>
+        <li><a href="../press/media-kit.html">Media Kit</a><span class="index-path">/press/media-kit.html</span>
+          <p class="index-desc">Facts, marks, and assets for coverage.</p></li>
+        <li><a href="../ios-keyboard/">Forge Keyboard</a><span class="index-path">/ios-keyboard/</span>
+          <p class="index-desc">The academy&rsquo;s iOS keyboard — no silent substitution, ever.</p></li>
+        <li><a href="../inquire.html">Contact</a><span class="index-path">/inquire.html</span>
+          <p class="index-desc">Contact &amp; inquiries.</p></li>
+      </ul>
+    </div>
   </section>
 
-  <section id="implementations"><h2>Implementations</h2>
-    <p class="lede">What has shipped, what is staged, what is built, and what was rolled back — with the commit or record that pins each state.</p>
-    <div class="scroll"><table id="impl-table"></table></div>
-    <p class="src" id="impl-excluded"></p>
+  <section class="section section-alt" aria-labelledby="trust-heading">
+    <div class="wrap">
+      <p class="kicker">Trust</p>
+      <h2 id="trust-heading">Status and the <span class="accent">fine print.</span></h2>
+      <ul class="index-list">
+        <li><a href="../dashboard.html">Status</a><span class="index-path">/dashboard.html</span>
+          <p class="index-desc">Platform status.</p></li>
+        <li><a href="../terms.html">Terms of Service</a><span class="index-path">/terms.html</span></li>
+        <li><a href="../privacy.html">Privacy Policy</a><span class="index-path">/privacy.html</span></li>
+        <li><a href="../live-transit/terms/">Live Transit Terms</a><span class="index-path">/live-transit/terms/</span></li>
+        <li><a href="../find.html">Find</a><span class="index-path">/find.html</span>
+          <p class="index-desc">Search the site.</p></li>
+        <li><a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a>
+          <p class="index-desc">Email the academy.</p></li>
+      </ul>
+    </div>
   </section>
 
-  <section id="modularity"><h2>Modularity track — Live Transit Core</h2>
-    <div id="modularity-body"></div>
-  </section>
-
-  <footer>
-    <nav aria-label="Site"><a href="../live-transit.html">Live Map</a> · <a href="../live-transit/">Cities</a> · <a href="../programs.html">Programs</a> · <a href="../signal/">The Signal</a> · <a href="./" aria-current="page">The Index</a> · <a href="../inquire.html">Contact</a> · <a href="../find.html">Find</a></nav>
-    <p>The Index · Detroit Automation Academy. Figures on this page come from the registry stamped above; board and sitemap figures are live reads at generation, and gate and implementation entries are curated from the domain's records.</p>
-  </footer>
 </main>
 
-<script>
-(function(){
-  'use strict';
-  function el(tag, text){ var n=document.createElement(tag); if(text!=null) n.textContent=text; return n; }
-  function cell(text, cls){ var td=el('td', text); if(cls) td.className=cls; return td; }
-  function baseName(p){ var parts=String(p).split('/'); return parts[parts.length-1]; }
-  function tableInto(id, headers, rows){
-    var t=document.getElementById(id); t.textContent='';
-    var thead=el('thead'), tr=el('tr');
-    headers.forEach(function(h){ var th=el('th', h.t); if(h.num) th.className='num'; tr.appendChild(th); });
-    thead.appendChild(tr); t.appendChild(thead);
-    var tb=el('tbody');
-    rows.forEach(function(r){ tb.appendChild(r); });
-    t.appendChild(tb);
-  }
-  function fail(msg){
-    var s=document.getElementById('stamp'); s.textContent='';
-    var d=el('div'); d.className='fail';
-    d.appendChild(el('strong','Registry unavailable. '));
-    d.appendChild(el('span', msg));
-    s.appendChild(d);
-  }
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="../assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-fine">Southfield, Michigan · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <nav class="footer-groups" aria-label="Site">
+      <div class="footer-group">
+        <h3>Ride</h3>
+        <p class="footer-fine"><a href="../live-transit.html">Live Map</a> · <a href="../board/">Departure Board</a> · <a href="../live-transit/">Cities</a></p>
+        <p class="footer-fine"><a href="../live-transit.html">Detroit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Read</h3>
+        <p class="footer-fine"><a href="../signal/">The Signal</a> · <a href="../live-transit-detroit/">Live Transit Detroit stories</a> · <a href="../notes/">Notes</a> · <a href="../press/">The Press</a> · <a href="../the-index/">The Index</a> · <a href="../feed/">Latest</a> · <a href="../watch/">Watch</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Learn &amp; work</h3>
+        <p class="footer-fine"><a href="../programs.html">Programs</a> · <a href="../curriculum/online-safety/">Online Safety</a> · <a href="../partners.html">Partners</a> · <a href="../api.html">API</a> · <a href="../inquire.html">Contact</a> · <a href="../apple-learning-coach/">Coach Profile</a> · <a href="../press/media-kit.html">Media Kit</a></p>
+      </div>
+      <div class="footer-group">
+        <h3>Trust</h3>
+        <p class="footer-fine"><a href="../dashboard.html">Status</a> · <a href="../terms.html">Terms of Service</a> · <a href="../privacy.html">Privacy Policy</a> · <a href="../live-transit/terms/">Live Transit Terms</a></p>
+      </div>
+    </nav>
+    <p class="footer-fine"><a href="../find.html">Find</a> (search) · <a href="mailto:justin@detroitautomationacademy.com">justin@detroitautomationacademy.com</a></p>
+    <p class="footer-fine">© 2026 AutomatedTechnologies d/b/a Detroit Automation Academy</p>
+  </div>
+</footer>
 
-  fetch('registry.json', {cache:'no-store'}).then(function(r){
-    if(!r.ok) throw new Error('registry.json returned HTTP '+r.status);
-    return r.json();
-  }).then(function(reg){
-    /* Stamp band */
-    var s=document.getElementById('stamp'); s.textContent='';
-    var when=el('div'); when.className='when';
-    when.textContent='Generated '+reg.generated_at_local+' — registry '+(reg.generated_at||'');
-    s.appendChild(when);
-    var srcs=el('div'); srcs.textContent='Sources: '+reg.sources.join(' · ')+'.';
-    s.appendChild(srcs);
-    var note=el('div'); note.textContent=reg.page.note; s.appendChild(note);
-    if(reg.errors && reg.errors.length){
-      var e=el('div'); e.appendChild(el('strong','Partial refresh: '));
-      e.appendChild(el('span', reg.errors.join('; '))); s.appendChild(e);
-    }
-    var c=reg.counts||{};
-    var cb=el('div'); cb.className='counts';
-    [['Project boards',c.boards],['Board items',c.board_items],['Gates open',c.gates_open],
-     ['Gates decided',c.gates_decided],['Implementations',c.implementations],['Core modules',c.modules]
-    ].forEach(function(pair){
-      var span=el('span'); span.appendChild(el('b', String(pair[1]))); span.appendChild(el('span',' '+pair[0])); cb.appendChild(span);
-    });
-    s.appendChild(cb);
-    document.getElementById('tagline').textContent=reg.page.tagline;
-
-    /* Views */
-    tableInto('views-table',
-      [{t:'View'},{t:'Route'},{t:'Production'},{t:'UAT'},{t:'Note'}],
-      reg.release_views.map(function(v){
-        var tr=el('tr');
-        var name=cell(null); name.appendChild(el('strong', v.name));
-        name.appendChild(el('div', v.id)).className=''; tr.appendChild(name);
-        tr.appendChild(cell(v.route,'route'));
-        tr.appendChild(cell(v.production)); tr.appendChild(cell(v.uat)); tr.appendChild(cell(v.note));
-        return tr;
-      }));
-
-    /* Sitemaps */
-    var blocks=document.getElementById('sitemap-blocks'); blocks.textContent='';
-    [['production','Production'],['uat','UAT (staging)']].forEach(function(pair){
-      var sm=reg.sitemaps[pair[0]]; if(!sm) return;
-      var panel=el('div'); panel.className='panel';
-      var h=el('h3', pair[1]+' — '+sm.repo); panel.appendChild(h);
-      if(sm.error){ panel.appendChild(el('p','Read failed at generation: '+sm.error)); blocks.appendChild(panel); return; }
-      var meta=el('p');
-      meta.textContent='Head '+sm.head_short+' · committed '+sm.commit_date+' · '+sm.total_blobs+' files in the tree.';
-      panel.appendChild(meta);
-      var routes=sm.html_routes.filter(function(p){
-        return p==='index.html'||p==='404.html'||p==='press/index.html'||p==='press/media-kit.html';
-      }).map(function(p){
-        return p==='index.html'?'/':(p==='404.html'?'/404.html':'/'+p.replace(/index\.html$/,''));
-      });
-      var rp=el('p'); rp.appendChild(el('strong','Pages: '));
-      rp.appendChild(el('span', routes.join(' · ')+(pair[0]==='uat'?' · plus 248 brief pages under /press/':'')));
-      panel.appendChild(rp);
-      var t=el('table'), tb=el('tbody');
-      Object.keys(sm.groups).forEach(function(g){
-        var tr=el('tr'); tr.appendChild(cell(g)); tr.appendChild(cell(String(sm.groups[g]),'num')); tb.appendChild(tr);
-      });
-      var th=el('thead'), htr=el('tr'); htr.appendChild(el('th','Contents')); var n=el('th','Files'); n.className='num'; htr.appendChild(n); th.appendChild(htr);
-      t.appendChild(th); t.appendChild(tb); panel.appendChild(t);
-      blocks.appendChild(panel);
-    });
-
-    /* Projects — internal boards never render (existence-count only) */
-    var pubBoards=reg.projects.filter(function(b){ return !b.internal; });
-    tableInto('projects-table',
-      [{t:'№'},{t:'Project'},{t:'Items',num:1},{t:'Done',num:1},{t:'In progress',num:1},{t:'To do',num:1},{t:'Board'}],
-      pubBoards.map(function(b){
-        var tr=el('tr');
-        tr.appendChild(cell(String(b.number)));
-        var name=cell(null); var a=el('a', b.title); a.href=b.url; name.appendChild(a); tr.appendChild(name);
-        var bs=b.by_status||{};
-        tr.appendChild(cell(String(b.items_total==null?'—':b.items_total),'num'));
-        tr.appendChild(cell(String(bs['Done']||0),'num'));
-        tr.appendChild(cell(String(bs['In Progress']||0),'num'));
-        tr.appendChild(cell(String(bs['Todo']||0),'num'));
-        tr.appendChild(cell(b.closed?'Closed':'Open'));
-        return tr;
-      }));
-    var exB=reg.projects.length-pubBoards.length;
-    document.getElementById('projects-excluded').textContent =
-      exB>0 ? exB+' further project boards are internal working records and are not published on this page.' : '';
-
-    /* Gates — internal entries never render */
-    var pub=reg.gates.filter(function(g){ return !g.internal; });
-    function gateRows(list, decided){
-      return list.map(function(g){
-        var tr=el('tr');
-        tr.appendChild(cell(g.name));
-        tr.appendChild(cell(g.gates));
-        tr.appendChild(cell(g.anchor));
-        if(decided){ tr.appendChild(cell((g.date||'')+' · '+g.decider)); }
-        tr.appendChild(cell(baseName(g.source),'src'));
-        return tr;
-      });
-    }
-    tableInto('gates-open', [{t:'Gate'},{t:'What it decides'},{t:'Anchored to'},{t:'Record'}],
-      gateRows(pub.filter(function(g){return g.state==='OPEN';}), false));
-    tableInto('gates-decided', [{t:'Gate'},{t:'What it decided'},{t:'Anchored to'},{t:'Decided'},{t:'Record'}],
-      gateRows(pub.filter(function(g){return g.state==='DECIDED';}), true));
-    var ex=reg.gates.length-pub.length;
-    document.getElementById('gates-excluded').textContent =
-      ex>0 ? ex+' further gate entries are internal working records and are not published on this page.' : '';
-
-    /* Implementations */
-    var pubI=reg.implementations.filter(function(i){ return !i.internal; });
-    tableInto('impl-table',
-      [{t:'Implementation'},{t:'State'},{t:'Pin / record'},{t:'Evidence'},{t:'Anchored to'}],
-      pubI.map(function(i){
-        var tr=el('tr');
-        tr.appendChild(cell(i.name));
-        var st=cell(i.state); st.className='state'; tr.appendChild(st);
-        tr.appendChild(cell(i.pin)); tr.appendChild(cell(i.evidence)); tr.appendChild(cell(i.anchor));
-        return tr;
-      }));
-    var exI=reg.implementations.length-pubI.length;
-    document.getElementById('impl-excluded').textContent =
-      exI>0 ? exI+' further implementation entry is an internal working record and is not published on this page.' : '';
-
-    /* Modularity */
-    var mb=document.getElementById('modularity-body'); mb.textContent='';
-    var mod=reg.modularity;
-    var h=el('h3', mod.program); mb.appendChild(h);
-    mb.appendChild(el('p', mod.summary));
-    var lh=el('h3','Lineage'); mb.appendChild(lh);
-    var ul=el('ul'); ul.className='tight';
-    mod.lineage.forEach(function(l){ ul.appendChild(el('li', l)); });
-    mb.appendChild(ul);
-    var vh=el('h3','Version names in use'); mb.appendChild(vh);
-    var vt=el('table'), vtb=el('tbody');
-    mod.versions.forEach(function(v){
-      var tr=el('tr'); tr.appendChild(cell(v.name)); var vc=cell(v.version); vc.className='state'; tr.appendChild(vc); tr.appendChild(cell(v.note)); vtb.appendChild(tr);
-    });
-    vt.appendChild(vtb); mb.appendChild(vt);
-    var mh=el('h3','Modules — Core v2.3 set, pins as recorded'); mb.appendChild(mh);
-    mb.appendChild(el('p','Pins are the first eight characters of each module\'s MD5, measured from the archived tree and from the restoration build tree. A module whose pins match is byte-identical to the archive.'));
-    var wrap=el('div'); wrap.className='scroll';
-    var mt=el('table'); wrap.appendChild(mt); mb.appendChild(wrap);
-    mt.textContent='';
-    var mth=el('thead'), mtr=el('tr');
-    ['Module','Archive pin','Build pin','State in the restoration build'].forEach(function(x){ mtr.appendChild(el('th',x)); });
-    mth.appendChild(mtr); mt.appendChild(mth);
-    var mtb=el('tbody');
-    mod.modules.forEach(function(m){
-      var tr=el('tr');
-      tr.appendChild(cell(m.path,'route'));
-      tr.appendChild(cell(m.archive_md5,'route'));
-      tr.appendChild(cell(m.build_md5||'—','route'));
-      tr.appendChild(cell(m.change_class ? (m.state+' — '+m.change_class) : m.state));
-      mtb.appendChild(tr);
-    });
-    mt.appendChild(mtb);
-  }).catch(function(err){ fail(String(err && err.message || err)); });
-})();
-</script>
+<script src="../script.js?v=20261003-1330"></script>
+<script src="../owner.js" defer></script>
+<script src="../assets/measure.js?v=20261023-o2" defer></script>
 </body>
 </html>
