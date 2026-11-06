@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forge Keyboard — Detroit Automation Academy</title>
+<!--
+  Download page for Forge Keyboard (Xcode project).
+  Place this file and ForgeKeyboard.zip together under
+  https://www.detroitautomationacademy.com/ios-keyboard/
+  This is a source download, not an OTA install: iOS installs only
+  Apple-signed builds, and this project is compiled and signed on
+  the owner's Mac with free provisioning (see README in the zip).
+-->
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #000; color: #f2f2f2;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.55;
+  }
+  main { max-width: 40rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+  .kicker { letter-spacing: .18em; text-transform: uppercase; font-size: .72rem; color: #9a9a9a; }
+  h1 { font-size: 1.9rem; line-height: 1.15; margin: .5rem 0 1rem; font-weight: 700; }
+  h2 { font-size: 1.05rem; margin: 2.25rem 0 .5rem; }
+  p, li { color: #cfcfcf; font-size: .98rem; }
+  .install {
+    display: block; text-align: center; margin: 2rem 0 1rem;
+    background: #f2f2f2; color: #000; text-decoration: none;
+    font-weight: 700; font-size: 1.1rem; padding: 1rem 1.5rem; border-radius: 999px;
+  }
+  .note { border: 1px solid #333; border-radius: 12px; padding: 1rem 1.25rem; margin-top: 2rem; }
+  .note p { margin: .25rem 0; font-size: .9rem; }
+  footer { margin-top: 3rem; color: #777; font-size: .82rem; }
+  a { color: #f2f2f2; }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Detroit Automation Academy</p>
+  <h1>Forge Keyboard</h1>
+  <p>A keyboard that types what you type. Nothing you type is ever
+     replaced without your tap — the candidate bar offers up to three
+     suggestions, and a suggestion is inserted only when you tap it.
+     No key flicks. Your vocabulary built in: infrastructure, Jamf,
+     macOS, endpoint, Detroit, Southfield, AutomatedTechnologies,
+     GitLab, Terraform, YAML.</p>
+  <p>The keyboard requests <strong>no Full Access</strong> and does
+     <strong>no networking</strong>. Keystrokes stay on the device.</p>
+
+  <a class="install" href="ForgeKeyboard.zip">Download the Xcode project (.zip)</a>
+
+  <h2>Install it (Mac, Xcode 16 — free provisioning, $0)</h2>
+  <ol>
+    <li>Unzip <strong>ForgeKeyboard.zip</strong> on the Mac.</li>
+    <li>Open <strong>ForgeKeyboard.xcodeproj</strong> in Xcode.</li>
+    <li>Xcode → Settings → Accounts → sign in with your Apple ID (once;
+        Xcode creates the free Personal Team).</li>
+    <li>Select the ForgeKeyboard target → Signing &amp; Capabilities →
+        "Automatically manage signing" → Team: your Personal Team.
+        Do the same for the ForgeKeyboardKeyboard target if Xcode asks.</li>
+    <li>Connect the iPad, select it as the run destination, Run (⌘R).</li>
+    <li>If prompted on the iPad: <strong>Settings → General → VPN &amp;
+        Device Management</strong> → the developer profile → <strong>Trust</strong>.</li>
+    <li><strong>Settings → General → Keyboard → Keyboards → Add New
+        Keyboard… → Forge Keyboard.</strong> Then hold the globe key in
+        any app and pick Forge Keyboard.</li>
+  </ol>
+
+  <div class="note">
+    <p><strong>Requirements.</strong> iPhone or iPad running iOS 17 or
+       later; a Mac with Xcode 16 for the one compile-and-sign step.</p>
+    <p>iOS installs only builds whose signature chains to Apple, so the
+       final step happens on the Mac: free provisioning signs with the
+       owner's own Apple ID at no cost. The free profile expires after
+       7 days; reinstall from Xcode the same way to renew it.</p>
+  </div>
+
+  <footer>
+    <p>Detroit Automation Academy · Forge Keyboard ·
+       <a href="https://www.detroitautomationacademy.com">detroitautomationacademy.com</a></p>
+  </footer>
+</main>
+</body>
+</html>
