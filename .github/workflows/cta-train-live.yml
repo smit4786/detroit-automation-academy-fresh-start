@@ -10,6 +10,14 @@ name: CTA live positions (Chicago staging)
 # run loops 5 collection cycles ~60 s apart, giving ~60 s polling
 # while a run is alive (CTA Train Tracker terms permit reasonable
 # polling; one request per cycle covers all 8 'L' routes).
+#
+# Schedule re-registration (2026-11-06): as first landed (commit
+# d4940b94, 2026-11-06T04:40:20Z) this workflow dispatched cleanly
+# but GitHub delivered zero schedule ticks (~34 */5 ticks, zero
+# schedule-event runs repo-wide, while the owner's production repo
+# recorded schedule runs in the same window). This comment-only
+# commit re-lands the file on main to force GitHub to re-register
+# the schedule. Defect record: chi-build repair record, 2026-11-05.
 
 on:
   schedule:
