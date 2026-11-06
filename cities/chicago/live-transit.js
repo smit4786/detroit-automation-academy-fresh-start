@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261105-chi2';
+  var STAMP = '20261105-chi3';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -128,6 +128,30 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   } catch (e) {}
   // Read-back hook for support/diagnostics (read-only copy).
   window.__flErrLog = function () { return flErrLog.slice(); };
+  /* FL-DIAG (temporary, 2026-11-05 repair round 2): on-page boot
+     diagnostics state. The browser route has no devtools console, so the
+     page itself must report why the underlay does not paint: fetch
+     results, built segment counts, tier visibility, WebGL context
+     events, recovery/toast event flow, reset outcomes, and the error
+     log tail are collected here and rendered into the About readout
+     block (#fl-diag-pre) by the writer at the end of this file.
+     Remove every FL-DIAG hook + the HTML block when the defects close. */
+  var FLDIAG = {
+    t0: Date.now(),
+    streetsFetch: 'pending', streetNamesFetch: 'pending', waterFetch: 'pending',
+    waterBake: 'pending', waterBuilt: 'pending',
+    streetsBuilt: null, tierRefs: {}, loopStarted: false,
+    ctxLost: 0, ctxRestored: 0,
+    recoveries: [], standDowns: 0, reloads: 0, wdFires: 0,
+    toastLog: [], resets: []
+  };
+  window.__flDiag = FLDIAG;
+  function flDiagToast(action, msg) {
+    try {
+      FLDIAG.toastLog.push({ s: ((Date.now() - FLDIAG.t0) / 1000).toFixed(1), a: action, m: String(msg == null ? '' : msg).slice(0, 60) });
+      if (FLDIAG.toastLog.length > 8) FLDIAG.toastLog.shift();
+    } catch (e) {}
+  }
   // Step 1: global capture. Installed before renderer construction so
   // boot-adjacent faults are captured too. Uncaught errors are logged,
   // never auto-recovered from here: recovery belongs to the detectors
@@ -255,10 +279,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var pos, tgt;
       if (camMem) { pos = camMem.pos.clone(); tgt = camMem.tgt.clone(); }
       else {
-        // No preserved framing: recover to the home framing — the
-        // setup literals (Project 16 overhaul, Option A).
-        pos = new THREE.Vector3(3826, 8039, 9372);
-        tgt = new THREE.Vector3(3826, 0, -205);
+        // No preserved framing: recover to the home framing.
+        // Chicago repair round 2 (2026-11-05): this fallback carried
+        // Detroit's setup literals verbatim (3826, 8039, 9372) /
+        // (3826, 0, -205) — in Chicago's projection that target sits
+        // ~11 km east of this build's home target, out over the lake,
+        // so a camera recovery dragged the view off the city. Use this
+        // build's own home framing (homePos/homeTarget, set at setup).
+        pos = homePos.clone();
+        tgt = homeTarget.clone();
       }
       glideTo(pos, tgt, 900); // the existing interruptible glide: the rider can grab the camera mid-recovery
       try { showToast('The map view was reset.', false); } catch (e) {}
@@ -408,13 +437,26 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   function recoverReload(reason) {
     if (recovering) return;
     recovering = true;
+    // FL-DIAG (temporary): record every recovery entry + watchdog count.
+    try {
+      FLDIAG.recoveries.push({ s: ((Date.now() - FLDIAG.t0) / 1000).toFixed(1), reason: String(reason) });
+      if (FLDIAG.recoveries.length > 8) FLDIAG.recoveries.shift();
+      if (reason === 'watchdog') FLDIAG.wdFires++;
+    } catch (e) {}
     var last = 0;
     try { last = +(sessionStorage.getItem('fl-recover-at') || 0); } catch (e) {}
     if (Date.now() - last < 30000) {
       fail('The map display stopped and could not be restored automatically. Close this tab and reopen the page to continue.');
       return;
     }
-    showToast('Display interrupted — reloading the map…', true);
+    // D4 (round 2): do not rebuild/re-show the interruption toast when
+    // it is already on screen (the DOM rebuild is what made the dismiss
+    // button's reference go stale in the browser check), and do not
+    // re-show it at all inside the mute window after a rider dismiss.
+    if (!flInterruptToastUp && Date.now() >= flInterruptMutedUntil) {
+      flInterruptToastUp = true;
+      showToast('Display interrupted — reloading the map…', true);
+    }
     setTimeout(function () {
       var gl = null;
       try { gl = renderer.getContext(); } catch (e) {}
@@ -425,6 +467,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         // after a stand-down, and repeat firings made its dismiss
         // button appear broken.
         recovering = false;
+        FLDIAG.standDowns++; // FL-DIAG (temporary)
         hideToast();
         return;
       }
@@ -434,6 +477,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // a stand-down (context alive, no reload ever attempted) consumed
       // the one automatic recovery and a genuine failure within 30 s
       // went straight to the terminal fallback.
+      FLDIAG.reloads++; // FL-DIAG (temporary)
       try { sessionStorage.setItem('fl-recover-at', '' + Date.now()); } catch (e) {}
       // State preservation (2026-11-05, owner directive): a recovery
       // reload must not destroy the rider's place — snapshot camera and
@@ -449,9 +493,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
   renderer.domElement.addEventListener('webglcontextlost', function (e) {
     e.preventDefault(); // lets the platform fire contextrestored
+    FLDIAG.ctxLost++; // FL-DIAG (temporary)
     ladderReload('context');
   }, false);
   renderer.domElement.addEventListener('webglcontextrestored', function () {
+    FLDIAG.ctxRestored++; // FL-DIAG (temporary)
     try { sessionStorage.removeItem('fl-recover-at'); } catch (e) {}
   }, false);
 
@@ -3661,9 +3707,21 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
   function resetView() {
     cancelStreetTween();
+    // Chicago repair round 2 (2026-11-05): an in-flight trip fly was
+    // not cancelled here, so it kept writing the camera on the frames
+    // after the copies below and the reset never landed. Cancel it too.
+    cancelTripFly();
     camera.position.copy(homePos);
     controls.target.copy(homeTarget);
     camMemRefresh();
+    // FL-DIAG (temporary): record the reset and where the camera sits
+    // 1.2 s later, so an overwrite-by-animation is visible in the log.
+    try {
+      var flR = { s: ((Date.now() - FLDIAG.t0) / 1000).toFixed(1), pos: camera.position.toArray(), tgt: controls.target.toArray(), after1s: null };
+      FLDIAG.resets.push(flR);
+      if (FLDIAG.resets.length > 6) FLDIAG.resets.shift();
+      setTimeout(function () { flR.after1s = camera.position.toArray(); }, 1200);
+    } catch (e) {}
   }
   $('zoom-in').addEventListener('click', function () { zoomStep(1); });
   $('zoom-out').addEventListener('click', function () { zoomStep(-1); });
@@ -4383,7 +4441,25 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     logoFadeEach(function (sp) { logoFadeOne(sp, cx, cy, rPx, rw, rh, discR); });
   }
   var toastTimer = null;
-  function hideToast() { $('map-toast').hidden = true; clearTimeout(toastTimer); }
+  // D4 (round 2): interruption-toast state. flInterruptToastUp tracks the
+  // sticky interruption notice so recoverReload does not rebuild its DOM
+  // on every refire; flInterruptMutedUntil is set by a rider dismiss so
+  // refires cannot resurrect the notice inside the mute window.
+  var flInterruptToastUp = false;
+  var flInterruptMutedUntil = 0;
+  var flCurrentToastMsg = null;
+  function flMuteInterrupt() {
+    if (flCurrentToastMsg && flCurrentToastMsg.indexOf('Display interrupted') === 0) {
+      flInterruptMutedUntil = Date.now() + 60000;
+    }
+  }
+  function hideToast() {
+    flDiagToast('hide', flCurrentToastMsg); // FL-DIAG (temporary)
+    flCurrentToastMsg = null;
+    flInterruptToastUp = false;
+    $('map-toast').hidden = true;
+    clearTimeout(toastTimer);
+  }
   function showToast(msg, sticky) {
     var t = $('map-toast');
     t.innerHTML = '';
@@ -4395,15 +4471,17 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       x.id = 'toast-x';
       x.setAttribute('aria-label', 'Dismiss');
       x.textContent = '\u00D7';
-      x.addEventListener('click', function (e) { e.stopPropagation(); hideToast(); });
+      x.addEventListener('click', function (e) { e.stopPropagation(); flMuteInterrupt(); hideToast(); });
       t.appendChild(x);
     } else {
       clearTimeout(toastTimer);
       toastTimer = setTimeout(hideToast, 4500);
     }
+    flCurrentToastMsg = msg;
+    flDiagToast('show', msg); // FL-DIAG (temporary)
     t.hidden = false;
   }
-  $('map-toast').addEventListener('click', hideToast);
+  $('map-toast').addEventListener('click', function () { flMuteInterrupt(); hideToast(); });
   // === Adaptive input hint (project 28 item 4, register C-11(i)) ======
   // A withheld-modality session has a detectable local signature: a
   // hardware pointer is active (mouse/pen pointerdowns), the wheel has
@@ -8526,6 +8604,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       tex.generateMipmaps = false;
       tex.needsUpdate = true;
       console.info('buildWater: shore field baked, ' + gw + 'x' + gh + ' cells at ' + CELL + ' m');
+      FLDIAG.waterBake = gw + 'x' + gh + ' cells at ' + CELL + ' m'; // FL-DIAG (temporary)
       return { tex: tex, bounds: new THREE.Vector4(minX, minY, gw * CELL, gh * CELL) };
     }
     function fillWater(entries, y) {
@@ -8541,6 +8620,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     neonShoreBoundsU.value.copy(shoreField.bounds);
     fillWater(W.polygons, 2);
     if (W.islePolygons && W.islePolygons.length) fillWater(W.islePolygons, 4.5);
+    FLDIAG.waterBuilt = 'fillWater done, polygons=' + W.polygons.length; // FL-DIAG (temporary)
     // Merged shoreline stroke: every ring of both water sets, seated
     // just above its fill so the water's edge is drawn, not implied.
     var seg = [];
@@ -12412,6 +12492,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       fleetData = all[1];
       streetData = all[2];
       streetNameData = all[3];
+      // FL-DIAG (temporary): what the boot legs actually delivered.
+      FLDIAG.streetsFetch = streetData
+        ? 'ok tiers fw/ar/lo=' + streetData.freeway.length + '/' + streetData.arterial.length + '/' + streetData.local.length
+        : 'NULL after retries';
+      FLDIAG.streetNamesFetch = streetNameData
+        ? 'ok labels=' + (streetNameData.labels ? streetNameData.labels.length : '?')
+        : 'NULL after retries';
       if (!streetData) {
         showToast('The street map could not be loaded. Check your connection and reload the page.', true);
       }
@@ -12518,7 +12605,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           streetExt.add(border);
           streetExtMats.push({ mat: mat, baseOpacity: 0.55 });
         })();
-        if (!streetData) return; // ground still renders; streets absent
+        if (!streetData) { FLDIAG.streetsBuilt = 'skipped: streetData null'; return; } // FL-DIAG (temporary); ground still renders, streets absent
         function splitTier(arr) {
           var core = [], ext = [];
           for (var i = 0; i < arr.length; i += 4) {
@@ -12550,14 +12637,21 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           return lines;
         }
         var fw = splitTier(streetData.freeway);
-        addTier(fw.core, 0x404040, 0.95, 16, scene);
+        FLDIAG.tierRefs.fwCore = addTier(fw.core, 0x404040, 0.95, 16, scene); // FL-DIAG ref
         addTier(fw.ext, 0x404040, 0.95, 16, streetExt);
         var ar = splitTier(streetData.arterial);
-        addTier(ar.core, 0x2b2b2b, 0.9, 15, scene);
+        FLDIAG.tierRefs.arCore = addTier(ar.core, 0x2b2b2b, 0.9, 15, scene); // FL-DIAG ref
         addTier(ar.ext, 0x2b2b2b, 0.9, 15, streetExt);
         var lo = splitTier(streetData.local);
         streetLocal = addTier(lo.core, 0x181818, 0.8, 14, scene);
+        FLDIAG.tierRefs.loCore = streetLocal; // FL-DIAG ref
         streetExtLocal = addTier(lo.ext, 0x181818, 0.8, 14, streetExt);
+        // FL-DIAG (temporary): core/ext segment counts actually built.
+        FLDIAG.streetsBuilt = {
+          fwCore: fw.core.length / 4, fwExt: fw.ext.length / 4,
+          arCore: ar.core.length / 4, arExt: ar.ext.length / 4,
+          loCore: lo.core.length / 4, loExt: lo.ext.length / 4
+        };
       })();
 
       var casingMat = routeShader(new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.95, side: THREE.DoubleSide }), false);
@@ -12733,10 +12827,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       fetchJsonRetry('assets/chicago-water.json?v=' + STAMP, 2)
         .then(function (W) {
           if (!W) {
+            FLDIAG.waterFetch = 'NULL after retries'; // FL-DIAG (temporary)
             errLog('water', 'chicago-water.json failed to load after retry');
             showToast('The lake and river layer could not be loaded.', false);
             return;
           }
+          FLDIAG.waterFetch = 'ok polygons=' + ((W && W.polygons) ? W.polygons.length : '?'); // FL-DIAG (temporary)
           buildWater(W);
         })
         .catch(function (e) { errLog('water', 'build failed: ' + ((e && e.message) || e)); });
@@ -12813,6 +12909,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       });
       var lastBusMode = null;
       var lastFrameAt = performance.now();
+      FLDIAG.loopStarted = true; // FL-DIAG (temporary)
       var wdDeferStreak = 0;
       var ehStuckSince = 0; // step 4a: when the stuck-interaction condition began
       var frameErrStreak = 0;
@@ -13070,6 +13167,48 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     .catch(function () {
       fail('Could not load route data. Please check your connection and reload.');
     });
+
+  /* FL-DIAG (temporary, 2026-11-05 repair round 2): readout writer.
+     Renders FLDIAG + live renderer stats + the error-log tail into the
+     About diagnostics block (#fl-diag-pre) every 2 s, so a rendered
+     recheck can read the failure off the page without a console.
+     renderer.info reflects the most recent render call: if its line
+     count is ~0 while streetsBuilt shows tens of thousands of segments,
+     the underlay is built but never drawn; if the counts are present,
+     the draw calls happen and the fault is in rasterization/state.
+     Remove with the rest of FL-DIAG when the defects close. */
+  setInterval(function () {
+    var el = document.getElementById('fl-diag-pre');
+    if (!el) return;
+    try {
+      var ri = renderer.info.render;
+      var camD = Math.round(camera.position.distanceTo(controls.target));
+      var L = [];
+      L.push('FL-DIAG chi3 · t+' + ((Date.now() - FLDIAG.t0) / 1000).toFixed(0) + 's · camDist ' + camD + ' m · camPos [' + camera.position.toArray().map(Math.round).join(',') + '] · camTgt [' + controls.target.toArray().map(Math.round).join(',') + ']');
+      L.push('loop started: ' + FLDIAG.loopStarted + ' · render calls ' + ri.calls + ' · lines ' + ri.lines + ' · triangles ' + ri.triangles + ' · scene children ' + scene.children.length);
+      L.push('streets fetch: ' + FLDIAG.streetsFetch);
+      L.push('street names fetch: ' + FLDIAG.streetNamesFetch);
+      L.push('streets built: ' + JSON.stringify(FLDIAG.streetsBuilt));
+      if (FLDIAG.tierRefs.fwCore) {
+        L.push('tier visible fw/ar/lo: ' + FLDIAG.tierRefs.fwCore.visible + '/' +
+          (FLDIAG.tierRefs.arCore ? FLDIAG.tierRefs.arCore.visible : '?') + '/' +
+          (FLDIAG.tierRefs.loCore ? FLDIAG.tierRefs.loCore.visible : '?'));
+      }
+      L.push('water fetch: ' + FLDIAG.waterFetch + ' · bake: ' + FLDIAG.waterBake + ' · built: ' + FLDIAG.waterBuilt);
+      L.push('webgl ctx lost/restored: ' + FLDIAG.ctxLost + '/' + FLDIAG.ctxRestored);
+      L.push('recoveries: ' + FLDIAG.recoveries.map(function (r) { return r.s + 's:' + r.reason; }).join(' ') +
+        ' · stand-downs ' + FLDIAG.standDowns + ' · reloads ' + FLDIAG.reloads + ' · watchdog fires ' + FLDIAG.wdFires);
+      L.push('toast log: ' + FLDIAG.toastLog.map(function (t) { return t.s + 's ' + t.a + ' "' + t.m + '"'; }).join(' | '));
+      L.push('resets: ' + FLDIAG.resets.map(function (r) {
+        return r.s + 's pos[' + r.pos.map(Math.round).join(',') + '] after1s[' + (r.after1s ? r.after1s.map(Math.round).join(',') : '…') + ']';
+      }).join(' | '));
+      var log = (window.__flErrLog ? window.__flErrLog() : []).slice(-6);
+      L.push('errlog tail: ' + log.map(function (e) { return (e.cls || '?') + ': ' + String(e.msg || '').slice(0, 90); }).join(' | '));
+      el.textContent = L.join('\n');
+    } catch (e) {
+      try { el.textContent = 'FL-DIAG writer error: ' + ((e && e.message) || e); } catch (e2) {}
+    }
+  }, 2000);
 
   resize();
 })();

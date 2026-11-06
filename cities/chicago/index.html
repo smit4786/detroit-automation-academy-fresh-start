@@ -1047,6 +1047,8 @@
         <p>Route shapes and stop positions come from the CTA&rsquo;s published GTFS schedule data; the streets underneath are the U.S. Census Bureau&rsquo;s TIGER/Line centerlines for Cook County, and the water is Lake Michigan and the Chicago River from the same source. Zoom in close and the routes resolve onto the street grid the CTA actually runs on. Live vehicle positions will come from the CTA&rsquo;s own Bus Tracker and Train Tracker feeds.</p>
       </div>
       <p class="fine">Route shapes &amp; stops: CTA GTFS. Street underlay &amp; water: U.S. Census Bureau TIGER/Line 2024 (Cook County). Live data: CTA Bus Tracker / Train Tracker (connection pending an API key). Developers: see the <a href="/api.html">transit data API</a>.</p>
+      <!-- FL-DIAG (temporary): boot diagnostics readout; remove with the FL-DIAG JS when the defects close. -->
+      <details id="fl-diag"><summary>Boot diagnostics (temporary)</summary><pre id="fl-diag-pre">collecting…</pre></details>
       <p class="fine">Trademark notice: CTA and the &lsquo;L&rsquo; are service marks of the Chicago Transit Authority. This is an unofficial project by Detroit Automation Academy — not affiliated with, endorsed by, or acting on behalf of the CTA or the City of Chicago. Detroit || else™ is a trademark of Detroit Automation Academy.</p>
     </div>
   </section>
@@ -1076,7 +1078,7 @@
   window.FORGE_LIVE_DATA_URL = "live-data";
 </script>
 <script src="ride-along.js?v=20261019-1228"></script>
-<script type="module" src="live-transit.js?v=20261105-chi2"></script>
+<script type="module" src="live-transit.js?v=20261105-chi3"></script>
 <script src="assets/measure.js?v=20261023-o2" defer></script>
 </body>
 </html>
