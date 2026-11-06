@@ -232,7 +232,7 @@
   .f-idle-row button b { font-weight: 600; flex: 1; text-align: left; }
   .f-idle-row button[aria-pressed="false"] .f-box { background: transparent; }
   .f-note { color: #9F9F9F; font-size: .72rem; line-height: 1.5; margin: 0 0 .7rem; }
-  .map-hint { position: absolute; left: 1.25rem; bottom: 1.25rem; color: #9F9F9F; font-size: .75rem; background: rgba(16,16,16,.7); padding: .45rem .7rem; border-radius: 8px; border: 1px solid rgba(242,242,242,.1); }
+  .map-hint { position: absolute; left: 1.25rem; bottom: 1.25rem; color: #9F9F9F; font-size: .75rem; background: rgba(16,16,16,.7); padding: .45rem .7rem; border-radius: 8px; border: 1px solid rgba(242,242,242,.1); max-width: min(30rem, calc(50% - 15rem)); line-height: 1.5; }
   .map-hint.touch { display: block; }
   .map-tools { position: absolute; right: 1.25rem; bottom: 1.25rem; display: flex; flex-direction: column; gap: .5rem; z-index: 4; }
   .map-tools button { width: 2.75rem; height: 2.75rem; border-radius: 50%; background: rgba(16,16,16,.85); border: 1px solid rgba(242,242,242,.2); color: #F2F2F2; font-size: 1.3rem; line-height: 1; cursor: pointer; touch-action: manipulation; backdrop-filter: blur(6px); font-family: "Inter", sans-serif; padding: 0; display: flex; align-items: center; justify-content: center; }
@@ -819,10 +819,8 @@
         <p class="f-note">Starbucks and Planet Fitness points of interest from OpenStreetMap (&copy; OpenStreetMap contributors, ODbL), within the map&rsquo;s street boundary. Flat discs colored by brand carry letter badges at close zoom &mdash; S for Starbucks, PF for Planet Fitness. Community map data may not list every point of interest; licensed counters inside other stores are the likeliest gaps. <span class="sponsored-note" id="places-sponsored-note" hidden><b>Sponsored</b> &mdash; the Starbucks and Planet Fitness layers are partnership placements.</span></p>
         <div id="filter-groups"></div>
         <div class="f-static">
-          <button class="f-group-head" id="pm-toggle" aria-pressed="true" title="Show the People Mover downtown loop and stations"><span class="f-box"></span><b>People Mover loop</b><span class="f-count">static</span></button>
-          <p class="f-note">No live feed exists for the People Mover &mdash; stations and the downtown loop are schedule geometry from the agency&rsquo;s GTFS. Positions are real; no vehicles are shown.</p>
-          <button class="f-group-head" id="mogo-toggle" aria-pressed="false" title="Show MoGo bikeshare stations with live bike and dock availability"><span class="f-box"></span><b>MoGo bikeshare</b><span class="f-count" id="mogo-count">loading</span></button>
-          <p class="f-note">Live availability from MoGo&rsquo;s public GBFS feed, refreshed every minute. Marker height and color show bikes available; a ring means an e-assist bike is available; counts appear at close zoom. Short, grey markers are stations whose feed reports are stale &mdash; their counts may be out of date.</p>
+          <button class="f-group-head" id="mogo-toggle" aria-pressed="false" title="Show Divvy bikeshare stations with live bike and dock availability"><span class="f-box"></span><b>Divvy bikeshare</b><span class="f-count" id="mogo-count">loading</span></button>
+          <p class="f-note">Live availability from Divvy&rsquo;s public GBFS feed, refreshed every minute. Marker height and color show bikes available; a ring means an e-assist bike is available; counts appear at close zoom. Short, grey markers are stations whose feed reports are stale &mdash; their counts may be out of date.</p>
         </div>
         </div>
         <div class="resize-grip" id="panel-resize" aria-hidden="true"></div>
@@ -913,7 +911,7 @@
           <div id="stop-live-list"></div>
         </div>
         <div class="stop-mogo" id="stop-mogo" hidden>
-          <div class="sel-eyebrow">MoGo bikeshare</div>
+          <div class="sel-eyebrow">Divvy bikeshare</div>
           <dl id="stop-mogo-dl"></dl>
           <p class="stop-mogo-note" id="stop-mogo-note"></p>
         </div>
@@ -1006,8 +1004,8 @@
         <ul id="alerts-sr-list"></ul>
         <p id="alerts-sr-sources"></p>
       </section>
-      <section id="mogo-sr" class="sr-only" aria-label="MoGo bikeshare availability, text form">
-        <h2>MoGo bikeshare stations</h2>
+      <section id="mogo-sr" class="sr-only" aria-label="Divvy bikeshare availability, text form">
+        <h2>Divvy bikeshare stations</h2>
         <ul id="mogo-sr-list"></ul>
         <p id="mogo-sr-note"></p>
       </section>
@@ -1080,7 +1078,7 @@
   window.FORGE_LIVE_DATA_URL = "live-data";
 </script>
 <script src="ride-along.js?v=20261019-1228"></script>
-<script type="module" src="live-transit.js?v=20261105-chi1"></script>
+<script type="module" src="live-transit.js?v=20261105-chi2"></script>
 <script src="assets/measure.js?v=20261023-o2" defer></script>
 </body>
 </html>

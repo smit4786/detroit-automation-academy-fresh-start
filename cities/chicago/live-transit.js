@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261105-chi1';
+  var STAMP = '20261105-chi2';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -418,7 +418,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     setTimeout(function () {
       var gl = null;
       try { gl = renderer.getContext(); } catch (e) {}
-      if (gl && !gl.isContextLost()) { recovering = false; return; }
+      if (gl && !gl.isContextLost()) {
+        // Stand-down: the display recovered on its own, so the
+        // "reloading the map..." notice leaves with the recovery.
+        // Before this fix the toast stayed on screen indefinitely
+        // after a stand-down, and repeat firings made its dismiss
+        // button appear broken.
+        recovering = false;
+        hideToast();
+        return;
+      }
       // Token fix (2026-10-16, error-handling step 5): the loop-guard
       // timestamp is written only here, once the reload is certain. The
       // previous bytes stamped it before the stand-down check above, so
@@ -1333,18 +1342,18 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
   function smartNoteText(age) {
     if (!age || age.band === 'unknown' || age.band === 'fresh') return '';
-    if (age.band === 'aging') return age.oldestAtMs != null ? 'SMART positions as of ' + formatClock12(age.oldestAtMs) + '.' : '';
-    return 'SMART data is ' + formatAgeLong(age.payloadAgeMin) + ' old \u2014 positions may have moved.';
+    if (age.band === 'aging') return age.oldestAtMs != null ? 'Positions as of ' + formatClock12(age.oldestAtMs) + '.' : '';
+    return 'Position data is ' + formatAgeLong(age.payloadAgeMin) + ' old \u2014 positions may have moved.';
   }
   function smartStopNoteText(age) {
     if (!age) return '';
-    if (age.band === 'aging') return age.oldestAtMs != null ? 'SMART positions as of ' + formatClock12(age.oldestAtMs) + '.' : '';
-    if (age.band === 'stale') return 'SMART data is ' + formatAgeLong(age.payloadAgeMin) + ' old \u2014 buses may have moved from the positions shown.';
+    if (age.band === 'aging') return age.oldestAtMs != null ? 'Positions as of ' + formatClock12(age.oldestAtMs) + '.' : '';
+    if (age.band === 'stale') return 'Position data is ' + formatAgeLong(age.payloadAgeMin) + ' old \u2014 buses may have moved from the positions shown.';
     return '';
   }
   function smartPillText(age) {
     if (!age || age.band !== 'stale') return '';
-    return 'SMART ' + age.count + ' (stale)';
+    return age.count + ' (stale)';
   }
 
   // Applies the current smartAge object to every SMART age surface.
@@ -3537,7 +3546,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var name = document.createElement('b');
     name.textContent = routeLabel(v.route_id) + ' · Bus ' + (v.vehicle_id || '');
     var sub = document.createElement('span');
-    sub.textContent = dest ? 'to ' + dest : (routeNames[v.route_id] || 'DDOT');
+    sub.textContent = dest ? 'to ' + dest : (routeNames[v.route_id] || 'CTA');
     main.appendChild(name); main.appendChild(sub);
     if (typeof alertsForRoute === 'function' && typeof alertFx === 'function' && alertsState.ok && alertsForRoute(v.route_id).length) {
       var rList = alertsForRoute(v.route_id);
@@ -3729,7 +3738,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     ['\u27F3', 'Two-finger twist', 'Rotate the view. Tilt to see the elevated route guideways — each route floats at its own height so crossings read as clean overpasses.'],
     ['\u25CF', 'Tap a bus', 'Opens the bus card: vehicle number, route, destination, speed, heading, and how fresh the position reading is. Tap Follow to track it.'],
     ['\u25A0', 'Bus badges', 'Each bus carries a bus-shaped badge showing its route number, bordered in the route\u2019s color. Badges declutter automatically when buses cluster.'],
-    ['\u29E9', 'Routes', 'Filter by group (DDOT, SMART, QLINE, People Mover) or individual route. Routes with no live buses are dimmed or hidden automatically.'],
+    ['\u29E9', 'Routes', 'Filter by group (CTA Bus, CTA Rail) or individual route. Routes with no live buses are dimmed or hidden automatically.'],
     ['\u25C8', 'Plan trip', 'Enter two points and get a transit itinerary with real routes, transfers, and walking legs — built on the same schedule data as the map.'],
     ['\u25C9', 'Ride along', 'Pick any live bus and see its upcoming stops from the rider\u2019s seat, ordered by travel direction. If a bus is already selected it rides that bus; selecting a bus on the map while Ride along is open rides it too, and the camera follows it.'],
     [ICO_FINDME, 'Find me', 'Center the map on your location. "Routes near me" then shows only routes with a stop within 1,250 m of you.'],
@@ -3743,7 +3752,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     ['\u2194', 'Right-drag', 'Pan across the city. Tilt to see the elevated route guideways — each route floats at its own height so crossings read as clean overpasses.'],
     ['\u25CF', 'Click a bus', 'Opens the bus card: vehicle number, route, destination, speed, heading, and how fresh the position reading is. Click Follow to track it.'],
     ['\u25A0', 'Bus badges', 'Each bus carries a bus-shaped badge showing its route number, bordered in the route\u2019s color. Badges declutter automatically when buses cluster.'],
-    ['\u29E9', 'Routes', 'Filter by group (DDOT, SMART, QLINE, People Mover) or individual route. Routes with no live buses are dimmed or hidden automatically.'],
+    ['\u29E9', 'Routes', 'Filter by group (CTA Bus, CTA Rail) or individual route. Routes with no live buses are dimmed or hidden automatically.'],
     ['\u25C8', 'Plan trip', 'Enter two points and get a transit itinerary with real routes, transfers, and walking legs — built on the same schedule data as the map.'],
     ['\u25C9', 'Ride along', 'Pick any live bus and see its upcoming stops from the rider\u2019s seat, ordered by travel direction. If a bus is already selected it rides that bus; selecting a bus on the map while Ride along is open rides it too, and the camera follows it.'],
     [ICO_FINDME, 'Find me', 'Center the map on your location. "Routes near me" then shows only routes with a stop within 1,250 m of you.'],
@@ -4620,15 +4629,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   function rideTimesFor(v) {
     var DELAY_PROJECTION = 0.6; // rank 5 — record above this function
     if (!v) return null;
-    if (v.agency === 'qline') {
-      return { byStop: {}, onlyIds: null, note: 'QLINE stop times are not published to this view. Stops are listed in order.' };
-    }
-    if (v.agency === 'smart') {
-      // Restored with the reactivation (and now literally true): SMART
-      // publishes live positions to this view, never stop times.
-      return { byStop: {}, onlyIds: null, note: 'SMART stop times are not published to this view. Stops are listed in order.' };
-    }
-    if (v.agency !== 'ddot') return null;
+    if (v.agency !== 'cta') return null;
     if (!tripTT) {
       return { byStop: {}, onlyIds: null, note: 'Stop times load with the trip engine; they appear here once it is ready.' };
     }
@@ -5052,7 +5053,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var anyDdot = false;
       for (var fq = 0; fq < pats.length; fq++) {
         var frec = tripTT.routes[tripTT.patterns[pats[fq][0]].route];
-        if (!frec || frec.ag !== 'SMART') { anyDdot = true; break; }
+        if (!frec || frec.ag === 'CTA') { anyDdot = true; break; }
       }
       if (!anyDdot) { out.state = 'na'; return out; }
     }
@@ -5100,7 +5101,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     note.hidden = true;
     var idx = (stopData && selectedStop) ? stopData.indexOf(selectedStop) : -1;
     if (selectedStop.pm) {
-      note.textContent = 'Arrival times are published for DDOT stops. The People Mover, SMART, and QLINE publish live positions only — see the live vehicles below.';
+      note.textContent = 'Arrival times are not published for this stop.';
       note.hidden = false;
       return;
     }
@@ -5117,7 +5118,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var tuRows = smartTuRowsForStop(selectedStop, Date.now());
       if (tuRows) {
         if (!tuRows.length) {
-          note.textContent = 'SMART live times are published when a bus is on its way; no SMART trip is reporting times for this stop right now — see the live vehicles below.';
+          note.textContent = 'Live times are published when a vehicle is on its way; no trip is reporting times for this stop right now.';
           note.hidden = false;
           return;
         }
@@ -5139,21 +5140,21 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           var t = document.createElement('span');
           var dSec = r.time - nowSecTu;
           t.textContent = dSec < 45 ? 'now' : (dSec <= 5400 ? 'in ' + Math.round(dSec / 60) + 'm' : formatClock12(r.time * 1000));
-          t.title = 'Live trip update from Swiftly' + (r.bus ? ' — bus ' + r.bus : '') +
+          t.title = 'Live trip update' + (r.bus ? ' — bus ' + r.bus : '') +
             (r.delay != null && Math.abs(r.delay) >= 45 ? ' — running ' + Math.round(Math.abs(r.delay) / 60) + ' min ' + (r.delay > 0 ? 'late' : 'early') : '');
           row.appendChild(t);
           list.appendChild(row);
         });
-        note.textContent = 'Live times from SMART trip updates (Swiftly); the feed rebuilds every few minutes.';
+        note.textContent = 'Live times from CTA trip updates.';
         note.hidden = false;
         return;
       }
-      note.textContent = 'Arrival times are published for DDOT stops. SMART and QLINE publish live positions only — see the live vehicles below.';
+      note.textContent = 'Scheduled times are published for CTA stops. Live times appear when the CTA tracker feed is connected.';
       note.hidden = false;
       return;
     }
     if (res.state === 'nosvc') {
-      note.textContent = 'No DDOT service is scheduled today.';
+      note.textContent = 'No CTA service is scheduled today.';
       note.hidden = false;
       return;
     }
@@ -5777,7 +5778,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     host.innerHTML = '';
     var none = document.createElement('p');
     none.className = 'trip-note';
-    none.textContent = 'One of these stops is not on a DDOT or SMART route, and no covered stop is within a short walk of it. The scheduled planner covers DDOT and SMART scheduled routes; QLINE stops share the map and the stop search.';
+    none.textContent = 'One of these stops is not on a CTA route, and no covered stop is within a short walk of it. The scheduled planner covers CTA bus and rail routes.';
     host.appendChild(none);
     announceSr(none.textContent);
   }
@@ -6170,7 +6171,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     }
     var meta = document.createElement('p');
     meta.className = 'trip-note';
-    var svcName = res.meta.service && SVC_NAMES[res.meta.service] ? SVC_NAMES[res.meta.service] : 'DDOT';
+    var svcName = res.meta.service && SVC_NAMES[res.meta.service] ? SVC_NAMES[res.meta.service] : 'CTA';
     var whenLbl = tripLeaveMode === 'at' && tripLeaveTime ? 'depart ' + tripLeaveTime : 'leave now';
     var provMode = 'scheduled';
     tripJourneys.forEach(function (j) {
@@ -6191,7 +6192,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       none.textContent = res.meta.reason === 'no-service'
         ? 'No scheduled service at this time.'
         : res.meta.reason === 'no-origin'
-          ? 'No DDOT or SMART stop is within a short walk of the start point. The scheduled planner covers DDOT and SMART scheduled routes.'
+          ? 'No CTA stop is within a short walk of the start point. The scheduled planner covers CTA bus and rail routes.'
           : 'No scheduled trip found between these stops right now. Try a different pair or time.';
       host.appendChild(none);
       announceSr(none.textContent);
@@ -6257,7 +6258,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         dot.style.background = l.color || '#F2F2F2';
         chip.appendChild(dot);
         var lbl = document.createElement('b');
-        lbl.textContent = l.agency === 'SMART' ? 'SMART ' + l.routeId : routeLabel(l.routeId);
+        lbl.textContent = routeLabel(l.routeId);
         chip.appendChild(lbl);
       } else {
         var w = document.createElement('b');
@@ -6360,7 +6361,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       if (l.type === 'bus') {
         dot.style.background = l.color || '#F2F2F2';
         var t = document.createElement('b');
-        t.textContent = (l.agency === 'SMART' ? 'SMART ' + l.routeId : routeLabel(l.routeId)) + (l.headsign ? ' · ' + l.headsign : '');
+        t.textContent = routeLabel(l.routeId) + (l.headsign ? ' · ' + l.headsign : '');
         body.appendChild(t);
         var s = document.createElement('span');
         s.textContent = tripStopName(l.board) + ' → ' + tripStopName(l.alight);
@@ -8091,18 +8092,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       });
       sec.appendChild(head);
       sec.appendChild(list);
-      if (g.id === 'smart') {
-        // S6/S9: the group note carries the derived route count and
-        // the live source; the freshness sentence (smart-age-note) is set
-        // by applySmartAgeUI and stays empty while the feed is fresh.
-        var smartNote = document.createElement('p');
-        smartNote.className = 'f-smart-note';
-        smartNote.textContent = 'All ' + g.routes.length + ' routes have map lines. Vehicle positions via Swiftly GTFS-Realtime.';
-        var smartAgeNote = document.createElement('span');
-        smartAgeNote.id = 'smart-age-note';
-        smartNote.appendChild(smartAgeNote);
-        sec.appendChild(smartNote);
-      }
       host.appendChild(sec);
     });
     applySmartAgeUI();
@@ -8165,7 +8154,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     // chip ("DPM · Detroit People Mover"). Kept OUT of routeOrder: the
     // DDOT filter/dim/near-me machinery must never touch this layer.
     routeColors['DPM'] = new THREE.Color(0x9F9F9F);
-    routeNames['DPM'] = 'Detroit People Mover';
+    routeNames['DPM'] = 'People Mover';
 
     pmGroup = new THREE.Group();
     pmGroup.name = 'people-mover';
@@ -8650,6 +8639,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   var liveEverOk = false;
   var historyOk = false;
   var lastTotal = null;
+  var liveNotConfigured = false;
 
   function fmtTime(when) {
     return (when && !isNaN(when)) ? when.toLocaleTimeString() : '–';
@@ -8669,6 +8659,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // empties the map while the header still claims "13 buses" is a lie.
   function refreshHeaderCount() {
     if (!lastVehicles) return;
+    if (liveNotConfigured) { setHeader(null, lastHeaderText, lastHeaderWarn); return; }
     setHeader(busSlots.length, lastHeaderText, lastHeaderWarn);
   }
 
@@ -10002,7 +9993,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         refreshFilterCounts();
         if (selectedRoute) renderRouteCard(selectedRoute);
         lastTotal = n;
-        setHeader(n, 'updated ' + fmtTime(d.generated_at ? new Date(d.generated_at) : null), false);
+        if (d.sources && d.sources.cta && d.sources.cta.configured === false) {
+          // No CTA API key is configured: there is no live update to
+          // stamp, so the header says so instead of presenting the
+          // envelope's generated_at as a current "updated" time.
+          liveNotConfigured = true;
+          setHeader(null, 'live positions not connected', false);
+        } else {
+          liveNotConfigured = false;
+          setHeader(n, 'updated ' + fmtTime(d.generated_at ? new Date(d.generated_at) : null), false);
+        }
         svcFeedOk(d); // service degradation notice: evaluate source states + freshness
         // SMART freshness surfaces track every successful poll (S6).
         applySmartAgeUI();
@@ -10050,12 +10050,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
   var SVC_SHORT = {
     'stale': 'live positions delayed',
-    'ddot-not-configured': 'DDOT positions not connected',
-    'ddot-down': 'DDOT positions unavailable',
-    'ddot-partial': 'DDOT positions incomplete',
-    'qline-down': 'QLINE positions unavailable'
+    'cta-not-configured': 'CTA live positions not connected',
+    'cta-down': 'CTA live positions unavailable'
   };
-  var SVC_TAIL = 'What still works: the map, all stop and route information, and the trip planner are unaffected. The planner computes journeys from the published DDOT timetable (DDOT schedule data current through February 7, 2027), not from live positions. While live positions are degraded, scheduled times are the reliable basis for planning a trip. This notice concerns the live data feed only. Bus and streetcar service is not cancelled, and this page does not announce service cancellations.';
+  var SVC_TAIL = 'What still works: the map, all stop and route information, and the trip planner are unaffected. The planner computes journeys from the published CTA timetable (CTA GTFS schedule data), not from live positions. While live positions are unavailable, scheduled times are the reliable basis for planning a trip. This notice concerns the live data feed only. CTA bus and train service is not cancelled, and this page does not announce service cancellations.';
 
   function svcConditions() {
     var out = [];
@@ -10071,25 +10069,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       }
     }
     var src = d.sources || {};
-    var dd = src.ddot;
-    if (dd) {
-      if (dd.ok === false && dd.configured === false) {
-        out.push({ key: 'ddot-not-configured' });
-      } else if (dd.ok === false) {
-        out.push({ key: 'ddot-down' });
-      } else {
-        // The builder reports ok:true for the DDOT leg whenever the leg
-        // ran; a leg whose every route-group request failed is visible
-        // only in the batch counters, so the counters are the signal.
-        var bo = Number(dd.batches_ok), bf = Number(dd.batches_failed);
-        if (isFinite(bo) && isFinite(bf) && (bo + bf) > 0) {
-          if (bo === 0) out.push({ key: 'ddot-down' });
-          else if (bf > 0) out.push({ key: 'ddot-partial', ok: bo, total: bo + bf });
-        }
-      }
+    var cta = src.cta;
+    if (cta && cta.configured === false) {
+      // The CTA tracker feeds are not connected (no API key configured).
+      // That is the whole story: a feed that was never connected is not
+      // "stale", so the age condition is suppressed and only the
+      // not-connected condition is reported.
+      return [{ key: 'cta-not-configured' }];
     }
-    var ql = src.qline;
-    if (ql && ql.ok === false) out.push({ key: 'qline-down' });
+    if (cta && cta.ok === false) out.push({ key: 'cta-down' });
     return out;
   }
 
@@ -10101,14 +10089,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         return 'Live positions delayed — last update ' +
           fmtTime(new Date(c.genAt)) + ', ' + c.ageMin +
           (c.ageMin === 1 ? ' minute' : ' minutes') + ' ago.';
-      case 'ddot-not-configured':
-        return 'DDOT live positions are not available on this map.';
-      case 'ddot-down':
-        return 'DDOT live positions unavailable. The DDOT feed is not reporting.';
-      case 'ddot-partial':
-        return 'DDOT live positions are incomplete. Some DDOT routes are not reporting.';
-      case 'qline-down':
-        return 'QLINE live positions unavailable. The QLINE feed is not reporting.';
+      case 'cta-not-configured':
+        return 'CTA live positions are not connected to this map yet.';
+      case 'cta-down':
+        return 'CTA live positions unavailable. The CTA feed is not reporting.';
     }
     return '';
   }
@@ -10125,17 +10109,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         }
         return 'The live data file this page reads could not be loaded, and no live update has been received yet. No live vehicle positions are shown.';
       case 'stale':
-        return 'The live feed is rebuilt every five minutes. The newest file available is from ' +
-          fmtTime(new Date(c.genAt)) + ' (' + c.ageMin + ' minutes old). The positions on the map are exactly the positions in that file. They are not advanced or estimated between updates.';
-      case 'ddot-not-configured':
-        return 'The DDOT live position feed is not connected to this map in its current configuration, so DDOT vehicles do not appear. This is a data connection state. It is not a change to DDOT service, and it does not affect QLINE positions, the map, or the trip planner.';
-      case 'ddot-down':
-        return 'The DDOT position source returned no data for the most recent update. DDOT vehicles are removed from the map while the source is not reporting, and they return when the source resumes. A source outage is not a service suspension. DDOT buses continue to run on their published schedules.';
-      case 'ddot-partial':
-        return 'The DDOT position source returned data for ' + c.ok + ' of ' + c.total +
-          ' route groups in the most recent update. Vehicles on the remaining routes do not appear in this update. Routes that are reporting are shown at their measured positions.';
-      case 'qline-down':
-        return 'The QLINE position source returned no data for the most recent update. QLINE streetcars are removed from the map while the source is not reporting, and they return when the source resumes. A source outage is not a service suspension.';
+        return 'The newest live file available is from ' +
+          fmtTime(new Date(c.genAt)) + ' (' + c.ageMin + ' minutes old), and it is not being refreshed. The positions on the map are exactly the positions in that file. They are not advanced or estimated between updates.';
+      case 'cta-not-configured':
+        return 'Live CTA positions come from the CTA Bus Tracker and Train Tracker feeds, which require a CTA API key. No key is configured for this map yet, so no live vehicles are shown and the count above is not a live count. Everything else works: every CTA route and stop is on the map, and departures and trip planning use the published CTA timetable.';
+      case 'cta-down':
+        return 'The CTA position source returned no data for the most recent update. CTA vehicles are removed from the map while the source is not reporting, and they return when the source resumes. A source outage is not a service suspension. CTA buses and trains continue to run on their published schedules.';
     }
     return '';
   }
@@ -10143,8 +10122,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   function svcSig(conds) {
     return conds.map(function (c) {
       return c.key +
-        (c.key === 'stale' ? '@' + c.genAt : '') +
-        (c.key === 'ddot-partial' ? ':' + c.ok + '/' + c.total : '');
+        (c.key === 'stale' ? '@' + c.genAt : '');
     }).join('|');
   }
 
@@ -10240,7 +10218,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     ACCESSIBILITY_ISSUE: 2, STOP_MOVED: 2, MODIFIED_SERVICE: 2,
     ADDITIONAL_SERVICE: 1, OTHER_EFFECT: 1, UNKNOWN_EFFECT: 0, NO_EFFECT: 0
   };
-  var ALERT_AGENCY = { ddot: 'DDOT', qline: 'QLINE' };
+  var ALERT_AGENCY = { cta: 'CTA' };
   // The five-effect vocabulary (design samples, shared table). cls keys
   // the CSS treatments; css is the glyph color used on map sprites.
   var ALERT_FX = {
@@ -12382,6 +12360,21 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       .catch(function () { /* history is a bonus; live poll proceeds regardless */ });
   }
 
+  // Geometry legs retry (Chicago repair 2026-11-05): a transient fetch
+  // failure must not silently strip the street fabric or the water from
+  // the map — the boot previously accepted a null streets payload and
+  // rendered a black void with no signal to the rider.
+  function fetchJsonRetry(url, tries) {
+    return fetch(url)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (v) {
+        if (v !== null || tries <= 1) return v;
+        return new Promise(function (res) { setTimeout(res, 1500); })
+          .then(function () { return fetchJsonRetry(url, tries - 1); });
+      });
+  }
+
   // --- boot --------------------------------------------------------------------
   function resize() {
     var w = container.clientWidth || 800;
@@ -12394,16 +12387,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
   Promise.all([
     fetch('cta-routes-3d.json?v=' + STAMP)
-      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }),
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .catch(function (e) {
+        fail('The map data could not be loaded. Check your connection and reload the page.');
+        throw e;
+      }),
     fetch('cta-fleet.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }),
-    fetch('assets/chicago-streets.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }),
-    fetch('assets/chicago-street-names.json?v=' + STAMP)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; }),
+    fetchJsonRetry('assets/chicago-streets.json?v=' + STAMP, 3),
+    fetchJsonRetry('assets/chicago-street-names.json?v=' + STAMP, 3),
     fetch('cta-empty.json?v=' + STAMP)
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; }), // static layer is optional: map works without it
@@ -12419,6 +12412,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       fleetData = all[1];
       streetData = all[2];
       streetNameData = all[3];
+      if (!streetData) {
+        showToast('The street map could not be loaded. Check your connection and reload the page.', true);
+      }
       var pmData = all[4];
       var smartData = all[5];
       var qlineData = all[6];
@@ -12734,10 +12730,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // Water + far-shore static layer (project 16): built once from
       // TIGER+OSM geometry. Absent (fetch failed) the map simply has
       // no water layer.
-      fetch('assets/chicago-water.json?v=' + STAMP)
-        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-        .then(function (W) { buildWater(W); })
-        .catch(function () { /* water is a bonus; map works without it */ });
+      fetchJsonRetry('assets/chicago-water.json?v=' + STAMP, 2)
+        .then(function (W) {
+          if (!W) {
+            errLog('water', 'chicago-water.json failed to load after retry');
+            showToast('The lake and river layer could not be loaded.', false);
+            return;
+          }
+          buildWater(W);
+        })
+        .catch(function (e) { errLog('water', 'build failed: ' + ((e && e.message) || e)); });
 
       /* LANDMARK-MASSING-BEGIN v20261006-1700 — staging-only Phase A.
          True-form OSM landmark massing (single merged mesh, 1 draw call).
