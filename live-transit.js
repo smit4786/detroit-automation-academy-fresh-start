@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261106-1638';
+  var STAMP = '20261106-1719';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -892,7 +892,17 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     x.fillText(text, c.width / 2, 68);
     var tex = new THREE.CanvasTexture(c);
     tex.anisotropy = 4;
-    var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+    var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false }));
+    // Label band (2026-11-06): every other label class pins a renderOrder
+    // in the 30-41 band (street 35, stop 36, bus badges 40); these pills
+    // used to sit at the default 0, depth-sorted among the transparent
+    // scene meshes, so a nearer transparent mesh could paint over the
+    // pill and smear its text (owner screenshot 2026-11-06 16:32). 30 is
+    // the band floor (ride-pick labels): above all scene geometry,
+    // below the street/stop/bus labels that must paint over these pills.
+    // The two callers that pin 36 (Belle Isle, water labels) still
+    // override this after creation, unchanged.
+    sp.renderOrder = 30;
     sp.scale.set(375 * c.width / c.height, 375, 1);
     return sp;
   }
@@ -4340,10 +4350,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // 256 px canvas: dark disc, orange ring). It is a world-space sprite
   // with depthTest:false at renderOrder 0, and every label/badge sprite
   // layer is drawn AFTER it -- street labels (35), stop labels (36),
-  // the Belle Isle and People Mover labels (36), places badges (35)
-  // and glows (34), MoGo badges (35), alert glyphs (6), bus badges
-  // (40), the bus info label (41), route labels (0, depth-sorted
-  // after) -- so those artifacts paint at full strength straight
+  // the Belle Isle label (36), the People Mover label (30), places
+  // badges (35) and glows (34), MoGo badges (35), alert glyphs (6),
+  // bus badges (40), the bus info label (41), route labels (30) --
+  // so those artifacts paint at full strength straight
   // across the disc's face (Justin's 2026-10-15 iPad screenshot:
   // "Lysander St" and "Lincoln St" at full opacity on the disc).
   // Scene geometry needs no treatment: streets, route lines, pylons
