@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261106-1719';
+  var STAMP = '20261107-1504';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -8507,14 +8507,40 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     function triGeo(entries) {
       var pos = [];
       var bad = 0;
+      // UAT fix 2026-11-07 (owner iPad: water contrast shading banded
+      // across land, obscuring Woodward Ave): every ring in
+      // detroit-water.json is CLOSED (its last point repeats its
+      // first), but ShapeUtils.triangulateShape strips that closing
+      // point from its own vertex list before earcut (its internal
+      // removeDupEndPts), so the faces it returns index a
+      // DE-DUPLICATED list. The lookup list `all` below kept the
+      // duplicates, shifting every hole vertex by one slot per
+      // preceding ring — on the unioned river body (84 rings) hole
+      // faces resolved to vertices of entirely different rings,
+      // emitting 714 triangles outside the water polygons totalling
+      // ~509 km^2 (true water area is ~80.5 km^2). The band shader
+      // paints any fragment over a land cell at its brightest value
+      // (land cells encode shore distance ~0), so the spill rendered
+      // as a light band brighter than the water itself. Ring points
+      // are now stripped of the closing duplicate up front, making
+      // `all` index-identical to triangulateShape's list; verified
+      // against the data: emitted triangle area then equals the true
+      // polygon area exactly and every triangle centroid falls inside
+      // its polygon. Shorelines unchanged (the stripped point
+      // duplicates the ring's first point and carries no geometry).
+      function ringPts(ring) {
+        var pts = ring.map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+        while (pts.length > 2 && pts[0].equals(pts[pts.length - 1])) pts.pop();
+        return pts;
+      }
       entries.forEach(function (e) {
         if (!e.rings || !e.rings.length || e.rings[0].length < 3) return;
         try {
-          var contour = e.rings[0].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+          var contour = ringPts(e.rings[0]);
           var holes = [];
           var all = contour.slice();
           for (var h = 1; h < e.rings.length; h++) {
-            var hole = e.rings[h].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+            var hole = ringPts(e.rings[h]);
             holes.push(hole);
             all = all.concat(hole);
           }
