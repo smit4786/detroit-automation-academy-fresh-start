@@ -13,7 +13,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261107-1504';
+  var STAMP = '20261107-1904';
   // Build string in the help footer derives from the cache stamp — never
   // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
   // for days before anyone noticed).
@@ -7992,8 +7992,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // writes only — zero per-frame CPU geometry work (P15 economics).
   var neonT = 0, neonLastNow = 0;
   var neonWaterTimeU = { value: 0 };
-  var neonShoreTexU = { value: null };
-  var neonShoreBoundsU = { value: new THREE.Vector4(0, 0, 1, 1) };
   // Phase 1: guideEntryOpacity / syncGuideEntry are gone with the
   // per-route materials they served. Per-route guide alpha now lives in
   // routeAlphaU (see refreshRouteAlpha / applyDim); the composition rule
@@ -8504,236 +8502,192 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // target list — tap resolution is unchanged by construction.
   function buildWater(W) {
     if (!W || !W.polygons) return;
-    function triGeo(entries) {
-      var pos = [];
-      var bad = 0;
-      // UAT fix 2026-11-07 (owner iPad: water contrast shading banded
-      // across land, obscuring Woodward Ave): every ring in
-      // detroit-water.json is CLOSED (its last point repeats its
-      // first), but ShapeUtils.triangulateShape strips that closing
-      // point from its own vertex list before earcut (its internal
-      // removeDupEndPts), so the faces it returns index a
-      // DE-DUPLICATED list. The lookup list `all` below kept the
-      // duplicates, shifting every hole vertex by one slot per
-      // preceding ring — on the unioned river body (84 rings) hole
-      // faces resolved to vertices of entirely different rings,
-      // emitting 714 triangles outside the water polygons totalling
-      // ~509 km^2 (true water area is ~80.5 km^2). The band shader
-      // paints any fragment over a land cell at its brightest value
-      // (land cells encode shore distance ~0), so the spill rendered
-      // as a light band brighter than the water itself. Ring points
-      // are now stripped of the closing duplicate up front, making
-      // `all` index-identical to triangulateShape's list; verified
-      // against the data: emitted triangle area then equals the true
-      // polygon area exactly and every triangle centroid falls inside
-      // its polygon. Shorelines unchanged (the stripped point
-      // duplicates the ring's first point and carries no geometry).
-      function ringPts(ring) {
-        var pts = ring.map(function (p) { return new THREE.Vector2(p[0], p[1]); });
-        while (pts.length > 2 && pts[0].equals(pts[pts.length - 1])) pts.pop();
-        return pts;
+    // Project 30 (Novel Water, owner directive 2026-11-07): the water
+    // fills are no longer triangulated polygons. Triangulation failed
+    // the owner's device UAT twice (flicker/triangle edges 2026-11-06;
+    // a bright shading band over Woodward Ave 2026-11-07 — earcut
+    // mis-indexing on holed rings, index-fixed in 8c635d0b), and the
+    // owner directed a mechanism in which that failure class cannot
+    // recur. The fill is now a baked signed distance field:
+    //
+    //   assets/detroit-water-sdf.json (manifest) + assets/water-sdf/
+    //   tile_C_R.png — one RGB PNG per 1024x1024-texel tile at 5 m
+    //   texels over the mosaic grid (origin -20480,-15360). Channels:
+    //   R = water SDF (every water polygon + Belle Isle interior
+    //   water), G = Belle Isle interior-water SDF, B = far-shore
+    //   landmass SDF. Byte value = 0.5 - d/(2*range), ranges
+    //   384/160/96 m, d negative inside. Tiles that are a single value
+    //   travel as manifest constants, not PNGs. The bake is offline
+    //   (2.5 m supersampled raster + Euclidean distance transform +
+    //   box downsample; bake script and audit live in the goal
+    //   record, forge-line-live-transit-layer/water-sdf).
+    //
+    // Render: one flat quad per tile per layer, at the same heights
+    // and draw order as the triangulated fills (far tint y=1, water
+    // y=2, Belle Isle interior y=4.5). The fragment shader decodes
+    // the signed distance and discards every fragment the field
+    // calls land, so the fill exists only where the mask says water
+    // — spill is impossible by construction, and no polygon
+    // triangulation remains anywhere in the water path (triGeo and
+    // the runtime chamfer bake are gone). The vector shoreline
+    // strokes below still trace every ring, so the edge stays crisp
+    // at street zoom; shorelines are unchanged.
+    //
+    // Shading: the Project 22 band structure is carried over exactly
+    // (values 0.12157/0.14510/0.17647, smoothsteps 240-360 m and
+    // 40-90 m, the +/-4% shore shimmer), reading shore distance as
+    // -d from the R channel; both fills share the field, as before.
+    // The far-shore tint keeps Project 16 Option A's 0x141414.
+    //
+    // Motion: a slow procedural flow rides the same shading — three
+    // value-noise octaves (600/243/98 m wavelengths) advected
+    // downstream at 14 m/s along (-0.287, +0.958) (scene south,
+    // slightly west; the river runs to Lake Erie), applied as
+    // +/-0.011 luminance (about +/-3 gray levels), depth-gated so
+    // the shore band stays quieter than open water, and gated by
+    // clamp(uTime/3): the frame loop pins uTime to 0 under reduced
+    // motion (P28 C-10), so under that preference the flow term is
+    // exactly zero and the water sits at the static band values —
+    // the same posture the shimmer already had.
+    //
+    // Bake audit of record: rasterized water area 81.20 km^2 vs 81.13 km^2 of
+    // polygon area (+0.09%); 31,570 sampled shoreline points read
+    // |d| p95 = 2.6 m post-quantization (the few larger readings sit
+    // on the Belle Isle blanket outline — not a union shoreline;
+    // the field treats that footprint as water exactly as the fills
+    // did, and the 30 m relief occludes it); zero mask-disagreement
+    // texels beyond +/-7.5 m of a shore; Woodward-corridor,
+    // downtown and downriver/Fort St land grids all read land.
+    // Failure posture is unchanged: if the manifest or tiles fail to
+    // load, the fills simply do not draw; the map works without them.
+    function sdfDataTexture(arr, w, h) {
+      var t = new THREE.DataTexture(arr, w, h, THREE.RedFormat);
+      t.minFilter = THREE.LinearFilter;
+      t.magFilter = THREE.LinearFilter;
+      t.wrapS = THREE.ClampToEdgeWrapping;
+      t.wrapT = THREE.ClampToEdgeWrapping;
+      t.generateMipmaps = false;
+      t.needsUpdate = true;
+      return t;
+    }
+    var sdfConstTex = {};
+    function sdfConstTexture(byte) {
+      if (!sdfConstTex[byte]) {
+        sdfConstTex[byte] = sdfDataTexture(new Uint8Array([byte]), 1, 1);
       }
-      entries.forEach(function (e) {
-        if (!e.rings || !e.rings.length || e.rings[0].length < 3) return;
-        try {
-          var contour = ringPts(e.rings[0]);
-          var holes = [];
-          var all = contour.slice();
-          for (var h = 1; h < e.rings.length; h++) {
-            var hole = ringPts(e.rings[h]);
-            holes.push(hole);
-            all = all.concat(hole);
-          }
-          var faces = THREE.ShapeUtils.triangulateShape(contour, holes);
-          for (var f = 0; f < faces.length; f++) {
-            for (var k = 0; k < 3; k++) {
-              var v = all[faces[f][k]];
-              pos.push(v.x, 0, v.y);
-            }
-          }
-        } catch (err) { bad++; }
-      });
-      if (bad) console.warn('buildWater: skipped ' + bad + ' degenerate polygons');
-      var g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-      g.computeVertexNormals();
-      return g;
+      return sdfConstTex[byte];
     }
-    function fillMesh(entries, y, color) {
-      var m = new THREE.Mesh(triGeo(entries),
-        new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
-      m.position.y = y;
-      m.renderOrder = 1;
-      scene.add(m);
-      return m;
-    }
-    // Project 22, Treatment 1 (Neon Vector): the water fills draw hard
-    // indigo bands from a baked shore-distance field — deep 0x101010
-    // (>= 300 m from shore), mid 0x1f1f1f (60-300 m), shore accent
-    // 0x222222 (< 60 m, shimmering +/-4% via uTime).
-    // UAT fix 2026-11-06 (owner iPad: water read coarse/faceted): the
-    // three governing values and their luminance order are unchanged,
-    // but the band edges now graduate (smoothstep 240-360 m and
-    // 40-90 m) instead of stepping at the thresholds, and the field
-    // bakes at 10 m cells (was 20 m) — the hard steps on a 20 m grid
-    // were the visible faceting on the water surface. The mid band
-    // carries Project 16 Option A's governing water value 0x1f1f1f
-    // (A owns water luminance; the band structure, thresholds, and
-    // the deep and shore-accent values are Neon Vector's): A's value
-    // sits between the deep band and the shore accent on the
-    // luminance scale, so it takes the mid band — as the deep band
-    // it would invert the shore-brightening order. The far shore
-    // fill below is A's 0x141414 for the same reason. The field is baked
-    // ONCE at load into a single-channel texture: the water mask is
-    // scanline-rasterized from the same rings triGeo renders, and a
-    // two-pass chamfer distance transform gives every cell its
-    // distance to the nearest shoreline (the gate prototypes were
-    // painted by exactly this distance-transform method). A per-vertex
-    // attribute cannot carry the field on this geometry — earcut
-    // emits only ring vertices, all at distance 0 — and subdividing
-    // to resolve the bands measured 410k triangles / ~21.6 s of load
-    // time on the real data, so the bake lives in the texture and the
-    // rendered geometry is byte-identical to the flat fill it
-    // replaces. One shared patched material (one new shader program)
-    // serves both water fills. Zero per-frame CPU: the frame loop
-    // writes the uTime uniform only.
-    var waterBandMat = null;
-    function getWaterBandMat() {
-      if (waterBandMat) return waterBandMat;
+    function sdfMaterial(texD, texW, spanD, spanW, mode, rect) {
       var m = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
       m.onBeforeCompile = function (sh) {
         sh.uniforms.uTime = neonWaterTimeU;
-        sh.uniforms.uShoreTex = neonShoreTexU;
-        sh.uniforms.uShoreBounds = neonShoreBoundsU;
+        sh.uniforms.uTexD = { value: texD };
+        sh.uniforms.uTexW = { value: texW };
+        sh.uniforms.uSpanD = { value: spanD };
+        sh.uniforms.uSpanW = { value: spanW };
+        sh.uniforms.uMode = { value: mode };
+        sh.uniforms.uTileRect = { value: rect };
         sh.vertexShader = 'varying vec2 vWPos;\n' +
           sh.vertexShader.replace('#include <begin_vertex>',
             '#include <begin_vertex>\n\tvWPos = (modelMatrix * vec4(transformed, 1.0)).xz;');
-        sh.fragmentShader = ('uniform float uTime;\nuniform sampler2D uShoreTex;\n' +
-          'uniform vec4 uShoreBounds;\nvarying vec2 vWPos;\n') +
+        sh.fragmentShader = ('uniform float uTime;\nuniform sampler2D uTexD;\n' +
+          'uniform sampler2D uTexW;\nuniform float uSpanD;\nuniform float uSpanW;\n' +
+          'uniform float uMode;\nuniform vec4 uTileRect;\nvarying vec2 vWPos;\n' +
+          'float lvHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\n' +
+          'float lvNoise(vec2 p) {\n' +
+          '  vec2 i = floor(p); vec2 f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);\n' +
+          '  return mix(mix(lvHash(i), lvHash(i + vec2(1.0, 0.0)), u.x),\n' +
+          '             mix(lvHash(i + vec2(0.0, 1.0)), lvHash(i + vec2(1.0, 1.0)), u.x), u.y);\n' +
+          '}\n') +
           sh.fragmentShader.replace('#include <color_fragment>',
             ['#include <color_fragment>',
-             '\tvec2 shoreUv = (vWPos - uShoreBounds.xy) / uShoreBounds.zw;',
-             '\tfloat shoreD = texture2D(uShoreTex, shoreUv).r * 650.0;',
-             '\tvec3 waterCol = vec3(0.12157, 0.12157, 0.12157);',
-             '\twaterCol = mix(waterCol, vec3(0.14510, 0.14510, 0.14510), 1.0 - smoothstep(240.0, 360.0, shoreD));',
-             '\twaterCol = mix(waterCol, vec3(0.17647, 0.17647, 0.17647) * (1.0 + 0.04 * sin(uTime * 0.35)), 1.0 - smoothstep(40.0, 90.0, shoreD));',
-             '\tdiffuseColor.rgb = waterCol;'].join('\n'));
+             '\tvec2 sUv = (vWPos - uTileRect.xy) / uTileRect.zw;',
+             '\tfloat dHere = (0.5 - texture2D(uTexD, sUv).r) * uSpanD;',
+             '\tif (dHere > 0.0) discard;',
+             '\tif (uMode > 1.5) {',
+             '\t\tdiffuseColor.rgb = vec3(0.07843, 0.07843, 0.07843);',
+             '\t} else {',
+             '\t\tfloat shoreD = -(0.5 - texture2D(uTexW, sUv).r) * uSpanW;',
+             '\t\tvec3 waterCol = vec3(0.12157, 0.12157, 0.12157);',
+             '\t\twaterCol = mix(waterCol, vec3(0.14510, 0.14510, 0.14510), 1.0 - smoothstep(240.0, 360.0, shoreD));',
+             '\t\twaterCol = mix(waterCol, vec3(0.17647, 0.17647, 0.17647) * (1.0 + 0.04 * sin(uTime * 0.35)), 1.0 - smoothstep(40.0, 90.0, shoreD));',
+             '\t\tvec2 fP = vWPos - vec2(-0.28735, 0.95783) * (uTime * 14.0);',
+             '\t\tfloat fN = lvNoise(fP / 600.0) * 0.55 + lvNoise(fP / 243.0) * 0.30 + lvNoise(fP / 98.0) * 0.15;',
+             '\t\tfloat fGate = clamp(uTime / 3.0, 0.0, 1.0) * (0.35 + 0.65 * smoothstep(0.0, 150.0, shoreD));',
+             '\t\twaterCol += (fN - 0.5) * 0.022 * fGate;',
+             '\t\tdiffuseColor.rgb = waterCol;',
+             '\t}'].join('\n'));
       };
-      m.customProgramCacheKey = function () { return 'waterBand'; };
-      waterBandMat = m;
+      m.customProgramCacheKey = function () { return 'waterSdf'; };
       return m;
     }
-    function bakeShoreField(entries) {
-      var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      entries.forEach(function (e) {
-        if (!e.rings) return;
-        e.rings.forEach(function (ring) {
-          ring.forEach(function (p) {
-            if (p[0] < minX) minX = p[0];
-            if (p[0] > maxX) maxX = p[0];
-            if (p[1] < minY) minY = p[1];
-            if (p[1] > maxY) maxY = p[1];
+    function sdfQuad(texD, texW, spanD, spanW, mode, x0, z0, span, y) {
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute([
+        x0, 0, z0, x0 + span, 0, z0, x0 + span, 0, z0 + span, x0, 0, z0 + span
+      ], 3));
+      g.setIndex([0, 1, 2, 0, 2, 3]);
+      var mesh = new THREE.Mesh(g, sdfMaterial(texD, texW, spanD, spanW, mode,
+        new THREE.Vector4(x0, z0, span, span)));
+      mesh.position.y = y;
+      mesh.renderOrder = 1;
+      scene.add(mesh);
+      return mesh;
+    }
+    function decodeSdfTile(t, need, done) {
+      var img = new Image();
+      img.onload = function () {
+        var tex = null;
+        try {
+          var cv = document.createElement('canvas');
+          cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+          var cx = cv.getContext('2d', { willReadFrequently: true });
+          cx.drawImage(img, 0, 0);
+          var px = cx.getImageData(0, 0, cv.width, cv.height).data;
+          var n = cv.width * cv.height;
+          var ch = [null, null, null];
+          for (var ci = 0; ci < 3; ci++) if (need[ci]) ch[ci] = new Uint8Array(n);
+          for (var k = 0, j = 0; k < n; k++, j += 4) {
+            if (ch[0]) ch[0][k] = px[j];
+            if (ch[1]) ch[1][k] = px[j + 1];
+            if (ch[2]) ch[2][k] = px[j + 2];
+          }
+          tex = [ch[0] ? sdfDataTexture(ch[0], cv.width, cv.height) : null,
+                 ch[1] ? sdfDataTexture(ch[1], cv.width, cv.height) : null,
+                 ch[2] ? sdfDataTexture(ch[2], cv.width, cv.height) : null];
+        } catch (err) { tex = null; }
+        done(tex);
+      };
+      img.onerror = function () { done(null); };
+      img.src = 'assets/' + t.png + '?v=' + STAMP;
+    }
+    function buildSdfTiles(M) {
+      var span = M.texel * M.tileTexels;
+      var spanW = 2 * M.ranges.water, spanI = 2 * M.ranges.isle, spanF = 2 * M.ranges.far;
+      M.tiles.forEach(function (t) {
+        var x0 = M.origin[0] + t.c * span, z0 = M.origin[1] + t.r * span;
+        if (t.png) {
+          decodeSdfTile(t, [!!(t.w || t.i), !!t.i, !!t.f], function (tex) {
+            if (!tex) return;
+            if (t.f && tex[2]) sdfQuad(tex[2], tex[2], spanF, spanF, 2, x0, z0, span, 1);
+            if (t.w && tex[0]) sdfQuad(tex[0], tex[0], spanW, spanW, 0, x0, z0, span, 2);
+            if (t.i && tex[1] && tex[0]) sdfQuad(tex[1], tex[0], spanI, spanW, 1, x0, z0, span, 4.5);
           });
-        });
-      });
-      var CELL = 10;
-      var gw = Math.max(1, Math.ceil((maxX - minX) / CELL));
-      var gh = Math.max(1, Math.ceil((maxY - minY) / CELL));
-      var mask = new Uint8Array(gw * gh);
-      entries.forEach(function (e) {
-        if (!e.rings || !e.rings.length) return;
-        var edges = [];
-        e.rings.forEach(function (ring) {
-          for (var i = 0; i < ring.length; i++) {
-            var a = ring[i], b = ring[(i + 1) % ring.length];
-            edges.push(a[0], a[1], b[0], b[1]);
-          }
-        });
-        var yLo = Infinity, yHi = -Infinity;
-        for (var q = 1; q < edges.length; q += 2) {
-          if (edges[q] < yLo) yLo = edges[q];
-          if (edges[q] > yHi) yHi = edges[q];
-        }
-        var r0 = Math.max(0, Math.floor((yLo - minY) / CELL));
-        var r1 = Math.min(gh - 1, Math.floor((yHi - minY) / CELL));
-        for (var r = r0; r <= r1; r++) {
-          var wy = minY + (r + 0.5) * CELL;
-          var xs = [];
-          for (var ei = 0; ei < edges.length; ei += 4) {
-            var x1 = edges[ei], y1 = edges[ei + 1], x2 = edges[ei + 2], y2 = edges[ei + 3];
-            if ((y1 <= wy && y2 > wy) || (y2 <= wy && y1 > wy)) {
-              xs.push(x1 + (wy - y1) * (x2 - x1) / (y2 - y1));
-            }
-          }
-          if (xs.length < 2) continue;
-          xs.sort(function (a, b) { return a - b; });
-          for (var xi = 0; xi + 1 < xs.length; xi += 2) {
-            var c0 = Math.max(0, Math.floor((xs[xi] - minX) / CELL));
-            var c1 = Math.min(gw - 1, Math.floor((xs[xi + 1] - minX) / CELL));
-            for (var c = c0; c <= c1; c++) mask[r * gw + c] = 1;
-          }
+        } else if (t.const) {
+          var ct = [sdfConstTexture(t.const[0]), sdfConstTexture(t.const[1]),
+                    sdfConstTexture(t.const[2])];
+          if (t.f) sdfQuad(ct[2], ct[2], spanF, spanF, 2, x0, z0, span, 1);
+          if (t.w) sdfQuad(ct[0], ct[0], spanW, spanW, 0, x0, z0, span, 2);
+          if (t.i) sdfQuad(ct[1], ct[0], spanI, spanW, 1, x0, z0, span, 4.5);
         }
       });
-      var dt = new Float32Array(gw * gh);
-      var INF = 1e9, SQ2 = Math.SQRT2;
-      for (var i = 0; i < dt.length; i++) dt[i] = mask[i] ? INF : 0;
-      var x, y, idx, v;
-      for (y = 0; y < gh; y++) {
-        for (x = 0; x < gw; x++) {
-          idx = y * gw + x;
-          if (!mask[idx]) continue;
-          v = dt[idx];
-          if (x > 0) v = Math.min(v, dt[idx - 1] + 1);
-          if (y > 0) {
-            v = Math.min(v, dt[idx - gw] + 1);
-            if (x > 0) v = Math.min(v, dt[idx - gw - 1] + SQ2);
-            if (x < gw - 1) v = Math.min(v, dt[idx - gw + 1] + SQ2);
-          }
-          dt[idx] = v;
-        }
-      }
-      for (y = gh - 1; y >= 0; y--) {
-        for (x = gw - 1; x >= 0; x--) {
-          idx = y * gw + x;
-          if (!mask[idx]) continue;
-          v = dt[idx];
-          if (x < gw - 1) v = Math.min(v, dt[idx + 1] + 1);
-          if (y < gh - 1) {
-            v = Math.min(v, dt[idx + gw] + 1);
-            if (x < gw - 1) v = Math.min(v, dt[idx + gw + 1] + SQ2);
-            if (x > 0) v = Math.min(v, dt[idx + gw - 1] + SQ2);
-          }
-          dt[idx] = v;
-        }
-      }
-      var data = new Uint8Array(gw * gh);
-      for (var k = 0; k < dt.length; k++) {
-        var dm = dt[k] * CELL + CELL * 0.5;
-        data[k] = dm >= 650 ? 255 : Math.round(dm / 650 * 255);
-      }
-      var tex = new THREE.DataTexture(data, gw, gh, THREE.RedFormat);
-      tex.minFilter = THREE.LinearFilter;
-      tex.magFilter = THREE.LinearFilter;
-      tex.wrapS = THREE.ClampToEdgeWrapping;
-      tex.wrapT = THREE.ClampToEdgeWrapping;
-      tex.generateMipmaps = false;
-      tex.needsUpdate = true;
-      console.info('buildWater: shore field baked, ' + gw + 'x' + gh + ' cells at ' + CELL + ' m');
-      return { tex: tex, bounds: new THREE.Vector4(minX, minY, gw * CELL, gh * CELL) };
+      console.info('buildWater: SDF field, ' + M.tiles.length + ' tiles at ' +
+        M.texel + ' m texels');
     }
-    function fillWater(entries, y) {
-      var m = new THREE.Mesh(triGeo(entries), getWaterBandMat());
-      m.position.y = y;
-      m.renderOrder = 1;
-      scene.add(m);
-      return m;
-    }
-    if (W.farShore && W.farShore.rings) fillMesh([W.farShore], 1, 0x141414);
-    var shoreField = bakeShoreField(W.islePolygons ? W.polygons.concat(W.islePolygons) : W.polygons);
-    neonShoreTexU.value = shoreField.tex;
-    neonShoreBoundsU.value.copy(shoreField.bounds);
-    fillWater(W.polygons, 2);
-    if (W.islePolygons && W.islePolygons.length) fillWater(W.islePolygons, 4.5);
+    fetch('assets/detroit-water-sdf.json?v=' + STAMP)
+      .then(function (r) { return r.json(); })
+      .then(function (M) { if (M && M.tiles) buildSdfTiles(M); })
+      .catch(function () { /* water fills are a bonus; map works without */ });
     // Merged shoreline stroke: every ring of both water sets, seated
     // just above its fill so the water's edge is drawn, not implied.
     var seg = [];

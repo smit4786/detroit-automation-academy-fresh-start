@@ -16,7 +16,7 @@
  */
 'use strict';
 
-var STAMP = '20261107-1504';
+var STAMP = '20261107-1904';
 var SHELL_CACHE = 'ltd-shell-' + STAMP;
 var DATA_CACHE = 'ltd-data-' + STAMP;
 
